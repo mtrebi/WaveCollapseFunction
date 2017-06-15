@@ -6,8 +6,8 @@ public class TileStateManager : MonoBehaviour {
   public TileState[] tile_states_;
   public Texture2D[] tile_textures_;
 
-  private int BLUE = 0;
-  private int YELLOW = 1;
+  private TileConstraintId BLUE = new TileConstraintId("0");
+  private TileConstraintId YELLOW = new TileConstraintId("1");
 
   public Texture2D GetTexture(int id) {
     return tile_textures_[id];

@@ -16,12 +16,19 @@ static class DirectionMethods {
   }
 }
 
+public class TileConstraintId {
+  private string id_;
+
+  public TileConstraintId(string id) {
+    id_ = id;
+  }
+}
 
 public class TileConstraint {
   public Direction direction_;
-  public int id_; // TODO > Typedef
+  public TileConstraintId id_;
 
-  public TileConstraint(Direction direction, int id) {
+  public TileConstraint(Direction direction, TileConstraintId id) {
     direction_ = direction;
     id_ = id;
   }

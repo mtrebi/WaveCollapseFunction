@@ -53,18 +53,10 @@ public class Tile {
       return last_entropy_;
     }
 
-    // TODO - Use member class updated when available state changes
-    float sum_p = 0;
-    foreach (TileState available_state in available_states_) {
-      // TODO - all p must add 1
-      // Divide p by sum of p
-      sum_p += available_state.GetProbability();
-    }
-    Debug.Log(sum_p + " vs " + total_probability_);
     float entropy = 0;
     foreach (TileState available_state in available_states_) {
       float base_p = available_state.GetProbability();
-      float p = base_p / sum_p;
+      float p = base_p / total_probability_;
       entropy += -p * Mathf.Log(p, 2);
     }
 
@@ -114,7 +106,7 @@ public class Tile {
       if (!satisfy_any) {
         changed = true;
         update_entropy_ = true;
-        //total_probability_ -= available_states_[i].GetProbability();
+        total_probability_ -= available_states_[i].GetProbability();
         available_states_.RemoveAt(i);
       }
     }

@@ -7,9 +7,6 @@ public class WCFGenerator : MonoBehaviour {
              height_;
   public bool random_start_;
 
-
-
-
   public GameObject tile_state_manager_object_;
   public GameObject tile_prefab_;
 
@@ -60,7 +57,6 @@ public class WCFGenerator : MonoBehaviour {
     Propagate(min_entropy_tile);
   }
 
-  // TODO Scale
   private void Draw(Tile tile) {
     TileState state = tile.GetTileState();
 
@@ -69,8 +65,8 @@ public class WCFGenerator : MonoBehaviour {
     }
 
     GameObject new_tile = Instantiate(tile_prefab_, new Vector3(tile.X, tile.Y, 0), Quaternion.Euler(new Vector3(90, 0, 0)));
-    new_tile.GetComponent<Renderer>().material.mainTexture = state.texture_;
     new_tile.transform.parent = this.gameObject.transform;
+    new_tile.GetComponent<Renderer>().material.mainTexture = state.texture_;
   }
 
   private Tile Observe() {
@@ -142,7 +138,6 @@ public class WCFGenerator : MonoBehaviour {
     return Direction.NORTH;
   }
 
-  // TODO> Move to tile
   /// <summary>
   /// Get neighbors of a given tile
   /// </summary>
