@@ -8,12 +8,13 @@ public class Tile {
               y_;
 
   // TileState
-  private List<TileState> available_states_;       // TODO could be sorted by prob
+  private List<TileState> available_states_;
   private TileState final_state_;
 
   // Entropy
   private float last_entropy_;
-  private bool entropy_changed_;
+  private bool update_entropy_;
+  private float total_probability_;
 
   /// <summary>
   /// Default constructor - unobserved state - all patterns set to true
@@ -21,7 +22,9 @@ public class Tile {
   public Tile(int x, int y, TileState[] all_states) {
     x_ = x;
     y_ = y;
-    entropy_changed_ = true;
+    total_probability_ = 1.0f;
+
+    update_entropy_ = true;
     final_state_ = null;
     available_states_ = new List<TileState>(all_states);
   }
@@ -46,7 +49,7 @@ public class Tile {
   /// </summary>
   /// <returns> Returns the entropy </returns>
   public float GetEntropy() {
-    if (!entropy_changed_) {
+    if (!update_entropy_) {
       return last_entropy_;
     }
 
@@ -57,7 +60,7 @@ public class Tile {
       // Divide p by sum of p
       sum_p += available_state.GetProbability();
     }
-
+    Debug.Log(sum_p + " vs " + total_probability_);
     float entropy = 0;
     foreach (TileState available_state in available_states_) {
       float base_p = available_state.GetProbability();
@@ -65,9 +68,9 @@ public class Tile {
       entropy += -p * Mathf.Log(p, 2);
     }
 
-    last_entropy_ = entropy;
+    update_entropy_ = false;
 
-    return entropy;
+    return last_entropy_ = entropy;
   }
 
   /// <summary>
@@ -76,14 +79,9 @@ public class Tile {
   public void Collapse() {
     float max_probability = float.MinValue;
     TileState max_probability_state = null;
-    //List<GameObject> most_probable_states = new List<GameObject>();
 
     foreach (TileState available_state in available_states_) {
       // TODO better use of probabilities
-      // Add randomness
-      // What if two have same prob
-      // Store most probable states ~15% diff in an array and then random with weights
-
       float probability = available_state.GetProbability() + Random.Range(0, 0.025f);
       if (probability > max_probability) {
         max_probability = probability;
@@ -102,9 +100,7 @@ public class Tile {
   /// <param name="neighbor"></param>
   /// <returns>True if available states changed</returns>
   public bool UpdateAvailableStates(Tile neighbor, Direction direction) {
-    // TODO > Performance ---> Only check the state that has changed?
     bool changed = false;
-        
     for (int i = available_states_.Count - 1; i >= 0; --i) {
       TileState current_tile_state = available_states_[i];
       bool satisfy_any = false;
@@ -113,16 +109,12 @@ public class Tile {
           satisfy_any = true;
           break;
         }
-          /*
-          if (!TileConstraint.ConstraintSatisfies(current_tile_state, direction, neighbor_tile_state)) {
-            available_states_.RemoveAt(i);
-            changed = true;
-            break;
-          }*/
       }
 
       if (!satisfy_any) {
         changed = true;
+        update_entropy_ = true;
+        //total_probability_ -= available_states_[i].GetProbability();
         available_states_.RemoveAt(i);
       }
     }
