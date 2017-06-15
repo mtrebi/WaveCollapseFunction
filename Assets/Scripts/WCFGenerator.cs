@@ -88,13 +88,15 @@ public class WCFGenerator : MonoBehaviour {
     for (int x = 0; x < widht_; ++x) {
       for (int y = 0; y < height_; ++y) {
         Tile tile = wave_[x, y];
-        float current_entropy = tile.GetEntropy();
+        if (tile.GetTileState() == null) {
+          float current_entropy = tile.GetEntropy();
 
-        // TODO Undefined entropy check
-        if (current_entropy != 0 && current_entropy < min_entropy) {
-          min_entropy_tile = tile;
-          min_entropy = current_entropy;
+          if (current_entropy != 0 && current_entropy < min_entropy) {
+            min_entropy_tile = tile;
+            min_entropy = current_entropy;
+          }
         }
+
       }
     }
     return min_entropy_tile;
