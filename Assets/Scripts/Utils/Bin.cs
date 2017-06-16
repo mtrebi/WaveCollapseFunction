@@ -19,6 +19,9 @@ public class Bin {
     string_binary_ = System.Convert.ToString(int_binary_, 2);
   }
 
+  public char GetBit(int n) {
+    return string_binary_[n];
+  }
 
   /// <summary>
   /// Left rotate of a binary literal
@@ -29,7 +32,6 @@ public class Bin {
     int rotated_num = (int_binary_ << n) | (int_binary_ >> (kBITS - n));
     return new Bin(rotated_num, kBITS);
   }
-
 
   public override string ToString() {
     return "0b" + string_binary_;
