@@ -19,6 +19,10 @@ public class Bin {
     string_binary_ = System.Convert.ToString(int_binary_, 2);
   }
 
+  public int Length() {
+    return kBITS;
+  }
+
   public char GetBit(int n) {
     return string_binary_[kBITS - 1 - n];
   }
