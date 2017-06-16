@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 
-//TODO STRUCt
 public class Bin {
   int kBITS = 4;
 
