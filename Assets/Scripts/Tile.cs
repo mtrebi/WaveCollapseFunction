@@ -97,7 +97,7 @@ public class Tile {
       TileState current_tile_state = available_states_[i];
       bool satisfy_any = false;
       foreach (TileState neighbor_tile_state in neighbor.available_states_) {
-        if (TileConstraint.ConstraintSatisfies(current_tile_state, direction, neighbor_tile_state)) {
+        if (current_tile_state.Satisfies(neighbor_tile_state, direction)) {
           satisfy_any = true;
           break;
         }
