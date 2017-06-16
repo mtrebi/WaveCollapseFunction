@@ -67,6 +67,8 @@ public class WCFGenerator : MonoBehaviour {
     GameObject new_tile = Instantiate(tile_prefab_, new Vector3(tile.X, tile.Y, 0), Quaternion.Euler(new Vector3(90, 0, 0)));
     new_tile.transform.parent = this.gameObject.transform;
     new_tile.GetComponent<Renderer>().material.mainTexture = state.texture_;
+    //new_tile.transform.Rotate(new Vector3(0, 180, 0.0f));
+
   }
 
   private Tile Observe() {

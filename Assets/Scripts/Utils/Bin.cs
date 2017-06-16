@@ -20,7 +20,7 @@ public class Bin {
   }
 
   public char GetBit(int n) {
-    return string_binary_[n];
+    return string_binary_[kBITS - 1 - n];
   }
 
   /// <summary>
