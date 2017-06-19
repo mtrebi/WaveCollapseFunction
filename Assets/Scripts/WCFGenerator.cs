@@ -3,15 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class WCFGenerator : MonoBehaviour {
-  public int widht_,
+  public int width,
              height_;
   public bool random_start_;
-
   public GameObject tile_state_manager_object_;
-  public GameObject tile_prefab_;
 
-
-  private TileStateManager tile_state_manager_;
   private Tile[,] wave_;
 
   private bool finished_ = false;
@@ -19,7 +15,7 @@ public class WCFGenerator : MonoBehaviour {
 
   // Use this for initialization
   void Awake() {
-    tile_state_manager_ = tile_state_manager_object_.GetComponent<TileStateManager>();
+
   }
 
   private void Start() {
@@ -36,10 +32,10 @@ public class WCFGenerator : MonoBehaviour {
   }
 
   private void InitWave() {
-    wave_ = new Tile[widht_, height_];
-    for (int x = 0; x < widht_; ++x) {
+    wave_ = new Tile[width, height_];
+    for (int x = 0; x < width; ++x) {
       for (int y = 0; y < height_; ++y) {
-        wave_[x, y] = new Tile(x, y, tile_state_manager_.tile_states_);
+        wave_[x, y] = new Tile(x, y, new List<TileState>(tile_state_manager_object_.GetComponent<TileStateManager>().tile_states_));
       }
     }
   }
@@ -64,18 +60,15 @@ public class WCFGenerator : MonoBehaviour {
       return;
     }
 
-    GameObject new_tile = Instantiate(tile_prefab_, new Vector3(tile.X, tile.Y, 0), Quaternion.Euler(new Vector3(90, 0, 0)));
+    GameObject new_tile = Instantiate(tile.GetTileState().prefab_, new Vector3(tile.X, tile.Y, 0), tile.GetTileState().prefab_orientation_);
     new_tile.transform.parent = this.gameObject.transform;
-    new_tile.GetComponent<Renderer>().material.mainTexture = state.texture_;
-    //new_tile.transform.Rotate(new Vector3(0, 180, 0.0f));
-
   }
 
   private Tile Observe() {
     if (first_iteration_) {
       first_iteration_ = false;
       if (random_start_) {
-        return wave_[Random.Range(0, widht_), Random.Range(0, height_)];
+        return wave_[Random.Range(0, width), Random.Range(0, height_)];
       }
       return wave_[0, 0];
     }      
@@ -83,7 +76,7 @@ public class WCFGenerator : MonoBehaviour {
     Tile min_entropy_tile = null;
     float min_entropy = float.MaxValue;
 
-    for (int x = 0; x < widht_; ++x) {
+    for (int x = 0; x < width; ++x) {
       for (int y = 0; y < height_; ++y) {
         Tile tile = wave_[x, y];
         if (tile.GetTileState() == null) {
@@ -152,7 +145,7 @@ public class WCFGenerator : MonoBehaviour {
         bool a = (x == tile.X && y != tile.Y);
         bool b = (x != tile.X && y == tile.Y);
         if (((x == tile.X && y != tile.Y) || (x != tile.X && y == tile.Y))
-            && (x >= 0 && x < widht_)
+            && (x >= 0 && x < width)
             && (y >= 0 && y < height_)
           ) {
           neighbors.Add(wave_[x, y]);

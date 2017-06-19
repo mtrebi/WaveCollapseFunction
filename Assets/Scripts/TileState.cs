@@ -17,13 +17,25 @@ static class DirectionMethods {
 
 public class TileState {
   public Bin shape_id_;
-  public Texture2D texture_;
+  public GameObject prefab_;
+  public Quaternion prefab_orientation_;
+  public Vector3 base_rotation_ = new Vector3(90, -90, -90);
+
   public float probability_;
   public Bin constraints_id;
 
-  public TileState(Bin shape_id, Texture2D texture, float probability) {
+  public TileState(Bin shape_id, GameObject prefab, float probability) {
     shape_id_ = shape_id;
-    texture_ = texture;
+    prefab_ = prefab;
+    prefab_orientation_ = Quaternion.Euler(base_rotation_);
+    probability_ = probability;
+    constraints_id = CalculateConstraints();
+  }
+
+  public TileState(Bin shape_id, GameObject prefab, float probability, Vector3 euler_rotation) {
+    shape_id_ = shape_id;
+    prefab_ = prefab;
+    prefab_orientation_ = Quaternion.Euler(base_rotation_ + euler_rotation);
     probability_ = probability;
     constraints_id = CalculateConstraints();
   }
@@ -46,6 +58,15 @@ public class TileState {
     return shape_id_.ToString();
   }
 
+  public override bool Equals(object obj) {
+    var item = obj as TileState;
+    if (item == null) return false;
+    return this.shape_id_.Equals(item.shape_id_);
+  }
+
+  public override int GetHashCode() {
+    return this.shape_id_.GetHashCode();
+  }
 
   /// <summary>
   /// Calculate constraints from the TileState shape identifier

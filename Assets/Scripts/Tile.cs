@@ -19,14 +19,14 @@ public class Tile {
   /// <summary>
   /// Default constructor - unobserved state - all patterns set to true
   /// </summary>
-  public Tile(int x, int y, TileState[] all_states) {
+  public Tile(int x, int y, List<TileState> all_states) {
     x_ = x;
     y_ = y;
     total_probability_ = 1.0f;
 
     update_entropy_ = true;
     final_state_ = null;
-    available_states_ = new List<TileState>(all_states);
+    available_states_ = all_states;
   }
 
   /// <summary>
@@ -74,7 +74,7 @@ public class Tile {
 
     foreach (TileState available_state in available_states_) {
       // TODO better use of probabilities
-      float probability = available_state.GetProbability() + Random.Range(0, 0.025f);
+      float probability = available_state.GetProbability() + Random.Range(0.0f, 0.55f);
       if (probability > max_probability) {
         max_probability = probability;
         max_probability_state = available_state;
