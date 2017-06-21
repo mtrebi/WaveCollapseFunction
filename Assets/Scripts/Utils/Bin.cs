@@ -37,6 +37,12 @@ public class Bin {
     return string_binary_[kBITS - 1 - n];
   }
 
+  public void SetBit(int n, char bit) {
+    char[] arr = string_binary_.ToCharArray();
+    arr[kBITS - 1 - n] = bit;
+    string_binary_ = new string(arr);
+  }
+
   /// <summary>
   /// Left rotate of a binary literal
   /// </summary>
