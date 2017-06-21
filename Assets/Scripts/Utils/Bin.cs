@@ -7,7 +7,11 @@ public class Bin {
   string string_binary_;
   uint int_binary_;
 
-
+  /// <summary>
+  /// Constructor from binary string
+  /// </summary>
+  /// <param name="s"> binary string </param>
+  /// <param name="bits">number of bits used in the string (length)</param>
   public Bin(string s, int bits = 4) {
     kBITS = bits;
     kBITMASK = ((uint)kBITS * (uint)kBITS) - 1;
@@ -15,6 +19,11 @@ public class Bin {
     int_binary_ = System.Convert.ToUInt32(string_binary_, 2);
   }
 
+  /// <summary>
+  /// Constructor from unsigned int
+  /// </summary>
+  /// <param name="num"> Number to be represented in binary</param>
+  /// <param name="bits">Number of bits used to represent this number (log2)</param>
   public Bin(uint num, int bits = 4) {
     kBITS = bits;
     int_binary_ = num;
@@ -29,17 +38,31 @@ public class Bin {
     }
   }
 
+  /// <summary>
+  /// Number of bits of the binary word
+  /// </summary>
+  /// <returns> Number of bits of the binary word</returns>
   public int Length() {
     return kBITS;
   }
 
-  public char GetBit(int n) {
-    return string_binary_[kBITS - 1 - n];
+  /// <summary>
+  /// Get value of bit at a given position
+  /// </summary>
+  /// <param name="position">Position of the bit</param>
+  /// <returns> Value of the bit </returns>
+  public bool GetBit(int position) {
+    return string_binary_[kBITS - 1 - position] == '1';
   }
 
-  public void SetBit(int n, char bit) {
+  /// <summary>
+  /// Set the value of a bit at the given position
+  /// </summary>
+  /// <param name="position">Position of the bit</param>
+  /// <param name="bit">Value of the bit</param>
+  public void SetBit(int position, bool value) {
     char[] arr = string_binary_.ToCharArray();
-    arr[kBITS - 1 - n] = bit;
+    arr[kBITS - 1 - position] = value ? '1' : '0';
     string_binary_ = new string(arr);
   }
 
@@ -53,6 +76,10 @@ public class Bin {
     return new Bin(rotated_num, kBITS);
   }
 
+  /// <summary>
+  /// Get the negate of this bin (change 0 by 1 and 1 by 0)
+  /// </summary>
+  /// <returns> Negation of this bin </returns>
   public Bin Not() {
     char[] arr = new char[string_binary_.Length];
     for (int i = 0; i < string_binary_.Length; ++i) {
@@ -64,7 +91,7 @@ public class Bin {
   }
 
   public override string ToString() {
-    return "0b" + string_binary_;
+    return string_binary_;
   }
 
   public override bool Equals(object obj) {
