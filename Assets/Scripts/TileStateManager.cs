@@ -42,8 +42,10 @@ public class TileStateManager : MonoBehaviour {
 
     for (int i = 1; i < tile_state.shape_id_.Length(); ++i) {
       Bin rotation_id = tile_state.shape_id_.Rotate(i);
-      TileState new_state = new TileState(rotation_id, tile_state.prefab_, tile_state.probability_, new Vector3(i * 90, 0, 0));
-      if (!tile_state.Equals(new_state)) {
+      // TODO Check id and model
+      // TODO Generate constraint id rotation (cheaper than generate constraint from scratch)
+      if (!rotation_id.Equals(tile_state.shape_id_)) {
+        TileState new_state = new TileState(rotation_id, tile_state.prefab_, tile_state.probability_, new Vector3(i * 90, 0, 0));
         tile_rotations.Add(new_state);
       }
     }
