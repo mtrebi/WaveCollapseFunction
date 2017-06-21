@@ -54,7 +54,6 @@ public class Bin {
   }
 
   public Bin Not() {
-    string new_binary = string.Empty;
     char[] arr = new char[string_binary_.Length];
     for (int i = 0; i < string_binary_.Length; ++i) {
       char c = string_binary_[i] == '1' ? '0' : '1';
