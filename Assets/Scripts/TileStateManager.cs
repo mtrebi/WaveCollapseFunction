@@ -11,8 +11,6 @@ public class TileStateManager : MonoBehaviour {
   void Start () {
     tile_states_ = new List<TileState>();
 
-    // TODO get id and probability from game object  
-
     foreach (GameObject tile_prefab in tile_prefabs_) {
       BlockData data = tile_prefab.GetComponent<BlockData>();
       TileState ts = new TileState(new Bin(data.id), tile_prefab, data.probability);
