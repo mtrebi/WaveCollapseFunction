@@ -19,17 +19,15 @@ public class TileState {
   public Bin shape_id_;
   public GameObject prefab_;
   public Quaternion prefab_orientation_;
-  public Vector3 base_rotation_ = new Vector3(90, -90, -90);
+  public Vector3 base_rotation_ = new Vector3(0, 0, 0);
 
   public float probability_;
-  public Bin constraints_id;
 
   public TileState(Bin shape_id, GameObject prefab, float probability) {
     shape_id_ = shape_id;
     prefab_ = prefab;
     prefab_orientation_ = Quaternion.Euler(base_rotation_);
     probability_ = probability;
-    constraints_id = CalculateConstraints();
   }
 
   public TileState(Bin shape_id, GameObject prefab, float probability, Vector3 euler_rotation) {
@@ -37,7 +35,6 @@ public class TileState {
     prefab_ = prefab;
     prefab_orientation_ = Quaternion.Euler(base_rotation_ + euler_rotation);
     probability_ = probability;
-    constraints_id = CalculateConstraints();
   }
 
   public float GetProbability() {
@@ -51,7 +48,35 @@ public class TileState {
   /// <param name="direction">Direction that joins this tile with other</param>
   /// <returns> True if this tile can be connect with the other tile in the given direction</returns>
   public bool Satisfies(TileState other, Direction direction) {
-    return this.shape_id_.GetBit((int) direction) == other.shape_id_.GetBit((int) direction.Opposite());
+    return this.GetBlockBit(direction).Equals(other.GetBlockBit(direction.Opposite()));
+  }
+
+  private Bin GetBlockBit(Direction direction) {
+    int high_bit = -1, 
+        low_bit = -1;
+    switch (direction) {
+      case Direction.NORTH:
+        high_bit = 3;
+        low_bit = 2;
+        break;
+      case Direction.EAST:
+        high_bit = 2;
+        low_bit = 1;
+        break;
+      case Direction.SOUTH:
+        high_bit = 0;
+        low_bit = 1;
+        break;
+      case Direction.WEST:
+        high_bit = 3;
+        low_bit = 0;
+        break;
+    }
+
+    Bin block = new Bin("00", 2);
+    block.SetBit(1, shape_id_.GetBit(high_bit));
+    block.SetBit(0, shape_id_.GetBit(low_bit));
+    return block;
   }
 
   public override string ToString() {
@@ -66,13 +91,5 @@ public class TileState {
 
   public override int GetHashCode() {
     return this.shape_id_.GetHashCode();
-  }
-
-  /// <summary>
-  /// Calculate constraints from the TileState shape identifier
-  /// </summary>
-  private Bin CalculateConstraints() {
-    // TODO Actually perform calculation of constraints
-    return shape_id_;
   }
 }
