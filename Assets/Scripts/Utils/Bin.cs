@@ -64,6 +64,7 @@ public class Bin {
     char[] arr = string_binary_.ToCharArray();
     arr[kBITS - 1 - position] = value ? '1' : '0';
     string_binary_ = new string(arr);
+    int_binary_ = System.Convert.ToUInt32(string_binary_, 2);
   }
 
   /// <summary>
