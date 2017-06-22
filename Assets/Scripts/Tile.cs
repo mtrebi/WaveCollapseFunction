@@ -113,4 +113,8 @@ public class Tile {
 
     return changed;
   }
+
+  public override string ToString() {
+    return "("+ x_ + ", "+ y_ +") - States: " + available_states_.Count + " --> " + final_state_;
+  }
 }
