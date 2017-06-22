@@ -60,8 +60,9 @@ public class WCFGenerator : MonoBehaviour {
       return;
     }
 
-    GameObject new_tile = Instantiate(tile.GetTileState().prefab_, new Vector3(tile.X, tile.Y, 0), tile.GetTileState().prefab_orientation_);
+    GameObject new_tile = Instantiate(tile.GetTileState().prefab_, new Vector3(tile.X, 0, tile.Y), tile.GetTileState().prefab_orientation_);
     new_tile.transform.parent = this.gameObject.transform;
+    new_tile.name = "Tile_" + tile.GetTileState().shape_id_.ToString();
   }
 
   private Tile Observe() {
@@ -82,7 +83,7 @@ public class WCFGenerator : MonoBehaviour {
         if (tile.GetTileState() == null) {
           float current_entropy = tile.GetEntropy();
 
-          if (current_entropy != 0 && current_entropy < min_entropy) {
+          if (current_entropy < min_entropy) {
             min_entropy_tile = tile;
             min_entropy = current_entropy;
           }
@@ -114,19 +115,19 @@ public class WCFGenerator : MonoBehaviour {
 
 
   private Direction GetDirection (Tile tile, Tile neighbor) {
-    if (tile.Y < neighbor.Y) {
+    if (tile.X > neighbor.X) {
       return Direction.NORTH;
     }
 
-    if (tile.X > neighbor.X) {
+    if (tile.Y < neighbor.Y) {
       return Direction.EAST;
     }
 
-    if (tile.Y > neighbor.Y) {
+    if (tile.X < neighbor.X) {
       return Direction.SOUTH;
     }
 
-    if (tile.X < neighbor.X) {
+    if (tile.Y > neighbor.Y) {
       return Direction.WEST;
     }
 
@@ -142,8 +143,6 @@ public class WCFGenerator : MonoBehaviour {
     List<Tile> neighbors = new List<Tile>();
     for (int x = tile.X - 1; x <= tile.X + 1; ++x) {
       for (int y = tile.Y - 1; y <= tile.Y + 1; ++y) {
-        bool a = (x == tile.X && y != tile.Y);
-        bool b = (x != tile.X && y == tile.Y);
         if (((x == tile.X && y != tile.Y) || (x != tile.X && y == tile.Y))
             && (x >= 0 && x < width)
             && (y >= 0 && y < height_)
