@@ -23,8 +23,9 @@ public class TileFactory : MonoBehaviour {
   /// <param name="y"> Y Position of the tile in the grid</param>
   /// <param name="possible_states"> List of states that tile can take</param>
   /// <returns> Instantiated Game Object </returns>
-  public Tile CreateDefaultTile(int x, int y, List<TileState> possible_states) {
+  public Tile CreateDefaultTile(Transform parent, int x, int y, List<TileState> possible_states) {
     Tile tile = Object.Instantiate(default_prefab, new Vector3(x, 0, y), Quaternion.identity).GetComponent<Tile>();
+    tile.transform.parent = parent;
     tile.Initialize("DefaultTile", x, y, possible_states);
     return tile;
   }
