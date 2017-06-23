@@ -37,9 +37,9 @@ public class WCFGenerator : MonoBehaviour {
     wave_ = new Tile[width_, height_];
     wave_changed_ = new bool[width_, height_];
     for (int x = 0; x < width_; ++x) {
-      for (int y = 0; y < height_; ++y) {
-        wave_[x, y] = TileFactory.Instance.CreateDefaultTile(this.transform, x, y, new List<TileState>(tile_state_manager_object_.GetComponent<TileStateManager>().tile_states_));
-        wave_changed_[x, y] = true;
+      for (int z = 0; z < height_; ++z) {
+        wave_[x, z] = TileFactory.Instance.CreateDefaultTile(this.transform, x, z, new List<TileState>(tile_state_manager_object_.GetComponent<TileStateManager>().tile_states_));
+        wave_changed_[x, z] = true;
       }
     }
   }
@@ -59,9 +59,9 @@ public class WCFGenerator : MonoBehaviour {
   
   private void RenderWave() {
     foreach (Tile tile in wave_) {
-      if (wave_changed_[tile.X, tile.Y]) {
+      if (wave_changed_[tile.X, tile.Z]) {
         tile.Render(this.gameObject.transform);
-        wave_changed_[tile.X, tile.Y] = false;
+        wave_changed_[tile.X, tile.Z] = false;
       }
     }
   }
@@ -108,7 +108,7 @@ public class WCFGenerator : MonoBehaviour {
       Tile current_tile = remaining_tiles.Pop();
       Tile[] neighbors = GetNeighbors(current_tile);
 
-      wave_changed_[current_tile.X, current_tile.Y] = true;
+      wave_changed_[current_tile.X, current_tile.Z] = true;
 
       foreach (Tile neighbor in neighbors) {
         if (!neighbor.Collapsed() 
@@ -126,7 +126,7 @@ public class WCFGenerator : MonoBehaviour {
       return Direction.NORTH;
     }
 
-    if (tile.Y < neighbor.Y) {
+    if (tile.Z < neighbor.Z) {
       return Direction.EAST;
     }
 
@@ -134,7 +134,7 @@ public class WCFGenerator : MonoBehaviour {
       return Direction.SOUTH;
     }
 
-    if (tile.Y > neighbor.Y) {
+    if (tile.Z > neighbor.Z) {
       return Direction.WEST;
     }
 
@@ -149,8 +149,8 @@ public class WCFGenerator : MonoBehaviour {
   private Tile[] GetNeighbors(Tile tile) {
     List<Tile> neighbors = new List<Tile>();
     for (int x = tile.X - 1; x <= tile.X + 1; ++x) {
-      for (int y = tile.Y - 1; y <= tile.Y + 1; ++y) {
-        if (((x == tile.X && y != tile.Y) || (x != tile.X && y == tile.Y))
+      for (int y = tile.Z - 1; y <= tile.Z + 1; ++y) {
+        if (((x == tile.X && y != tile.Z) || (x != tile.X && y == tile.Z))
             && (x >= 0 && x < width_)
             && (y >= 0 && y < height_)
           ) {
