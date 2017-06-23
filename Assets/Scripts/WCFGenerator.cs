@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class WCFGenerator : MonoBehaviour {
-  public int width,
+  public int width_,
              height_;
   public bool random_start_;
   public GameObject tile_state_manager_object_;
 
   private Tile[,] wave_;
+  private bool[,] wave_changed_;
 
   private bool finished_ = false;
   private bool first_iteration_ = true;
@@ -19,7 +20,7 @@ public class WCFGenerator : MonoBehaviour {
   }
 
   private void Start() {
-    InitWave();
+    InitializeWave();
   }
 
 
@@ -27,20 +28,23 @@ public class WCFGenerator : MonoBehaviour {
   // Update is called once per frame
   void Update() {
     if (!finished_) {
-      GenerateTileMap();
+      GenerateWave();
+      RenderWave();
     }
   }
 
-  private void InitWave() {
-    wave_ = new Tile[width, height_];
-    for (int x = 0; x < width; ++x) {
+  private void InitializeWave() {
+    wave_ = new Tile[width_, height_];
+    wave_changed_ = new bool[width_, height_];
+    for (int x = 0; x < width_; ++x) {
       for (int y = 0; y < height_; ++y) {
-        wave_[x, y] = new Tile(x, y, new List<TileState>(tile_state_manager_object_.GetComponent<TileStateManager>().tile_states_));
+        wave_[x, y] = TileFactory.Instance.CreateDefaultTile(this.transform, x, y, new List<TileState>(tile_state_manager_object_.GetComponent<TileStateManager>().tile_states_));
+        wave_changed_[x, y] = true;
       }
     }
   }
 
-  private void GenerateTileMap() {
+  private void GenerateWave() {
     Tile min_entropy_tile = Observe();
 
     if (min_entropy_tile == null) {
@@ -48,28 +52,29 @@ public class WCFGenerator : MonoBehaviour {
       finished_ = true;
       return;
     }
+
     min_entropy_tile.Collapse();
-    Draw(min_entropy_tile);
     Propagate(min_entropy_tile);
   }
-
-  private void Draw(Tile tile) {
-    TileState state = tile.GetTileState();
-
-    if (state == null) {
-      return;
+  
+  private void RenderWave() {
+    foreach (Tile tile in wave_) {
+      if (wave_changed_[tile.X, tile.Y]) {
+        tile.Render(this.gameObject.transform);
+        wave_changed_[tile.X, tile.Y] = false;
+      }
     }
-
-    GameObject new_tile = Instantiate(tile.GetTileState().prefab_, new Vector3(tile.X, 0, tile.Y), tile.GetTileState().prefab_orientation_);
-    new_tile.transform.parent = this.gameObject.transform;
-    new_tile.name = "Tile_" + tile.GetTileState().shape_id_.ToString();
   }
 
+  /// <summary>
+  /// Observation step of WCF. Searches for the tile with lowest entropy
+  /// </summary>
+  /// <returns> Returns the tile with the lowest entropy that has not been collapsed yet</returns>
   private Tile Observe() {
     if (first_iteration_) {
       first_iteration_ = false;
       if (random_start_) {
-        return wave_[Random.Range(0, width), Random.Range(0, height_)];
+        return wave_[Random.Range(0, width_), Random.Range(0, height_)];
       }
       return wave_[0, 0];
     }      
@@ -77,10 +82,10 @@ public class WCFGenerator : MonoBehaviour {
     Tile min_entropy_tile = null;
     float min_entropy = float.MaxValue;
 
-    for (int x = 0; x < width; ++x) {
+    for (int x = 0; x < width_; ++x) {
       for (int y = 0; y < height_; ++y) {
         Tile tile = wave_[x, y];
-        if (tile.GetTileState() == null) {
+        if (!tile.Collapsed()) {
           float current_entropy = tile.GetEntropy();
 
           if (current_entropy < min_entropy) {
@@ -102,6 +107,8 @@ public class WCFGenerator : MonoBehaviour {
     while (remaining_tiles.Count != 0) {
       Tile current_tile = remaining_tiles.Pop();
       Tile[] neighbors = GetNeighbors(current_tile);
+
+      wave_changed_[current_tile.X, current_tile.Y] = true;
 
       foreach (Tile neighbor in neighbors) {
         if (!neighbor.Collapsed() 
@@ -144,7 +151,7 @@ public class WCFGenerator : MonoBehaviour {
     for (int x = tile.X - 1; x <= tile.X + 1; ++x) {
       for (int y = tile.Y - 1; y <= tile.Y + 1; ++y) {
         if (((x == tile.X && y != tile.Y) || (x != tile.X && y == tile.Y))
-            && (x >= 0 && x < width)
+            && (x >= 0 && x < width_)
             && (y >= 0 && y < height_)
           ) {
           neighbors.Add(wave_[x, y]);
