@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Tile {
+public class Tile : MonoBehaviour {
   // Position
   private int x_, 
               y_;
@@ -13,27 +13,35 @@ public class Tile {
 
   // Entropy
   private float last_entropy_;
+  private float max_entropy_;
   private bool update_entropy_;
   private float total_probability_;
 
   /// <summary>
-  /// Default constructor - unobserved state - all patterns set to true
+  /// Initialize tile Game object
   /// </summary>
-  public Tile(int x, int y, List<TileState> all_states) {
+  /// <param name="name"> name of the object</param>
+  /// <param name="x"> X position</param>
+  /// <param name="y"> Y position</param>
+  /// <param name="possible_states"> possible states that tile may take </param>
+  public void Initialize(string name, int x, int y,List<TileState> possible_states) {
+    this.gameObject.name = name;
+
     x_ = x;
     y_ = y;
     total_probability_ = 1.0f;
 
     update_entropy_ = true;
     final_state_ = null;
-    available_states_ = all_states;
+    available_states_ = possible_states;
+    max_entropy_ = GetEntropy();
   }
 
   /// <summary>
   /// Get final state of the Tile after collapsing
   /// </summary>
   /// <returns> The state of the Tile after collapsing </returns>
-  public TileState GetTileState() {
+  public TileState GetState() {
     return final_state_;
   }
 
@@ -112,6 +120,23 @@ public class Tile {
     }
 
     return changed;
+  }
+
+  /// <summary>
+  /// Updates the aspect of the tile in the game
+  /// </summary>
+  /// <param name="parent">Gameobject parent transform </param>
+  public void Render(Transform parent) {
+    Transform transparent_block = this.transform.GetChild(0);
+    if (final_state_ != null) {
+      // Render final state
+      transparent_block.gameObject.SetActive(false);
+      TileFactory.Instance.CreateBlock(this.transform, x_, y_, this.final_state_);
+    } else {
+      // Render based on entropy
+      float scale = Mathf.Lerp(0, 1, last_entropy_ / max_entropy_);
+      transparent_block.localScale = new Vector3(scale, scale, scale);
+    }
   }
 
   public override string ToString() {
