@@ -134,7 +134,7 @@ public class Tile : MonoBehaviour {
       TileFactory.Instance.CreateBlock(this.transform, x_, y_, this.final_state_);
     } else {
       // Render based on entropy
-      float scale = Mathf.Lerp(0, 1, last_entropy_ / max_entropy_);
+      float scale = Mathf.Lerp(0, 0.8f, last_entropy_ / max_entropy_);
       transparent_block.localScale = new Vector3(scale, scale, scale);
     }
   }
