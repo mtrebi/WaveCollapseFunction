@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class Tile : MonoBehaviour {
   // Position
-  private int x_, 
+  private int x_,
+              y_,
               z_;
 
   // TileState
@@ -16,6 +17,22 @@ public class Tile : MonoBehaviour {
   private float max_entropy_;
   private bool update_entropy_;
   private float total_probability_;
+
+  /// <summary>
+  /// Get final state of the Tile after collapsing
+  /// </summary>
+  /// <returns> The state of the Tile after collapsing </returns>
+  public TileState GetState() {
+    return final_state_;
+  }
+
+  public bool Collapsed() {
+    return final_state_ != null;
+  }
+
+  public int X { get { return x_; } }
+  public int Y { get { return y_; } }
+  public int Z { get { return z_; } }
 
   /// <summary>
   /// Initialize tile Game object
@@ -36,21 +53,6 @@ public class Tile : MonoBehaviour {
     available_states_ = possible_states;
     max_entropy_ = GetEntropy();
   }
-
-  /// <summary>
-  /// Get final state of the Tile after collapsing
-  /// </summary>
-  /// <returns> The state of the Tile after collapsing </returns>
-  public TileState GetState() {
-    return final_state_;
-  }
-
-  public bool Collapsed() {
-    return final_state_ != null;
-  }
-
-  public int X { get { return x_; } }
-  public int Z { get { return z_; } }
 
   /// <summary>
   /// Calculate entropy of the tile given the available patterns
