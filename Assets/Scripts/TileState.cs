@@ -48,6 +48,7 @@ public class TileState {
   /// <param name="direction">Direction that joins this tile with other</param>
   /// <returns> True if this tile can be connect with the other tile in the given direction</returns>
   public bool Satisfies(TileState other, Direction direction) {
+    // TODO store long string with all block bits
     return this.GetBlockBit(direction).Equals(other.GetBlockBit(direction.Opposite()));
   }
 
