@@ -52,6 +52,9 @@ public class Bin {
   /// <param name="position">Position of the bit</param>
   /// <returns> Value of the bit </returns>
   public string GetBit(int position) {
+    if (position > kBITS - 1) {
+      return "0";
+    }
     return string_binary_[kBITS - 1 - position].ToString();
   }
 
