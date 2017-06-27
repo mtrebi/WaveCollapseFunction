@@ -56,6 +56,18 @@ public class Bin {
   }
 
   /// <summary>
+  /// Get just a sub part of the binary literal
+  /// </summary>
+  /// <param name="start_pos">Start position of the range (lowest bit)</param>
+  /// <param name="end_pos">End position of the range (highest bit)</param>
+  /// <returns> A new binary literal that goes from start_pos to end_pos</returns>
+  public Bin GetBitRange(int start_pos, int end_pos) {
+    int length = start_pos - end_pos;
+    string substring = string_binary_.Substring(start_pos, length);
+    return new Bin(substring, length);
+  }
+
+  /// <summary>
   /// Set the value of a bit at the given position
   /// </summary>
   /// <param name="position">Position of the bit</param>
