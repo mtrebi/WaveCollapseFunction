@@ -72,7 +72,6 @@ public class TileState {
   /// <returns> True if this tile can be connect with the other tile in the given direction</returns>
   public bool Satisfies(TileState other, Direction direction) {
     return this.GetConnection(direction).Equals(other.GetConnection(direction.Opposite()));
-    //return this.GetBlockBit(direction).Equals(other.GetBlockBit(direction.Opposite()));
   }
 
   private Bin GetBlockBit(Direction direction) {
@@ -97,10 +96,7 @@ public class TileState {
         break;
     }
 
-    Bin block = new Bin("00", 2);
-    block.SetBit(1, shape_id_.GetBit(high_bit));
-    block.SetBit(0, shape_id_.GetBit(low_bit));
-    return block;
+    return new Bin(shape_id_.GetBit(high_bit).ToString() + shape_id_.GetBit(low_bit).ToString(), 2);
   }
 
   public override string ToString() {
