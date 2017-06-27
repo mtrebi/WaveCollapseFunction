@@ -75,28 +75,64 @@ public class TileState {
   }
 
   private Bin GetBlockBit(Direction direction) {
-    int high_bit = -1, 
-        low_bit = -1;
+    int bit_0 = -1,
+        bit_1 = -1,
+        bit_2 = -1,
+        bit_3 = -1;
+
     switch (direction) {
+      case Direction.TOP:
+        bit_0 = 4;
+        bit_1 = 5;
+        bit_2 = 6;
+        bit_3 = 7;
+        break;
       case Direction.NORTH:
-        high_bit = 3;
-        low_bit = 2;
+        bit_0 = 3;
+        bit_1 = 2;
+        bit_2 = 6;
+        bit_3 = 7;
+        //high_bit = 3;
+        //low_bit = 2;
         break;
       case Direction.EAST:
-        high_bit = 2;
-        low_bit = 1;
+        bit_0 = 1;
+        bit_1 = 2;
+        bit_2 = 6;
+        bit_3 = 5;
+        //high_bit = 2;
+        //low_bit = 1;
+        break;
+      case Direction.BOTTOM:
+        bit_0 = 0;
+        bit_1 = 1;
+        bit_2 = 2;
+        bit_3 = 3;
         break;
       case Direction.SOUTH:
-        high_bit = 0;
-        low_bit = 1;
+        bit_0 = 0;
+        bit_1 = 1;
+        bit_2 = 5;
+        bit_3 = 4;
+        //high_bit = 0;
+        //low_bit = 1;
         break;
       case Direction.WEST:
-        high_bit = 3;
-        low_bit = 0;
+        bit_0 = 0;
+        bit_1 = 3;
+        bit_2 = 7;
+        bit_3 = 4;
+        //high_bit = 3;
+        //low_bit = 0;
         break;
     }
 
-    return new Bin(shape_id_.GetBit(high_bit) + shape_id_.GetBit(low_bit), 2);
+    string id = shape_id_.GetBit(bit_3)
+                + shape_id_.GetBit(bit_2)
+                + shape_id_.GetBit(bit_1)
+                + shape_id_.GetBit(bit_0);
+
+    return new Bin(id, 4);
   }
 
   public override string ToString() {
