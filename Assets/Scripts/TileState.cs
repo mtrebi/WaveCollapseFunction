@@ -96,7 +96,7 @@ public class TileState {
         break;
     }
 
-    return new Bin(shape_id_.GetBit(high_bit).ToString() + shape_id_.GetBit(low_bit).ToString(), 2);
+    return new Bin(shape_id_.GetBit(high_bit) + shape_id_.GetBit(low_bit), 2);
   }
 
   public override string ToString() {

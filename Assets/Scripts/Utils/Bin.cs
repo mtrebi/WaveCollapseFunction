@@ -51,8 +51,8 @@ public class Bin {
   /// </summary>
   /// <param name="position">Position of the bit</param>
   /// <returns> Value of the bit </returns>
-  public int GetBit(int position) {
-    return string_binary_[kBITS - 1 - position] == '1' ? 1 : 0 ;
+  public string GetBit(int position) {
+    return string_binary_[kBITS - 1 - position].ToString();
   }
 
   /// <summary>
@@ -72,9 +72,9 @@ public class Bin {
   /// </summary>
   /// <param name="position">Position of the bit</param>
   /// <param name="bit">Value of the bit</param>
-  public void SetBit(int position, int value) {
+  public void SetBit(int position, string value) {
     char[] arr = string_binary_.ToCharArray();
-    arr[kBITS - 1 - position] = value == 1 ? '1' : '0';
+    arr[kBITS - 1 - position] = value[0];
     string_binary_ = new string(arr);
     int_binary_ = System.Convert.ToUInt32(string_binary_, 2);
   }
