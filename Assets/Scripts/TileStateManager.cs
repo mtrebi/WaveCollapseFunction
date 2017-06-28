@@ -15,7 +15,9 @@ public class TileStateManager : MonoBehaviour {
       BlockData data = tile_prefab.GetComponent<BlockData>();
       TileState ts = new TileState(new Bin(data.id), tile_prefab, data.probability);
       tile_states_.Add(ts);
-      tile_states_.AddRange(GenerateRotations(ts));
+      if (enable_rotations_) {
+        tile_states_.AddRange(GenerateRotations(ts));
+      }
     }
   }
 
