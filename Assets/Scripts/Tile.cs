@@ -48,7 +48,6 @@ public class Tile : MonoBehaviour {
     x_ = x;
     y_ = y;
     z_ = z;
-    total_probability_ = 1.0f;
 
     update_entropy_ = true;
     final_state_ = null;
@@ -65,15 +64,20 @@ public class Tile : MonoBehaviour {
       return last_entropy_;
     }
 
+    // TODO: Do it just once to improve performance
+    float total_probability = 0;
+    foreach (TileState available_state in available_states_) {
+      total_probability += available_state.GetProbability();
+    }
+
     float entropy = 0;
     foreach (TileState available_state in available_states_) {
       float base_p = available_state.GetProbability();
-      float p = base_p / total_probability_;
+      float p = base_p / total_probability;
       entropy += -p * Mathf.Log(p, 2);
     }
 
     update_entropy_ = false;
-
     return last_entropy_ = entropy;
   }
 
@@ -118,7 +122,7 @@ public class Tile : MonoBehaviour {
       if (!satisfy_any) {
         changed = true;
         update_entropy_ = true;
-        total_probability_ -= available_states_[i].GetProbability();
+        //total_probability_ -= available_states_[i].GetProbability();
         available_states_.RemoveAt(i);
       }
     }
@@ -138,7 +142,7 @@ public class Tile : MonoBehaviour {
       TileFactory.Instance.CreateBlock(this.transform, x_, y_, z_, this.final_state_);
     } else {
       // Render based on entropy
-      float scale = Mathf.Lerp(1.0f, 0.2f, last_entropy_ / max_entropy_);
+      float scale = Mathf.Lerp(0.2f, 1.0f, last_entropy_ / max_entropy_);
       transparent_block.localScale = new Vector3(scale, scale, scale);
     }
   }
