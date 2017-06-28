@@ -39,12 +39,14 @@ public class Tile : MonoBehaviour {
   /// </summary>
   /// <param name="name"> name of the object</param>
   /// <param name="x"> X position</param>
+  /// <param name="y"> Y position</param>
   /// <param name="z"> Z position</param>
   /// <param name="possible_states"> possible states that tile may take </param>
-  public void Initialize(string name, int x, int z, List<TileState> possible_states) {
+  public void Initialize(string name, int x, int y, int z, List<TileState> possible_states) {
     this.gameObject.name = name;
 
     x_ = x;
+    y_ = y;
     z_ = z;
     total_probability_ = 1.0f;
 
@@ -133,7 +135,7 @@ public class Tile : MonoBehaviour {
     if (final_state_ != null) {
       // Render final state
       transparent_block.gameObject.SetActive(false);
-      TileFactory.Instance.CreateBlock(this.transform, x_, z_, this.final_state_);
+      TileFactory.Instance.CreateBlock(this.transform, x_, y_, z_, this.final_state_);
     } else {
       // Render based on entropy
       float scale = Mathf.Lerp(1.0f, 0.2f, last_entropy_ / max_entropy_);
@@ -142,6 +144,6 @@ public class Tile : MonoBehaviour {
   }
 
   public override string ToString() {
-    return "("+ x_ + ", "+ z_ +") - States: " + available_states_.Count + " --> " + final_state_;
+    return "("+ x_ + ", " + y_ + ", " + z_ +") - States: " + available_states_.Count + " --> " + final_state_;
   }
 }
