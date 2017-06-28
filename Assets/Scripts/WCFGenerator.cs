@@ -30,21 +30,34 @@ public class WCFGenerator : MonoBehaviour {
   void Update() {
     if (!finished_) {
       GenerateWave();
-        RenderWave();
+      RenderWave();
     }
   }
 
   private void InitializeWave() {
     wave_ = new Tile[width_, height_, depth_];
     wave_changed_ = new bool[width_, height_, depth_];
+    List<TileState> states = tile_state_manager_object_.GetComponent<TileStateManager>().tile_states_;
     for (int x = 0; x < width_; ++x) {
       for (int y = 0; y < height_; ++y) {
         for (int z = 0; z < depth_; ++z) {
-          wave_[x,y,z] = TileFactory.Instance.CreateDefaultTile(this.transform, x, y, z, new List<TileState>(tile_state_manager_object_.GetComponent<TileStateManager>().tile_states_));
+          wave_[x, y, z] = TileFactory.Instance.CreateDefaultTile(this.transform, x, y, z, new List<TileState>(states));
           wave_changed_[x, y, z] = true;
         }
       }
     }
+
+
+    CollapseFloor(states.Find(x=>x.shape_id_.ToString().Equals("11111111")));
+  }
+
+  private void CollapseFloor(TileState state) {
+    for (int x = 0; x < width_; ++x) {
+      for (int z = 0; z < depth_; ++z) {
+        wave_[x, 0, z].Collapse(state);
+      }
+    }
+    
   }
 
   private void GenerateWave() {
@@ -77,7 +90,7 @@ public class WCFGenerator : MonoBehaviour {
     if (first_iteration_) {
       first_iteration_ = false;
       if (random_start_) {
-        return wave_[Random.Range(0, width_), Random.Range(0, height_), Random.Range(0, depth_)];
+        return wave_[Random.Range(0, width_), 0, Random.Range(0, depth_)];
       }
       return wave_[0, 0, 0];
     }      
