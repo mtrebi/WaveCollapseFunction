@@ -13,7 +13,7 @@ public class TileStateManager : MonoBehaviour {
 
     foreach (GameObject tile_prefab in tile_prefabs_) {
       BlockData data = tile_prefab.GetComponent<BlockData>();
-      TileState ts = new TileState(new Bin(data.id, data.id.Length), tile_prefab, data.probability);
+      TileState ts = new TileState(new Bin(data.id), tile_prefab, data.probability);
       tile_states_.Add(ts);
       tile_states_.AddRange(GenerateRotations(ts));
     }

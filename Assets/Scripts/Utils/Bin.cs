@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 
 public class Bin {
-  int kBITS = 4;
   uint kBITMASK;
 
   string string_binary_;
@@ -11,31 +10,27 @@ public class Bin {
   /// Constructor from binary string
   /// </summary>
   /// <param name="s"> binary string </param>
-  /// <param name="bits">number of bits used in the string (length)</param>
-  public Bin(string s, int bits = 4) {
-    kBITS = bits;
-    kBITMASK = ((uint)kBITS * (uint)kBITS) - 1;
+  public Bin(string s) {
     string_binary_ = s;
     int_binary_ = System.Convert.ToUInt32(string_binary_, 2);
+    kBITMASK = ((uint)string_binary_.Length * (uint)string_binary_.Length) - 1;
   }
 
   /// <summary>
   /// Constructor from unsigned int
   /// </summary>
   /// <param name="num"> Number to be represented in binary</param>
-  /// <param name="bits">Number of bits used to represent this number (log2)</param>
-  public Bin(uint num, int bits = 4) {
-    kBITS = bits;
+  public Bin(uint num) {
     int_binary_ = num;
     string_binary_ = System.Convert.ToString(int_binary_, 2);
-
-    int diff = kBITS - string_binary_.Length;
+    int diff = string_binary_.Length - string_binary_.Length;
     if (diff != 0) {
       // Fill with zeros on the left
       for (int i = 0; i < diff; ++i) {
         string_binary_ = string_binary_.Insert(0, "0");
       }
     }
+    kBITMASK = ((uint)string_binary_.Length * (uint)string_binary_.Length) - 1;
   }
 
   /// <summary>
@@ -43,7 +38,7 @@ public class Bin {
   /// </summary>
   /// <returns> Number of bits of the binary word</returns>
   public int Length() {
-    return kBITS;
+    return string_binary_.Length;
   }
 
   /// <summary>
@@ -52,10 +47,10 @@ public class Bin {
   /// <param name="position">Position of the bit</param>
   /// <returns> Value of the bit </returns>
   public string GetBit(int position) {
-    if (position > kBITS - 1) {
+    if (position > string_binary_.Length - 1) {
       return "0";
     }
-    return string_binary_[kBITS - 1 - position].ToString();
+    return string_binary_[string_binary_.Length - 1 - position].ToString();
   }
 
   /// <summary>
@@ -67,7 +62,7 @@ public class Bin {
   public Bin GetBitRange(int start_pos, int end_pos) {
     int length = start_pos - end_pos;
     string substring = string_binary_.Substring(start_pos, length);
-    return new Bin(substring, length);
+    return new Bin(substring);
   }
 
   /// <summary>
@@ -77,7 +72,7 @@ public class Bin {
   /// <param name="bit">Value of the bit</param>
   public void SetBit(int position, string value) {
     char[] arr = string_binary_.ToCharArray();
-    arr[kBITS - 1 - position] = value[0];
+    arr[string_binary_.Length - 1 - position] = value[0];
     string_binary_ = new string(arr);
     int_binary_ = System.Convert.ToUInt32(string_binary_, 2);
   }
@@ -88,8 +83,8 @@ public class Bin {
   /// <param name="n"> Number of rotations </param>
   /// <returns> The result of rotating this Bin N times to the left </returns>
   public Bin Rotate(int n) {
-    uint rotated_num = kBITMASK & ((int_binary_ << n) | (int_binary_ >> (kBITS - n)));
-    return new Bin(rotated_num, kBITS);
+    uint rotated_num = kBITMASK & ((int_binary_ << n) | (int_binary_ >> (string_binary_.Length - n)));
+    return new Bin(rotated_num);
   }
 
   /// <summary>
@@ -103,7 +98,7 @@ public class Bin {
       arr[i] = c;
     }
 
-    return new Bin(new string(arr), kBITS);
+    return new Bin(new string(arr));
   }
 
   public override string ToString() {
