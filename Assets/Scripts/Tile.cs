@@ -82,6 +82,16 @@ public class Tile : MonoBehaviour {
   }
 
   /// <summary>
+  /// Collapse Tile into one specific state
+  /// </summary>
+  /// <param name="final_state">State to collapse tile to</param>
+  public void Collapse(TileState final_state) {
+    final_state_ = final_state;
+    available_states_.Clear();
+    available_states_.Add(final_state_);
+  }
+
+  /// <summary>
   /// Collapse to tile to one final state
   /// </summary>
   public void Collapse() {
@@ -142,7 +152,7 @@ public class Tile : MonoBehaviour {
       TileFactory.Instance.CreateBlock(this.transform, x_, y_, z_, this.final_state_);
     } else {
       // Render based on entropy
-      float scale = Mathf.Lerp(0.2f, 1.0f, last_entropy_ / max_entropy_);
+      float scale = Mathf.Lerp(0.2f, 0.8f, last_entropy_ / max_entropy_);
       transparent_block.localScale = new Vector3(scale, scale, scale);
     }
   }
