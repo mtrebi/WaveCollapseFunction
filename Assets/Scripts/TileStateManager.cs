@@ -8,7 +8,7 @@ public class TileStateManager : MonoBehaviour {
   public bool enable_rotations_;
 
   // Use this for initialization
-  void Start () {
+  void Awake () {
     tile_states_ = new List<TileState>();
 
     foreach (GameObject tile_prefab in tile_prefabs_) {
