@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
 
+[System.Serializable]
 public class Bin {
+  [SerializeField] string string_binary_;
   uint kBITMASK;
-
-  string string_binary_;
   uint int_binary_;
 
   /// <summary>
@@ -20,10 +20,12 @@ public class Bin {
   /// Constructor from unsigned int
   /// </summary>
   /// <param name="num"> Number to be represented in binary</param>
-  public Bin(uint num) {
+  /// <param name="bits"> Number of bits used to represent this number</param>
+  public Bin(uint num, int bits = 8) {
     int_binary_ = num;
     string_binary_ = System.Convert.ToString(int_binary_, 2);
-    int diff = string_binary_.Length - string_binary_.Length;
+
+    int diff = bits - string_binary_.Length;
     if (diff != 0) {
       // Fill with zeros on the left
       for (int i = 0; i < diff; ++i) {
@@ -32,6 +34,15 @@ public class Bin {
     }
     kBITMASK = ((uint)string_binary_.Length * (uint)string_binary_.Length) - 1;
   }
+
+  /// <summary>
+  /// Get binary string literal
+  /// </summary>
+  /// <returns> Binary string </returns>
+  public string GetLiteral() {
+    return string_binary_;
+  }
+
 
   /// <summary>
   /// Number of bits of the binary word
@@ -84,7 +95,7 @@ public class Bin {
   /// <returns> The result of rotating this Bin N times to the left </returns>
   public Bin Rotate(int n) {
     uint rotated_num = kBITMASK & ((int_binary_ << n) | (int_binary_ >> (string_binary_.Length - n)));
-    return new Bin(rotated_num);
+    return new Bin(rotated_num, string_binary_.Length);
   }
 
   /// <summary>
@@ -102,7 +113,15 @@ public class Bin {
   }
 
   public override string ToString() {
-    return string_binary_;
+    string s = "";
+    for (int i = string_binary_.Length - 1; i >= 0; --i) {
+      char c = string_binary_[i];
+      s += c;
+      if (i % 4 == 0) {
+        s += " ";
+      }
+    }
+    return s;
   }
 
   public override bool Equals(object obj) {
