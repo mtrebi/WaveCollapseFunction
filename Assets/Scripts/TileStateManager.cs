@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class TileStateManager : MonoBehaviour {
   public GameObject[] tile_prefabs_;
-  public bool enable_rotations_;
 
   private List<TileState> tile_states_;
 
@@ -27,8 +26,10 @@ public class TileStateManager : MonoBehaviour {
       BlockData data = tile_prefab.GetComponent<BlockData>();
       TileState ts = new TileState(new Bin(data.id), tile_prefab, data.probability);
       States.Add(ts);
-      if (enable_rotations_) {
-        States.AddRange(GenerateRotations(ts));
+
+      foreach (var variation in data.variations) {
+        TileState temp = new TileState(new Bin(variation.id), tile_prefab, data.probability, variation.rotation);
+        States.Add(temp);
       }
     }
   }
