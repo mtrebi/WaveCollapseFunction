@@ -4,19 +4,31 @@ using UnityEngine;
 
 public class TileStateManager : MonoBehaviour {
   public GameObject[] tile_prefabs_;
-  public List<TileState> tile_states_;
   public bool enable_rotations_;
+
+  private List<TileState> tile_states_;
+
+  public List<TileState> States {
+    get {
+      return tile_states_;
+    }
+
+    set {
+      tile_states_ = value;
+    }
+  }
+
 
   // Use this for initialization
   void Awake () {
-    tile_states_ = new List<TileState>();
+    States = new List<TileState>();
 
     foreach (GameObject tile_prefab in tile_prefabs_) {
       BlockData data = tile_prefab.GetComponent<BlockData>();
       TileState ts = new TileState(new Bin(data.id), tile_prefab, data.probability);
-      tile_states_.Add(ts);
+      States.Add(ts);
       if (enable_rotations_) {
-        tile_states_.AddRange(GenerateRotations(ts));
+        States.AddRange(GenerateRotations(ts));
       }
     }
   }
