@@ -24,11 +24,11 @@ public class TileStateManager : MonoBehaviour {
   private TileState[] GenerateRotations(TileState tile_state) {
     HashSet<TileState> tile_rotations = new HashSet<TileState>();
 
-    for (int i = 1; i < tile_state.shape_id_.Length(); ++i) {
-      Bin rotation_id = tile_state.shape_id_.Rotate(i);
+    for (int i = 1; i < tile_state.Id.Length(); ++i) {
+      Bin rotation_id = tile_state.Id.Rotate(i);
       // TODO Check id and model
-      if (!rotation_id.Equals(tile_state.shape_id_)) {
-        TileState new_state = new TileState(rotation_id, tile_state.prefab_, tile_state.probability_, new Vector3(0, -i * 90, 0));
+      if (!rotation_id.Equals(tile_state.Id)) {
+        TileState new_state = new TileState(rotation_id, tile_state.Prefab, tile_state.Probability, new Vector3(0, -i * 90, 0));
         tile_rotations.Add(new_state);
       }
     }

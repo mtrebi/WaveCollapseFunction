@@ -9,14 +9,13 @@ public class Tile : MonoBehaviour {
               z_;
 
   // TileState
-  private List<TileState> available_states_;
-  private TileState final_state_;
+  [SerializeField] private TileState final_state_;
+  [SerializeField] private List<TileState> available_states_;
 
   // Entropy
-  private float last_entropy_;
+  [SerializeField] private float last_entropy_;
   private float max_entropy_;
   private bool update_entropy_;
-  private float total_probability_;
 
   /// <summary>
   /// Get final state of the Tile after collapsing
@@ -67,12 +66,12 @@ public class Tile : MonoBehaviour {
     // TODO: Do it just once to improve performance
     float total_probability = 0;
     foreach (TileState available_state in available_states_) {
-      total_probability += available_state.GetProbability();
+      total_probability += available_state.Probability;
     }
 
     float entropy = 0;
     foreach (TileState available_state in available_states_) {
-      float base_p = available_state.GetProbability();
+      float base_p = available_state.Probability;
       float p = base_p / total_probability;
       entropy += -p * Mathf.Log(p, 2);
     }
@@ -100,7 +99,7 @@ public class Tile : MonoBehaviour {
 
     foreach (TileState available_state in available_states_) {
       // TODO better use of probabilities
-      float probability = available_state.GetProbability() + Random.Range(0.0f, 0.55f);
+      float probability = available_state.Probability + Random.Range(0.0f, 0.55f);
       if (probability > max_probability) {
         max_probability = probability;
         max_probability_state = available_state;
