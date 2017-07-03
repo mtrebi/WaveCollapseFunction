@@ -81,6 +81,14 @@ public class Tile : MonoBehaviour {
   }
 
   /// <summary>
+  /// Check if tile can be collapsed into a final tile state
+  /// </summary>
+  /// <returns>Returns true if tile can collapse. False otherwise</returns>
+  public bool CanCollapse() {
+    return available_states_.Count == 0;
+  }
+
+  /// <summary>
   /// Collapse Tile into one specific state
   /// </summary>
   /// <param name="final_state">State to collapse tile to</param>
@@ -106,9 +114,11 @@ public class Tile : MonoBehaviour {
       }
     }
 
-    final_state_ = max_probability_state;
-    available_states_.Clear();
-    available_states_.Add(final_state_);
+    if (max_probability_state != null) {
+      final_state_ = max_probability_state;
+      available_states_.Clear();
+      available_states_.Add(final_state_);
+    } 
   }
 
   /// <summary>

@@ -12,6 +12,7 @@ public class WCFGenerator : MonoBehaviour {
   private Tile[,,] wave_;
   private bool[,,] wave_changed_;
 
+  private bool failed_ = false;
   private bool finished_ = false;
   private bool first_iteration_ = true;
 
@@ -28,6 +29,11 @@ public class WCFGenerator : MonoBehaviour {
 
   // Update is called once per frame
   void Update() {
+    if (failed_) {
+      failed_ = false;
+      ResetWave();
+    }
+
     if (!finished_) {
       GenerateWave();
       RenderWave();
@@ -37,7 +43,7 @@ public class WCFGenerator : MonoBehaviour {
   private void InitializeWave() {
     wave_ = new Tile[width_, height_, depth_];
     wave_changed_ = new bool[width_, height_, depth_];
-    List<TileState> states = tile_state_manager_object_.GetComponent<TileStateManager>().tile_states_;
+    List<TileState> states = tile_state_manager_object_.GetComponent<TileStateManager>().States;
     for (int x = 0; x < width_; ++x) {
       for (int y = 0; y < height_; ++y) {
         for (int z = 0; z < depth_; ++z) {
@@ -47,9 +53,24 @@ public class WCFGenerator : MonoBehaviour {
       }
     }
 
-
-    CollapseFloor(states.Find(x=>x.shape_id_.ToString().Equals("11111111")));
+    CollapseFloor(states.Find(x => x.Id.Equals(new Bin("11111111"))));
   }
+
+  private void ResetWave() {
+    List<TileState> states = tile_state_manager_object_.GetComponent<TileStateManager>().States;
+    for (int x = 0; x < width_; ++x) {
+      for (int y = 0; y < height_; ++y) {
+        for (int z = 0; z < depth_; ++z) {
+          Object.Destroy(wave_[x, y, z].gameObject);
+          wave_[x, y, z] = TileFactory.Instance.CreateDefaultTile(this.transform, x, y, z, new List<TileState>(states));
+          wave_changed_[x, y, z] = true;
+        }
+      }
+    }
+
+    CollapseFloor(states.Find(x => x.Id.Equals(new Bin("11111111"))));
+  }
+
 
   private void CollapseFloor(TileState state) {
     for (int x = 0; x < width_; ++x) {
@@ -66,6 +87,12 @@ public class WCFGenerator : MonoBehaviour {
     if (min_entropy_tile == null) {
       Debug.Log("Stopping...");
       finished_ = true;
+      return;
+    }
+
+    if (min_entropy_tile.CanCollapse()) {
+      Debug.Log("Restarting...");
+      failed_ = true;
       return;
     }
 
@@ -113,6 +140,7 @@ public class WCFGenerator : MonoBehaviour {
         }
       }
     }
+
     return min_entropy_tile;
   }
 
@@ -133,7 +161,6 @@ public class WCFGenerator : MonoBehaviour {
           remaining_tiles.Push(neighbor);
         }
       }
-
     }
   }
 
