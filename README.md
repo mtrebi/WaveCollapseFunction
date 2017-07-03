@@ -21,4 +21,4 @@ Procedural Generation using Block Tiles with visual enchantment (transparent blo
 
 (First) Procedural Generation using 3D Block Tiles
 
-![](https://github.com/mtrebi/WaveCollapseFunction/blob/master/Docs/Videos/first_3Dblock_tiles_generation.gif?raw=true)
+![](https://github.com/mtrebi/WaveCollapseFunction/blob/master/Docs/Videos/3Dblock_tiles_generation_first.gif?raw=true)
