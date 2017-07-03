@@ -18,3 +18,7 @@ Procedural Generation using Block Tiles
 Procedural Generation using Block Tiles with visual enchantment (transparent block size depends on entropy)
 
 ![](https://github.com/mtrebi/WaveCollapseFunction/blob/master/Docs/Videos/block_tiles_generation_with_entropy.gif?raw=true)
+
+(First) Procedural Generation using 3D Block Tiles
+
+![](https://github.com/mtrebi/WaveCollapseFunction/blob/master/Docs/Videos/first_3Dblock_tiles_generation.gif?raw=true)
