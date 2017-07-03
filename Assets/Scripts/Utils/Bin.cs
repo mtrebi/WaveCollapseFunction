@@ -113,15 +113,7 @@ public class Bin {
   }
 
   public override string ToString() {
-    string s = "";
-    for (int i = string_binary_.Length - 1; i >= 0; --i) {
-      char c = string_binary_[i];
-      s += c;
-      if (i % 4 == 0) {
-        s += " ";
-      }
-    }
-    return s;
+    return string_binary_;
   }
 
   public override bool Equals(object obj) {
