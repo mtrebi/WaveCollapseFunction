@@ -9,8 +9,8 @@ public class WCFGenerator : MonoBehaviour {
   public bool random_start_;
   public GameObject tile_state_manager_object_;
 
-  private Tile[,,] wave_;
-  private bool[,,] wave_changed_;
+  private Tile[,,] wave_ = null;
+  private bool[,,] wave_changed_ = null;
 
   private bool failed_ = false;
   private bool finished_ = false;
@@ -31,7 +31,7 @@ public class WCFGenerator : MonoBehaviour {
   void Update() {
     if (failed_) {
       failed_ = false;
-      ResetWave();
+      InitializeWave();
     }
 
     if (!finished_) {
@@ -41,8 +41,14 @@ public class WCFGenerator : MonoBehaviour {
   }
 
   private void InitializeWave() {
-    wave_ = new Tile[width_, height_, depth_];
-    wave_changed_ = new bool[width_, height_, depth_];
+    if (wave_ == null) {
+      wave_ = new Tile[width_, height_, depth_];
+    }
+
+    if (wave_changed_ == null) {
+      wave_changed_ = new bool[width_, height_, depth_];
+    }
+
     List<TileState> states = tile_state_manager_object_.GetComponent<TileStateManager>().States;
     for (int x = 0; x < width_; ++x) {
       for (int y = 0; y < height_; ++y) {
@@ -55,22 +61,6 @@ public class WCFGenerator : MonoBehaviour {
 
     CollapseFloor(states.Find(x => x.Id.Equals(new Bin("11111111"))));
   }
-
-  private void ResetWave() {
-    List<TileState> states = tile_state_manager_object_.GetComponent<TileStateManager>().States;
-    for (int x = 0; x < width_; ++x) {
-      for (int y = 0; y < height_; ++y) {
-        for (int z = 0; z < depth_; ++z) {
-          Object.Destroy(wave_[x, y, z].gameObject);
-          wave_[x, y, z] = TileFactory.Instance.CreateDefaultTile(this.transform, x, y, z, new List<TileState>(states));
-          wave_changed_[x, y, z] = true;
-        }
-      }
-    }
-
-    CollapseFloor(states.Find(x => x.Id.Equals(new Bin("11111111"))));
-  }
-
 
   private void CollapseFloor(TileState state) {
     for (int x = 0; x < width_; ++x) {
@@ -78,7 +68,6 @@ public class WCFGenerator : MonoBehaviour {
         wave_[x, 0, z].Collapse(state);
       }
     }
-    
   }
 
   private void GenerateWave() {
