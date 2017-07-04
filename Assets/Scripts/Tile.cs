@@ -112,7 +112,7 @@ public class Tile : MonoBehaviour {
 
     foreach (TileState available_state in available_states_) {
       // TODO better use of probabilities
-      float probability = available_state.Probability + Random.Range(0.0f, 0.15f);
+      float probability = available_state.Probability /*+ Random.Range(0.0f, 0.15f)*/;
 
       if (probability >= max_probability) {
         if (probability > max_probability) {
@@ -123,7 +123,7 @@ public class Tile : MonoBehaviour {
       }
     }
 
-    int random_index = Random.Range(0, max_probabilities_states.Count - 1);
+    int random_index = Random.Range(0, max_probabilities_states.Count);
     this.Collapse(max_probabilities_states[random_index]);
   }
 
