@@ -73,8 +73,13 @@ public class Tile : MonoBehaviour {
     foreach (TileState available_state in available_states_) {
       float base_p = available_state.Probability;
       float p = base_p / total_probability;
-      entropy += -p * Mathf.Log(p, 2);
+
+      // TODO:  Remove this
+      if (p > 0) {
+        entropy += -p * Mathf.Log(p, 2);
+      }
     }
+
 
     update_entropy_ = false;
     return last_entropy_ = entropy;
@@ -102,23 +107,24 @@ public class Tile : MonoBehaviour {
   /// Collapse to tile to one final state
   /// </summary>
   public void Collapse() {
+    List<TileState> max_probabilities_states = new List<TileState>();
     float max_probability = float.MinValue;
-    TileState max_probability_state = null;
 
     foreach (TileState available_state in available_states_) {
       // TODO better use of probabilities
-      float probability = available_state.Probability + Random.Range(0.0f, 0.55f);
-      if (probability > max_probability) {
-        max_probability = probability;
-        max_probability_state = available_state;
+      float probability = available_state.Probability + Random.Range(0.0f, 0.15f);
+
+      if (probability >= max_probability) {
+        if (probability > max_probability) {
+          max_probability = probability;
+          max_probabilities_states.Clear();
+        }
+        max_probabilities_states.Add(available_state);
       }
     }
 
-    if (max_probability_state != null) {
-      final_state_ = max_probability_state;
-      available_states_.Clear();
-      available_states_.Add(final_state_);
-    } 
+    int random_index = Random.Range(0, max_probabilities_states.Count - 1);
+    this.Collapse(max_probabilities_states[random_index]);
   }
 
   /// <summary>
