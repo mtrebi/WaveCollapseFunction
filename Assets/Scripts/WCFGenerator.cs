@@ -53,6 +53,10 @@ public class WCFGenerator : MonoBehaviour {
     for (int x = 0; x < width_; ++x) {
       for (int y = 0; y < height_; ++y) {
         for (int z = 0; z < depth_; ++z) {
+          if (wave_[x, y, z] != null) {
+            // TODO : Factory/ pool, null initialize
+            Object.Destroy(wave_[x, y, z].gameObject);
+          }
           wave_[x, y, z] = TileFactory.Instance.CreateDefaultTile(this.transform, x, y, z, new List<TileState>(states));
           wave_changed_[x, y, z] = true;
         }
