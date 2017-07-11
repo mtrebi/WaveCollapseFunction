@@ -23,14 +23,17 @@ public class TileStateManager : MonoBehaviour {
     States = new List<TileState>();
 
     foreach (GameObject tile_prefab in tile_prefabs_) {
-      BlockData data = tile_prefab.GetComponent<BlockData>();
-      TileState ts = new TileState(new Bin(data.id), tile_prefab, data.probability);
-      States.Add(ts);
+      if (tile_prefab != null) { //TODO OUT
+        BlockData data = tile_prefab.GetComponent<BlockData>();
+        TileState ts = new TileState(new Bin(data.id), tile_prefab, data.probability);
+        States.Add(ts);
 
-      foreach (var variation in data.variations) {
-        TileState temp = new TileState(new Bin(variation.id), tile_prefab, data.probability, variation.rotation);
-        States.Add(temp);
+        foreach (var variation in data.variations) {
+          TileState temp = new TileState(new Bin(variation.id), tile_prefab, data.probability, variation.rotation);
+          States.Add(temp);
+        }
       }
+
     }
   }
 
