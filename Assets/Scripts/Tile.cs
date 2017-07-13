@@ -17,21 +17,48 @@ public class Tile : MonoBehaviour {
   private float max_entropy_;
   private bool update_entropy_;
 
-  /// <summary>
-  /// Get final state of the Tile after collapsing
-  /// </summary>
-  /// <returns> The state of the Tile after collapsing </returns>
-  public TileState GetState() {
-    return final_state_;
-  }
-
-  public bool Collapsed() {
-    return final_state_ != null;
-  }
-
   public int X { get { return x_; } }
   public int Y { get { return y_; } }
   public int Z { get { return z_; } }
+
+  /// <summary>
+  /// Final State of the Tile that determines its rendered shape
+  /// </summary>
+  public TileState State {
+    get {
+      return final_state_;
+    }
+    set {
+      final_state_ = value;
+      available_states_.Clear();
+      available_states_.Add(final_state_);
+    }
+  }
+
+  /// <summary>
+  /// List of available states that could (eventually) be the final state of the Tile
+  /// </summary>
+  public List<TileState> AvailableStates {
+    get {
+      return available_states_;
+    }
+  }
+
+  /// <summary>
+  /// Check if tile can be collapsed into a final tile state
+  /// </summary>
+  /// <returns>Returns true if tile can collapse. False otherwise</returns>
+  public bool CanCollapse() {
+    return available_states_.Count == 0;
+  }
+
+  /// <summary>
+  /// Check if the Tile already collaped into a final state
+  /// </summary>
+  /// <returns> True if Tile already collapsed </returns>
+  public bool Collapsed() {
+    return final_state_ != null;
+  }
 
   /// <summary>
   /// Initialize tile Game object
@@ -86,24 +113,6 @@ public class Tile : MonoBehaviour {
   }
 
   /// <summary>
-  /// Check if tile can be collapsed into a final tile state
-  /// </summary>
-  /// <returns>Returns true if tile can collapse. False otherwise</returns>
-  public bool CanCollapse() {
-    return available_states_.Count == 0;
-  }
-
-  /// <summary>
-  /// Collapse Tile into one specific state
-  /// </summary>
-  /// <param name="final_state">State to collapse tile to</param>
-  public void Collapse(TileState final_state) {
-    final_state_ = final_state;
-    available_states_.Clear();
-    available_states_.Add(final_state_);
-  }
-
-  /// <summary>
   /// Collapse to tile to one final state
   /// </summary>
   public void Collapse() {
@@ -124,7 +133,7 @@ public class Tile : MonoBehaviour {
     }
 
     int random_index = Random.Range(0, max_probabilities_states.Count);
-    this.Collapse(max_probabilities_states[random_index]);
+    State = max_probabilities_states[random_index];
   }
 
   /// <summary>

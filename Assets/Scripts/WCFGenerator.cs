@@ -12,6 +12,7 @@ public class WCFGenerator : MonoBehaviour {
   private Tile[,,] wave_ = null;
   private bool[,,] wave_changed_ = null;
 
+  private bool stopped_ = false;
   private bool failed_ = false;
   private bool finished_ = false;
   private bool first_iteration_ = true;
@@ -69,7 +70,7 @@ public class WCFGenerator : MonoBehaviour {
   private void CollapseFloor(TileState state) {
     for (int x = 0; x < width_; ++x) {
       for (int z = 0; z < depth_; ++z) {
-        wave_[x, 0, z].Collapse(state);
+        wave_[x, 0, z].State = state;
       }
     }
   }
