@@ -2,6 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum ProgramState {
+  INIT,
+  RUNNING,
+  STOPPED,
+  FAILED,
+  FINISHED
+}
+
 public class WCFGenerator : MonoBehaviour {
   public int width_,
              height_,
@@ -12,10 +20,19 @@ public class WCFGenerator : MonoBehaviour {
   private Tile[,,] wave_ = null;
   private bool[,,] wave_changed_ = null;
 
-  private bool stopped_ = false;
-  private bool failed_ = false;
-  private bool finished_ = false;
+  private ProgramState program_state_ = ProgramState.INIT;
   private bool first_iteration_ = true;
+
+  public ProgramState ProgramState {
+    get {
+      return program_state_;
+    }
+
+    set {
+      program_state_ = value;
+    }
+  }
+
 
   // Use this for initialization
   void Awake() {
@@ -26,18 +43,27 @@ public class WCFGenerator : MonoBehaviour {
     InitializeWave();
   }
 
-
-
   // Update is called once per frame
   void Update() {
-    if (failed_) {
-      failed_ = false;
-      InitializeWave();
-    }
-
-    if (!finished_) {
-      GenerateWave();
-      RenderWave();
+    switch (program_state_) {
+      case ProgramState.INIT:
+        InitializeWave();
+        program_state_ = ProgramState.RUNNING;
+        break;
+      case ProgramState.RUNNING:
+        GenerateWave();
+        RenderWave();
+        break;
+      case ProgramState.STOPPED:
+        break;
+      case ProgramState.FAILED:
+        Debug.Log("Program failed. Restarting...");
+        program_state_ = ProgramState.INIT;
+        break;
+      case ProgramState.FINISHED:
+        Debug.Log("Program finished successfully...");
+        program_state_ = ProgramState.STOPPED;
+        break;
     }
   }
 
@@ -79,14 +105,12 @@ public class WCFGenerator : MonoBehaviour {
     Tile min_entropy_tile = Observe();
 
     if (min_entropy_tile == null) {
-      Debug.Log("Stopping...");
-      finished_ = true;
+      program_state_ = ProgramState.FINISHED;
       return;
     }
 
     if (min_entropy_tile.CanCollapse()) {
-      Debug.Log("Restarting...");
-      failed_ = true;
+      program_state_ = ProgramState.FAILED;
       return;
     }
 
