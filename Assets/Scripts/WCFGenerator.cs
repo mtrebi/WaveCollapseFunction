@@ -114,7 +114,7 @@ public class WCFGenerator : MonoBehaviour {
       return;
     }
 
-    min_entropy_tile.Collapse();
+    Collapse(min_entropy_tile);
     Propagate(min_entropy_tile);
   }
   
@@ -161,6 +161,31 @@ public class WCFGenerator : MonoBehaviour {
 
     return min_entropy_tile;
   }
+
+  /// <summary>
+  /// Collapse to tile to one final state
+  /// </summary>
+  public void Collapse(Tile tile) {
+    List<TileState> max_probabilities_states = new List<TileState>();
+    float max_probability = float.MinValue;
+
+    foreach (TileState available_state in tile.AvailableStates) {
+      // TODO better use of probabilities
+      float probability = available_state.Probability /*+ Random.Range(0.0f, 0.15f)*/;
+
+      if (probability >= max_probability) {
+        if (probability > max_probability) {
+          max_probability = probability;
+          max_probabilities_states.Clear();
+        }
+        max_probabilities_states.Add(available_state);
+      }
+    }
+
+    int random_index = Random.Range(0, max_probabilities_states.Count);
+    tile.State = max_probabilities_states[random_index];
+  }
+
 
   private void Propagate(Tile tile_changed) {
     Stack<Tile> remaining_tiles = new Stack<Tile>();

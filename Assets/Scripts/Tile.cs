@@ -113,30 +113,6 @@ public class Tile : MonoBehaviour {
   }
 
   /// <summary>
-  /// Collapse to tile to one final state
-  /// </summary>
-  public void Collapse() {
-    List<TileState> max_probabilities_states = new List<TileState>();
-    float max_probability = float.MinValue;
-
-    foreach (TileState available_state in available_states_) {
-      // TODO better use of probabilities
-      float probability = available_state.Probability /*+ Random.Range(0.0f, 0.15f)*/;
-
-      if (probability >= max_probability) {
-        if (probability > max_probability) {
-          max_probability = probability;
-          max_probabilities_states.Clear();
-        }
-        max_probabilities_states.Add(available_state);
-      }
-    }
-
-    int random_index = Random.Range(0, max_probabilities_states.Count);
-    State = max_probabilities_states[random_index];
-  }
-
-  /// <summary>
   /// Updates the available states of this tile based on the neighbor constraints
   /// </summary>
   /// <param name="neighbor"></param>
