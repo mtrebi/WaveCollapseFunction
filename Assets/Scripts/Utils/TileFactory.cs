@@ -39,8 +39,8 @@ public class TileFactory : MonoBehaviour {
   /// <param name="z"> Z Position of the tile in the grid</param>
   /// <param name="state"> State of the block (determines prefab_ and rotation)</param>
   /// <returns> The new instantiated block </returns>
-  public BlockData CreateBlock(Transform parent, int x, int y, int z, TileState state) {
-    BlockData block = Object.Instantiate(state.Prefab, new Vector3(x, y, z), state.PrefabOrientation).GetComponent<BlockData>();
+  public TileData CreateBlock(Transform parent, int x, int y, int z, TileState state) {
+    TileData block = Object.Instantiate(state.Prefab, new Vector3(x, y, z), state.PrefabOrientation).GetComponent<TileData>();
     block.transform.parent = parent;
     block.name = "Block_" + state;
     return block;

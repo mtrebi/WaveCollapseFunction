@@ -17,7 +17,7 @@ public struct Variation {
 }
 
 [System.Serializable]
-public class BlockFace {
+public class TileFace {
   public Bin id_;
   public Direction direction_;
   public int size_;
@@ -30,7 +30,7 @@ public class BlockFace {
     Z
   };
 
-  public BlockFace(Direction direction, int size) {
+  public TileFace(Direction direction, int size) {
     size_ = size;
     direction_ = direction;
     id_ = new Bin(size_ * size_);
@@ -101,22 +101,22 @@ public class BlockFace {
 /// <summary>
 /// Data holder for Block prefabs
 /// </summary>
-public class BlockData : MonoBehaviour {
+public class TileData : MonoBehaviour {
   public int size_;
 
   public float probability_;
   public string id_;
-  public BlockFace[] faces_;
+  public TileFace[] faces_;
   public Variation symmetry_type_;
 
   private void Start() {
-    faces_ = new BlockFace[6];
-    faces_[(int)Direction.TOP] = new BlockFace(Direction.TOP, size_);
-    faces_[(int)Direction.NORTH] = new BlockFace(Direction.NORTH, size_);
-    faces_[(int)Direction.EAST] = new BlockFace(Direction.EAST, size_);
-    faces_[(int)Direction.BOTTOM] = new BlockFace(Direction.BOTTOM, size_);
-    faces_[(int)Direction.SOUTH] = new BlockFace(Direction.SOUTH, size_);
-    faces_[(int)Direction.WEST] = new BlockFace(Direction.WEST, size_);
+    faces_ = new TileFace[6];
+    faces_[(int)Direction.TOP] = new TileFace(Direction.TOP, size_);
+    faces_[(int)Direction.NORTH] = new TileFace(Direction.NORTH, size_);
+    faces_[(int)Direction.EAST] = new TileFace(Direction.EAST, size_);
+    faces_[(int)Direction.BOTTOM] = new TileFace(Direction.BOTTOM, size_);
+    faces_[(int)Direction.SOUTH] = new TileFace(Direction.SOUTH, size_);
+    faces_[(int)Direction.WEST] = new TileFace(Direction.WEST, size_);
 
     CalculateId();
   }
@@ -134,8 +134,8 @@ public class BlockData : MonoBehaviour {
           // TODO better existence check
           Transform element = x_line.GetChild(x);
           string bit = element.gameObject.activeInHierarchy ? "1" : "0";
-          List<BlockFace> involved_faces = GetInvolvedFaces(x, y, z);
-          foreach (BlockFace face in involved_faces) {
+          List<TileFace> involved_faces = GetInvolvedFaces(x, y, z);
+          foreach (TileFace face in involved_faces) {
             face.UpdateId(x, y, z, bit);
           }
         }
@@ -150,8 +150,8 @@ public class BlockData : MonoBehaviour {
   /// <param name="y"></param>
   /// <param name="z"></param>
   /// <returns>Faces involved in the connection with the given semi-block </returns>
-  private List<BlockFace> GetInvolvedFaces(int x, int y, int z) {
-    List<BlockFace> faces = new List<BlockFace>();
+  private List<TileFace> GetInvolvedFaces(int x, int y, int z) {
+    List<TileFace> faces = new List<TileFace>();
     if (x == 0) {
       faces.Add(faces_[(int) Direction.SOUTH]);
     }

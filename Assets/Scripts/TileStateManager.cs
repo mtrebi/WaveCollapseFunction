@@ -24,14 +24,14 @@ public class TileStateManager : MonoBehaviour {
 
     foreach (GameObject tile_prefab in tile_prefabs_) {
       if (tile_prefab != null) { //TODO OUT
-        BlockData data = tile_prefab.GetComponent<BlockData>();
-        TileState ts = new TileState(new Bin(data.id), tile_prefab, data.probability);
+        TileData data = tile_prefab.GetComponent<TileData>();
+        TileState ts = new TileState(new Bin(data.id_), tile_prefab, data.probability_);
         States.Add(ts);
-
+        /*
         foreach (var variation in data.variations) {
-          TileState temp = new TileState(new Bin(variation.id), tile_prefab, data.probability, variation.rotation);
+          TileState temp = new TileState(new Bin(variation.id), tile_prefab, data.probability_, variation.rotation);
           States.Add(temp);
-        }
+        }*/
       }
 
     }
@@ -42,7 +42,7 @@ public class TileStateManager : MonoBehaviour {
 
     for (int i = 1; i < tile_state.Id.Length(); ++i) {
       Bin rotation_id = tile_state.Id.Rotate(i);
-      // TODO Check id and model
+      // TODO Check id_ and model
       if (!rotation_id.Equals(tile_state.Id)) {
         TileState new_state = new TileState(rotation_id, tile_state.Prefab, tile_state.Probability, new Vector3(0, -i * 90, 0));
         tile_rotations.Add(new_state);
