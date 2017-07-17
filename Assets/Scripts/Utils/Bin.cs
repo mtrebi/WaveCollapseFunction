@@ -17,6 +17,24 @@ public class Bin {
   }
 
   /// <summary>
+  /// Constructor from size
+  /// </summary>
+  /// <param name="bits"> Number of bits used to represent this number</param>
+  public Bin(int bits = 8) {
+    int_binary_ = 0;
+    string_binary_ = System.Convert.ToString(int_binary_, 2);
+
+    int diff = bits - string_binary_.Length;
+    if (diff != 0) {
+      // Fill with zeros on the left
+      for (int i = 0; i < diff; ++i) {
+        string_binary_ = string_binary_.Insert(0, "0");
+      }
+    }
+    kBITMASK = ((uint)string_binary_.Length * (uint)string_binary_.Length) - 1;
+  }
+
+  /// <summary>
   /// Constructor from unsigned int
   /// </summary>
   /// <param name="num"> Number to be represented in binary</param>
