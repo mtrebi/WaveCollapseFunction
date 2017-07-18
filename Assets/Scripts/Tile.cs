@@ -15,6 +15,7 @@ public class Tile : MonoBehaviour {
   // Entropy
   [SerializeField] private float last_entropy_;
   private float max_entropy_;
+  private float total_probability_;
   private bool update_entropy_;
 
   public int X { get { return x_; } }
@@ -78,6 +79,7 @@ public class Tile : MonoBehaviour {
     update_entropy_ = true;
     final_state_ = null;
     available_states_ = possible_states;
+    total_probability_ = TotalProbability();
     max_entropy_ = GetEntropy();
   }
 
@@ -90,21 +92,12 @@ public class Tile : MonoBehaviour {
       return last_entropy_;
     }
 
-    // TODO: Do it just once to improve performance
-    float total_probability = 0;
-    foreach (TileState available_state in available_states_) {
-      total_probability += available_state.Probability;
-    }
-
     float entropy = 0;
     foreach (TileState available_state in available_states_) {
       float base_p = available_state.Probability;
-      float p = base_p / total_probability;
+      float p = base_p / total_probability_;
 
-      // TODO:  Remove this
-      if (p > 0) {
-        entropy += -p * Mathf.Log(p, 2);
-      }
+      entropy += -p * Mathf.Log(p, 2);
     }
 
 
@@ -160,4 +153,12 @@ public class Tile : MonoBehaviour {
   public override string ToString() {
     return "("+ x_ + ", " + y_ + ", " + z_ +") - States: " + available_states_.Count + " --> " + final_state_;
   }
+
+  private float TotalProbability() {
+    float total_probability = 0;
+    foreach (TileState available_state in available_states_) {
+      total_probability += available_state.Probability;
+    }
+    return total_probability;
+  } 
 }

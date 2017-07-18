@@ -22,13 +22,11 @@ public class TileStateManager : MonoBehaviour {
     States = new List<TileState>();
 
     foreach (GameObject tile_prefab in tile_prefabs_) {
-      if (tile_prefab != null) { //TODO OUT
-        TileData tile_data = tile_prefab.GetComponent<TileData>();
-        tile_data.Initialize();
-        TileState tile_state = new TileState(tile_data);
-        States.Add(tile_state);
-        // TODO check symmetry type and generate rotations
-      }
+      TileData tile_data = tile_prefab.GetComponent<TileData>();
+      tile_data.Initialize();
+      TileState tile_state = new TileState(tile_data);
+      States.Add(tile_state);
+      // TODO check symmetry type and generate rotations
     }
   }
 }
