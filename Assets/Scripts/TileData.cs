@@ -11,12 +11,6 @@ public enum SymmetryType {
 }
 
 [System.Serializable]
-public struct Variation {
-  public string id;
-  public SymmetryType symmetry_;
-}
-
-[System.Serializable]
 public class TileFace {
   public Bin id_;
   public Direction direction_;
@@ -103,13 +97,11 @@ public class TileFace {
 /// </summary>
 public class TileData : MonoBehaviour {
   public int size_;
-
   public float probability_;
-  public string id_;
+  public SymmetryType symmetry_;
   public TileFace[] faces_;
-  public Variation symmetry_type_;
 
-  private void Start() {
+  public void Initialize() {
     faces_ = new TileFace[6];
     faces_[(int)Direction.TOP] = new TileFace(Direction.TOP, size_);
     faces_[(int)Direction.NORTH] = new TileFace(Direction.NORTH, size_);
@@ -118,14 +110,13 @@ public class TileData : MonoBehaviour {
     faces_[(int)Direction.SOUTH] = new TileFace(Direction.SOUTH, size_);
     faces_[(int)Direction.WEST] = new TileFace(Direction.WEST, size_);
 
-    CalculateId();
+    CalculateFaces();
   }
 
   /// <summary>
-  /// Calculate Block Id (based on tile positions and constraints)
+  /// Calculate Tile faces ids (based on tile positions and constraints)
   /// </summary>
-  private void CalculateId() {
-    id_ = new string(' ', size_ * size_ * size_);
+  private void CalculateFaces() {
     for (int y = 0; y < size_; ++y) {
       Transform xz_plane = transform.GetChild(y);
       for (int z = 0; z < size_; ++z) {

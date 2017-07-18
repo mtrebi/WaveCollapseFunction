@@ -84,13 +84,13 @@ public class WCFGenerator : MonoBehaviour {
             // TODO : Factory/ pool, null initialize
             Object.Destroy(wave_[x, y, z].gameObject);
           }
-          wave_[x, y, z] = TileFactory.Instance.CreateDefaultTile(this.transform, x, y, z, new List<TileState>(states));
+          wave_[x, y, z] = TileFactory.Instance.CreateTilePlaceholder(this.transform, x, y, z, new List<TileState>(states));
           wave_changed_[x, y, z] = true;
         }
       }
     }
 
-    CollapseFloor(states.Find(x => x.Id.Equals(new Bin("11111111"))));
+    //TODO CollapseFloor(states.Find(x => x.Id.Equals(new Bin("11111111"))));
   }
 
   private void CollapseFloor(TileState state) {
@@ -109,7 +109,7 @@ public class WCFGenerator : MonoBehaviour {
       return;
     }
 
-    if (min_entropy_tile.CanCollapse()) {
+    if (!min_entropy_tile.CanCollapse()) {
       program_state_ = ProgramState.FAILED;
       return;
     }

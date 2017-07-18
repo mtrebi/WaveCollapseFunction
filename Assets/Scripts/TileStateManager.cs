@@ -17,42 +17,18 @@ public class TileStateManager : MonoBehaviour {
     }
   }
 
-
   // Use this for initialization
   void Awake () {
     States = new List<TileState>();
 
     foreach (GameObject tile_prefab in tile_prefabs_) {
       if (tile_prefab != null) { //TODO OUT
-        TileData data = tile_prefab.GetComponent<TileData>();
-        TileState ts = new TileState(new Bin(data.id_), tile_prefab, data.probability_);
-        States.Add(ts);
-        /*
-        foreach (var variation in data.variations) {
-          TileState temp = new TileState(new Bin(variation.id), tile_prefab, data.probability_, variation.rotation);
-          States.Add(temp);
-        }*/
-      }
-
-    }
-  }
-
-  private TileState[] GenerateRotations(TileState tile_state) {
-    HashSet<TileState> tile_rotations = new HashSet<TileState>();
-
-    for (int i = 1; i < tile_state.Id.Length(); ++i) {
-      Bin rotation_id = tile_state.Id.Rotate(i);
-      // TODO Check id_ and model
-      if (!rotation_id.Equals(tile_state.Id)) {
-        TileState new_state = new TileState(rotation_id, tile_state.Prefab, tile_state.Probability, new Vector3(0, -i * 90, 0));
-        tile_rotations.Add(new_state);
+        TileData tile_data = tile_prefab.GetComponent<TileData>();
+        tile_data.Initialize();
+        TileState tile_state = new TileState(tile_data);
+        States.Add(tile_state);
+        // TODO check symmetry type and generate rotations
       }
     }
-
-    TileState[] tile_rotations_array = new TileState[tile_rotations.Count];
-    tile_rotations.CopyTo(tile_rotations_array);
-
-    return tile_rotations_array;
   }
-
 }

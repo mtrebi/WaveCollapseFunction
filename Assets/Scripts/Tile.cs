@@ -49,7 +49,7 @@ public class Tile : MonoBehaviour {
   /// </summary>
   /// <returns>Returns true if tile can collapse. False otherwise</returns>
   public bool CanCollapse() {
-    return available_states_.Count == 0;
+    return available_states_.Count != 0;
   }
 
   /// <summary>
@@ -145,15 +145,15 @@ public class Tile : MonoBehaviour {
   /// </summary>
   /// <param name="parent">Gameobject parent transform </param>
   public void Render(Transform parent) {
-    Transform transparent_block = this.transform.GetChild(0);
+    Transform placeholder = this.transform.FindChild("Placeholder");
     if (final_state_ != null) {
       // Render final state
-      transparent_block.gameObject.SetActive(false);
-      TileFactory.Instance.CreateBlock(this.transform, x_, y_, z_, this.final_state_);
+      placeholder.gameObject.SetActive(false);
+      TileFactory.Instance.CreateTileData(this.transform, x_, y_, z_, this.final_state_);
     } else {
       // Render based on entropy
       float scale = Mathf.Lerp(0.2f, 0.8f, last_entropy_ / max_entropy_);
-      transparent_block.localScale = new Vector3(scale, scale, scale);
+      placeholder.localScale = new Vector3(scale, scale, scale);
     }
   }
 
