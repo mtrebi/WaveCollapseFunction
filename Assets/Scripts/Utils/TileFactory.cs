@@ -40,7 +40,7 @@ public class TileFactory : MonoBehaviour {
   /// <param name="state"> State of the tile (determines prefab_ and rotation)</param>
   /// <returns> The new instantiated tile </returns>
   public TileData CreateTileData(Transform parent, int x, int y, int z, TileState state) {
-    TileData tile_data = Object.Instantiate(state.TileData.gameObject, new Vector3(x, y, z), state.PrefabOrientation).GetComponent<TileData>();
+    TileData tile_data = Object.Instantiate(state.Prefab, new Vector3(x, y, z), state.PrefabOrientation).GetComponent<TileData>();
     tile_data.transform.parent = parent;
     tile_data.name = "TileData";
     return tile_data;
