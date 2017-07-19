@@ -73,7 +73,7 @@ public class Bin {
   /// <summary>
   /// Get value of bit at a given position
   /// </summary>
-  /// <param name="position">Position of the bit</param>
+  /// <param name="position">Position of the bit starting from the end</param>
   /// <returns> Value of the bit </returns>
   public string GetBit(int position) {
     if (position > string_binary_.Length - 1) {
@@ -97,7 +97,7 @@ public class Bin {
   /// <summary>
   /// Set the value of a bit at the given position
   /// </summary>
-  /// <param name="position">Position of the bit</param>
+  /// <param name="position">Position of the bit starting from the end</param>
   /// <param name="bit">Value of the bit</param>
   public void SetBit(int position, string value) {
     char[] arr = string_binary_.ToCharArray();
