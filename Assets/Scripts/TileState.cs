@@ -106,6 +106,8 @@ public class TileState {
       return this_face.id_.Equals(other_face.id_);
     }
 
+    // Because we always use the same reference system to denote faces
+    // We need to reverse it when performing the comparision
     string[] blocked_reversed_id = new string[other_face.size_];
     for (int i = 0; i < blocked_reversed_id.Length; ++i) {
       blocked_reversed_id[i] = other_face.id_.ToString().Substring(i * other_face.size_, other_face.size_);
