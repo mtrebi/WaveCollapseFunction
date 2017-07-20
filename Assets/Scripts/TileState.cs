@@ -10,12 +10,26 @@ public enum Direction {
   TOP,
   BOTTOM
 }
-/* TODO Delete
+
 static class DirectionMethods {
   public static Direction Opposite(this Direction direction) {
-    return (int)direction < 3 ? direction + 3 : direction - 3;
+    switch (direction) {
+      case Direction.NORTH:
+        return Direction.SOUTH;
+      case Direction.WEST:
+        return Direction.EAST;
+      case Direction.SOUTH:
+        return Direction.NORTH;
+      case Direction.EAST:
+        return Direction.WEST;
+      case Direction.TOP:
+        return Direction.BOTTOM;
+      case Direction.BOTTOM:
+        return Direction.TOP;
+    }
+    return (Direction) (-1);
   }
-}*/
+}
 
 [System.Serializable]
 public class TileState {
@@ -54,7 +68,6 @@ public class TileState {
     }
   }
 
-
   public GameObject Prefab {
     get {
       return prefab_;
@@ -64,7 +77,6 @@ public class TileState {
       prefab_ = value;
     }
   }
-
 
   public TileState(GameObject prefab, TileFace[] faces, float probability) {
     Prefab = prefab;
@@ -85,7 +97,6 @@ public class TileState {
   /// <param name="direction">Direction that joins this tile with other</param>
   /// <returns> True if this tile can be connect with the other tile in the given direction</returns>
   public bool Satisfies(TileState other, Direction direction) {
-    // TODO because of symmetry --| Faces should be modified on TileState
-    return this.Faces[(int)direction].Equals(other.Faces[(int)direction]);
+    return this.Faces[(int)direction].id_.Equals(other.Faces[(int)direction.Opposite()].id_);
   }
 }
