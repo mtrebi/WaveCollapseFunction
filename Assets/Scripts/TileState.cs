@@ -4,9 +4,9 @@ using UnityEngine;
 
 public enum Direction {
   NORTH,
-  EAST,
-  SOUTH,
   WEST,
+  SOUTH,
+  EAST,
   TOP,
   BOTTOM
 }
