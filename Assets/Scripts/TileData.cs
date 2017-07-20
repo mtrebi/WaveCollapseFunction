@@ -12,7 +12,7 @@ public enum SymmetryType {
 
 [System.Serializable]
 public class TileFace {
-  // From bottom to top, from left to right
+  // From from left to right and bottom to top
   public Bin id_;
   public Direction direction_;
   public int size_;
@@ -45,8 +45,7 @@ public class TileFace {
     size_ = tf.size_;
     direction_ = direction;
     id_ = new Bin(tf.id_.ToString());
-    d1_ = tf.d1_;
-    d2_ = tf.d2_;
+    CalculateInvolvedDimensions();
   }
 
   public void SetIdBit(int x, int y, int z, string bit) {
@@ -110,7 +109,19 @@ public class TileFace {
   }
 
   private int GetIndex(int d1, int d2) {
-    int index = d1 + d2 * size_;
+    int index = -1;
+    switch (direction_) {
+      case Direction.NORTH:
+      case Direction.WEST:
+        index = (size_ - 1 - d1)  + d2 * size_;
+        break;
+      case Direction.SOUTH:
+      case Direction.EAST:
+      case Direction.TOP:
+      case Direction.BOTTOM:
+        index = d1 + d2 * size_;
+        break;
+    }
     int reversed_index = id_.Length() - 1 - index;
     return reversed_index;
   }
@@ -250,7 +261,7 @@ public class TileData : MonoBehaviour {
           string bit = element.gameObject.GetComponent<MeshRenderer>().enabled ? "1" : "0";
           List<TileFace> involved_faces = GetInvolvedFaces(x, y, z);
           foreach (TileFace face in involved_faces) {
-            face.SetIdBit(x, y, z, bit);
+              face.SetIdBit(x, y, z, bit);
           }
         }
       }

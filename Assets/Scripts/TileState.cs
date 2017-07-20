@@ -33,6 +33,7 @@ static class DirectionMethods {
 
 [System.Serializable]
 public class TileState {
+  [SerializeField]
   private TileFace[] faces_;
   private GameObject prefab_;
   private Quaternion prefab_orientation_;
@@ -97,6 +98,23 @@ public class TileState {
   /// <param name="direction">Direction that joins this tile with other</param>
   /// <returns> True if this tile can be connect with the other tile in the given direction</returns>
   public bool Satisfies(TileState other, Direction direction) {
-    return this.Faces[(int)direction].id_.Equals(other.Faces[(int)direction.Opposite()].id_);
+    TileFace this_face = this.Faces[(int)direction];
+    TileFace other_face = other.Faces[(int)direction.Opposite()];
+
+
+    if (direction == Direction.TOP || direction == Direction.BOTTOM) {
+      return this_face.id_.Equals(other_face.id_);
+    }
+
+    string[] blocked_reversed_id = new string[other_face.size_];
+    for (int i = 0; i < blocked_reversed_id.Length; ++i) {
+      blocked_reversed_id[i] = other_face.id_.ToString().Substring(i * other_face.size_, other_face.size_);
+      char[] arr = blocked_reversed_id[i].ToCharArray();
+      System.Array.Reverse(arr);
+      blocked_reversed_id[i] = new string(arr);
+    }
+    Bin aux = new Bin(string.Join("", blocked_reversed_id));
+
+    return this_face.id_.Equals(aux);
   }
 }
