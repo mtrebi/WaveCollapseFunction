@@ -14,6 +14,11 @@ public class WCFGenerator : MonoBehaviour {
   public int width_,
              height_,
              depth_;
+
+  public float randomness_min = 0,
+               randomness_max = 0;
+
+
   public bool random_start_;
   public GameObject tile_state_manager_object_;
 
@@ -171,7 +176,7 @@ public class WCFGenerator : MonoBehaviour {
 
     foreach (TileState available_state in tile.AvailableStates) {
       // TODO better use of probabilities
-      float probability = available_state.Probability /*+ Random.Range(0.0f, 0.15f)*/;
+      float probability = available_state.Probability + Random.Range(randomness_min, randomness_max);
 
       if (probability >= max_probability) {
         if (probability > max_probability) {
