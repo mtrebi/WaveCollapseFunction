@@ -34,10 +34,21 @@ static class DirectionMethods {
 [System.Serializable]
 public class TileState {
   [SerializeField]
+  private Bin id_;
   private TileFace[] faces_;
   private GameObject prefab_;
   private Quaternion prefab_orientation_;
   private float probability_;
+
+  public Bin Id {
+    get {
+      return id_;
+    }
+
+    set {
+      id_ = value;
+    }
+  }
 
   public Quaternion PrefabOrientation {
     get {
@@ -84,6 +95,13 @@ public class TileState {
     Faces = faces;
     Probability = probability;
     PrefabOrientation = Quaternion.Euler(Vector3.zero);
+    string id = "";
+
+    foreach (TileFace face in faces) {
+      id += face.id_;
+    }
+
+    Id = new Bin(id);
   }
 
   public TileState(GameObject prefab, TileFace[] faces, float probability, Vector3 euler_rotation)
@@ -118,5 +136,19 @@ public class TileState {
     Bin aux = new Bin(string.Join("", blocked_reversed_id));
 
     return this_face.id_.Equals(aux);
+  }
+
+  public override bool Equals(object obj) {
+    var item = obj as TileState;
+
+    if (item == null) {
+      return false;
+    }
+
+    return this.Id.Equals(item.Id);
+  }
+
+  public override int GetHashCode() {
+    return this.Id.GetHashCode();
   }
 }
