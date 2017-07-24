@@ -22,16 +22,21 @@ public class TileStateManager : MonoBehaviour {
     States = new List<TileState>();
 
     foreach (GameObject tile_prefab in tile_prefabs_) {
-      TileData tile_data = tile_prefab.GetComponent<TileData>();
-      tile_data.Initialize();
+      if (tile_prefab != null) {
+        TileData tile_data = tile_prefab.GetComponent<TileData>();
+        tile_data.Initialize();
 
-      AddState(new TileState(tile_prefab, tile_data.faces_, tile_data.probability_) );
+        AddState(new TileState(tile_prefab, tile_data.faces_, tile_data.probability_));
 
-      SymmetricTile[] symmetric_tiles = tile_data.GenerateSymmetrics();
-      foreach(SymmetricTile symmetric_tile in symmetric_tiles) {
-        TileState tile_state = new TileState(tile_prefab, symmetric_tile.faces, tile_data.probability_, symmetric_tile.rotation);
-        AddState(tile_state);
+        SymmetricTile[] symmetric_tiles = tile_data.GenerateSymmetrics();
+        foreach (SymmetricTile symmetric_tile in symmetric_tiles) {
+          TileState tile_state = new TileState(tile_prefab, symmetric_tile.faces, tile_data.probability_, symmetric_tile.rotation);
+          AddState(tile_state);
+        }
+      }else {
+        Debug.LogWarning("Null prefab in Tile State Manager");
       }
+
     }
   }
 
@@ -41,7 +46,7 @@ public class TileStateManager : MonoBehaviour {
     if (existing_state == null) {
       States.Add(tile_state);
     } else {
-      Debug.Log("Warning: Duplicated Tile State with names " + tile_state.Prefab.name + " and " + existing_state.Prefab.name);
+      Debug.LogWarning("Duplicated Tile State with names " + tile_state.Prefab.name + " and " + existing_state.Prefab.name);
     }
   }
 }
