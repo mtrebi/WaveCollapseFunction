@@ -96,8 +96,7 @@ public class Bin {
   public override bool Equals(object obj) {
     var item = obj as Bin;
     if (item == null) return false;
-    return this.ToInt().Equals(item.ToInt());
-    //return this.int_binary_.CompareTo(item.string_binary_) == 0;
+    return this.string_binary_.Equals(item.string_binary_);
   }
 
   public override int GetHashCode() {
