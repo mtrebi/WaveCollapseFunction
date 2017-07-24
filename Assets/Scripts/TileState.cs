@@ -101,7 +101,14 @@ public class TileState {
       id += face.id_;
     }
 
-    Id = new Bin(id);
+    Id = new Bin(
+      faces[(int)Direction.NORTH].id_.ToString()
+      + faces[(int)Direction.WEST].id_.ToString()
+      + faces[(int)Direction.SOUTH].id_.ToString()
+      + faces[(int)Direction.EAST].id_.ToString()
+      + faces[(int)Direction.TOP].id_.ToString()
+      + faces[(int)Direction.BOTTOM].id_.ToString()
+      );
   }
 
   public TileState(GameObject prefab, TileFace[] faces, float probability, Vector3 euler_rotation)
