@@ -25,13 +25,23 @@ public class TileStateManager : MonoBehaviour {
       TileData tile_data = tile_prefab.GetComponent<TileData>();
       tile_data.Initialize();
 
-      States.Add(new TileState(tile_prefab, tile_data.faces_, tile_data.probability_));
+      AddState(new TileState(tile_prefab, tile_data.faces_, tile_data.probability_) );
 
       SymmetricTile[] symmetric_tiles = tile_data.GenerateSymmetrics();
       foreach(SymmetricTile symmetric_tile in symmetric_tiles) {
         TileState tile_state = new TileState(tile_prefab, symmetric_tile.faces, tile_data.probability_, symmetric_tile.rotation);
-        States.Add(tile_state);
+        AddState(tile_state);
       }
+    }
+  }
+
+  private void AddState(TileState tile_state) {
+    TileState existing_state = tile_states_.Find(x => x.Equals(tile_state));
+
+    if (existing_state == null) {
+      States.Add(tile_state);
+    } else {
+      Debug.Log("Warning: Duplicated Tile State with names " + tile_state.Prefab.name + " and " + existing_state.Prefab.name);
     }
   }
 }
