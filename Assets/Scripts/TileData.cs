@@ -180,7 +180,7 @@ public class TileData : MonoBehaviour {
     symmetric_tiles = new SymmetricTile[cardinality];
 
     for (int i = 0; i < symmetric_tiles.Length; ++i) {
-      int rotation = (360 / (symmetric_tiles.Length + 1)) * (i + 1);
+      int rotation = 90 * (i + 1); //(360 / (symmetric_tiles.Length + 1)) * (i + 1);
       symmetric_tiles[i].faces = GenerateSymmetricTile(rotation);
       symmetric_tiles[i].rotation = new Vector3(0, rotation, 0);
     }
