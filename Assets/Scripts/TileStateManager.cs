@@ -46,7 +46,16 @@ public class TileStateManager : MonoBehaviour {
     if (existing_state == null) {
       States.Add(tile_state);
     } else {
-      Debug.LogWarning("Duplicated Tile State with names " + tile_state.Prefab.name + " and " + existing_state.Prefab.name);
+      if (tile_state.Prefab.name.Equals(existing_state.Prefab.name)) {
+        // An automatic symmetric tile ends up being equals to its original tile
+        Debug.LogWarning("Duplicated Tile State in symmetric tile" + tile_state.Prefab.name);
+      }
+      else {
+        // Two different prefabs have the same model
+        Debug.LogWarning("Duplicated Tile State with names " + tile_state.Prefab.name + " and " + existing_state.Prefab.name);
+      }
+
+
     }
   }
 }
