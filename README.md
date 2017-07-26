@@ -22,3 +22,7 @@ Procedural Generation using Block Tiles with visual enchantment (transparent blo
 (First) Procedural Generation using 3D Block Tiles
 
 ![](https://github.com/mtrebi/WaveCollapseFunction/blob/master/Docs/Videos/3Dblock_tiles_generation_first.gif?raw=true)
+
+More advanced Procedural Generation using 5x5x5 Block Tiles. Algorithm can use any arbitrary size and can automatically generate symmetric tiles and detect edges and constraints between different tiles.
+
+![](https://github.com/mtrebi/WaveCollapseFunction/blob/master/Docs/Videos/3Dblock_tiles_generation_5x5.gif?raw=true)
