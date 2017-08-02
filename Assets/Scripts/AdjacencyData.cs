@@ -69,6 +69,29 @@ public class FaceAdjacency {
     CalculateFaceAxis();
   }
 
+  public void AddEdge(Edge edge) {
+    Edge sorted_edge = new Edge(edge);
+
+    if (CompareTo(edge.v1_, edge.v2_) == 1) {
+      sorted_edge = new Edge(edge.v2_, edge.v1_);
+    }
+
+    edges_.Add(sorted_edge);
+  }
+  
+  public void Sort() {
+    edges_.Sort(delegate (Edge edge1, Edge edge2) {
+      return CompareTo(edge1, edge2);
+    });
+
+  }
+
+  public void Draw(Color color) {
+    foreach (Edge edge in edges_) {
+      Debug.DrawLine(edge.v1_, edge.v2_, color, 1000.0f, false);
+    }
+  }
+
   private void CalculateFaceAxis() {
     switch (face_orientation_) {
       case FaceOrientation.TOP:
@@ -96,23 +119,6 @@ public class FaceAdjacency {
         vertical_axis_ = FaceAxis.Y_POS;
         break;
     }
-  }
-
-  public void AddEdge(Edge edge) {
-    Edge sorted_edge = new Edge(edge);
-
-    if (CompareTo(edge.v1_, edge.v2_) == 1) {
-      sorted_edge = new Edge(edge.v2_, edge.v1_);
-    }
-
-    edges_.Add(sorted_edge);
-  }
-  
-  public void Sort() {
-    edges_.Sort(delegate (Edge edge1, Edge edge2) {
-      return CompareTo(edge1, edge2);
-    });
-
   }
 
   private float GetValueAtAxis(Vector3 v, FaceAxis axis) {
@@ -178,12 +184,6 @@ public class FaceAdjacency {
     }
     return result;
   }
-
-  public void Draw(Color color) {
-    foreach(Edge edge in edges_) {
-      Debug.DrawLine(edge.v1_, edge.v2_, color, 1000.0f, false);
-    }
-  }
 }
 
 [RequireComponent(typeof(MeshFilter))]
@@ -212,24 +212,6 @@ public class AdjacencyData : MonoBehaviour {
   }
  
   private void CalculateAdjacencies() {
-    Vector3 v1 = new Vector3(-0.5f, -0.5f, 0.5f);
-    Vector3 v2 = new Vector3(-0.5f, 0, 0.5f);
-    Vector3 v3 = new Vector3(-0.5f, 0f, 0f);
-    Vector3 v4 = new Vector3(-0.5f, 0.5f, 0f);
-    Vector3 v5= new Vector3(-0.5f, 0.5f, -0.5f);
-
-    Edge[] edges = new Edge[4];
-    edges[0] = new Edge(v5, v4);
-    edges[1] = new Edge(v1, v2);
-    edges[2] = new Edge(v3, v2);
-    edges[3] = new Edge(v3, v4);
-
-    foreach (Edge edge in edges) {
-
-      adjacencies_[(int)FaceOrientation.NORTH].AddEdge(edge);
-    }
-
-    /*
     Edge[] outer_edges = BuildManifoldEdges(GetComponent<MeshFilter>().mesh);
 
     foreach (Edge edge in outer_edges) {
@@ -238,9 +220,10 @@ public class AdjacencyData : MonoBehaviour {
         adjacencies_[(int)face_orientation].AddEdge(edge);
       }
     }
-    */
-    adjacencies_[(int)FaceOrientation.SOUTH].Sort();
-    int a = 2;
+    
+    for (int i = 0; i < adjacencies_.Length; ++i) {
+      adjacencies_[i].Sort();
+    }
   }
 
   /// <summary>
