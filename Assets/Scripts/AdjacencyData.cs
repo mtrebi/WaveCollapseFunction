@@ -23,11 +23,23 @@ public enum FaceOrientation {
 }
 
 public class Edge {
-  //TODO private members using public accessors
-  public Vector3 v1_,
+  private Vector3 v1_,
                  v2_;
   // TODO face index!
   public int[] faceIndex = new int[2];
+
+  public Vector3 v1 {
+    get {
+      return v1_;
+    }
+  }
+
+  public Vector3 v2 {
+    get {
+      return v2_;
+    }
+  }
+
 
   public Edge() {
     v1_ = Vector3.zero;
@@ -44,6 +56,14 @@ public class Edge {
     v2_ = edge.v2_;
   }
 
+  public void SortEdgeVertices(FaceAxis horizontal, FaceAxis vertical) {
+    if (CompareTo(v1_, v2_, horizontal, vertical) == 1) {
+      Vector3 aux = v1_;
+      v1_ = v2_;
+      v2_ = aux;
+    }
+  }
+
   public override bool Equals(object obj) {
     var item = obj as Edge;
     if (item == null) return false;
@@ -52,8 +72,66 @@ public class Edge {
            || this.v1_.Equals(item.v2_) && this.v2_.Equals(item.v1_);
   }
 
+  public int CompareTo(Edge edge, FaceAxis horizontal, FaceAxis vertical) {
+    switch (CompareTo(this.v1_, edge.v1_, horizontal, vertical)) {
+      case 0:
+        return CompareTo(this.v2_, edge.v2_, horizontal, vertical);
+      case -1:
+        return -1;
+      case 1:
+        return 1;
+    }
+    // Should never get here
+    return 0;
+  }
+
+  private int CompareTo(Vector3 v1, Vector3 v2, FaceAxis horizontal, FaceAxis vertical) {
+    float horizontal_axis_value_v1 = GetValueAtAxis(v1, horizontal);
+    float vertical_axis_value_v1 = GetValueAtAxis(v1, vertical);
+
+    float horizontal_axis_value_v2 = GetValueAtAxis(v2, horizontal);
+    float vertical_axis_value_v2 = GetValueAtAxis(v2, vertical);
+
+    int result = 0;
+
+    if (vertical_axis_value_v1 < vertical_axis_value_v2) {
+      result = -1;
+    }
+    else if (vertical_axis_value_v1 > vertical_axis_value_v2) {
+      result = 1;
+    }
+    else {
+      if (horizontal_axis_value_v1 < horizontal_axis_value_v2) {
+        result = -1;
+      }
+      else if (horizontal_axis_value_v1 > horizontal_axis_value_v2) {
+        result = 1;
+      }
+    }
+    return result;
+  }
+
   public override int GetHashCode() {
     return v1_.GetHashCode() + v2_.GetHashCode();
+  }
+
+  private float GetValueAtAxis(Vector3 v, FaceAxis axis) {
+    switch (axis) {
+      case FaceAxis.X_POS:
+        return v.x;
+      case FaceAxis.X_NEG:
+        return -v.x;
+      case FaceAxis.Y_POS:
+        return v.y;
+      case FaceAxis.Y_NEG:
+        return -v.y;
+      case FaceAxis.Z_POS:
+        return v.z;
+      case FaceAxis.Z_NEG:
+        return -v.z;
+    }
+    // Should never get here
+    return -1;
   }
 }
 
@@ -70,25 +148,20 @@ public class FaceAdjacency {
   }
 
   public void AddEdge(Edge edge) {
-    Edge sorted_edge = new Edge(edge);
-
-    if (CompareTo(edge.v1_, edge.v2_) == 1) {
-      sorted_edge = new Edge(edge.v2_, edge.v1_);
-    }
-
-    edges_.Add(sorted_edge);
+    edge.SortEdgeVertices(horizontal_axis_, vertical_axis_);
+    edges_.Add(edge);
   }
   
   public void Sort() {
     edges_.Sort(delegate (Edge edge1, Edge edge2) {
-      return CompareTo(edge1, edge2);
+      return edge1.CompareTo(edge2, horizontal_axis_, vertical_axis_);
     });
 
   }
 
   public void Draw(Color color) {
     foreach (Edge edge in edges_) {
-      Debug.DrawLine(edge.v1_, edge.v2_, color, 1000.0f, false);
+      Debug.DrawLine(edge.v1, edge.v2, color, 1000.0f, false);
     }
   }
 
@@ -119,70 +192,6 @@ public class FaceAdjacency {
         vertical_axis_ = FaceAxis.Y_POS;
         break;
     }
-  }
-
-  private float GetValueAtAxis(Vector3 v, FaceAxis axis) {
-    switch (axis) {
-      case FaceAxis.X_POS:
-        return v.x;
-      case FaceAxis.X_NEG:
-        return -v.x;
-      case FaceAxis.Y_POS:
-        return v.y;
-      case FaceAxis.Y_NEG:
-        return -v.y;
-      case FaceAxis.Z_POS:
-        return v.z;
-      case FaceAxis.Z_NEG:
-        return -v.z;
-    }
-    // Should never get here
-    return -1;
-  }
-  
-  private int CompareTo(Edge edge1, Edge edge2) {
-    float horizontal_axis_value_e1v1 = GetValueAtAxis(edge1.v1_, horizontal_axis_);
-    float vertical_axis_value_e1v1 = GetValueAtAxis(edge1.v1_, vertical_axis_);
-
-    float horizontal_axis_value_e2v1 = GetValueAtAxis(edge2.v1_, horizontal_axis_);
-    float vertical_axis_value_e2v1 = GetValueAtAxis(edge2.v1_, vertical_axis_);
-
-    switch(CompareTo(edge1.v1_, edge2.v1_)) {
-      case 0:
-        return CompareTo(edge1.v2_, edge2.v2_);
-      case -1:
-        return -1;
-      case 1:
-        return 1;
-    }
-    // Should never get here
-    return 0;
-  }
-
-  private int CompareTo(Vector3 v1, Vector3 v2) {
-    float horizontal_axis_value_v1 = GetValueAtAxis(v1, horizontal_axis_);
-    float vertical_axis_value_v1 = GetValueAtAxis(v1, vertical_axis_);
-
-    float horizontal_axis_value_v2 = GetValueAtAxis(v2, horizontal_axis_);
-    float vertical_axis_value_v2 = GetValueAtAxis(v2, vertical_axis_);
-
-    int result = 0;
-
-    if (vertical_axis_value_v1 < vertical_axis_value_v2) {
-      result = -1;
-    }
-    else if (vertical_axis_value_v1 > vertical_axis_value_v2) {
-      result = 1;
-    }
-    else {
-      if (horizontal_axis_value_v1 < horizontal_axis_value_v2) {
-        result = -1;
-      }
-      else if (horizontal_axis_value_v1 > horizontal_axis_value_v2) {
-        result = 1;
-      }
-    }
-    return result;
   }
 }
 
@@ -234,24 +243,24 @@ public class AdjacencyData : MonoBehaviour {
   private FaceOrientation[] GetFaceOrientationOfEdge(Edge edge) {
     List<FaceOrientation> faces = new List<FaceOrientation>();
 
-    if (edge.v1_.x == edge.v2_.x && edge.v1_.x == 0.5) {
+    if (edge.v1.x == edge.v2.x && edge.v1.x == 0.5) {
       faces.Add(FaceOrientation.SOUTH);
     }
-    else if (edge.v1_.x == edge.v2_.x && edge.v1_.x == -0.5) {
+    else if (edge.v1.x == edge.v2.x && edge.v1.x == -0.5) {
       faces.Add(FaceOrientation.NORTH);
     }
 
-    if (edge.v1_.z == edge.v2_.z && edge.v1_.z == 0.5) {
+    if (edge.v1.z == edge.v2.z && edge.v1.z == 0.5) {
       faces.Add(FaceOrientation.WEST);
     }
-    else if (edge.v1_.z == edge.v2_.z && edge.v1_.z == -0.5) {
+    else if (edge.v1.z == edge.v2.z && edge.v1.z == -0.5) {
       faces.Add(FaceOrientation.EAST);
     }
 
-    if (edge.v1_.y == edge.v2_.y && edge.v1_.y == 0.5) {
+    if (edge.v1.y == edge.v2.y && edge.v1.y == 0.5) {
       faces.Add(FaceOrientation.TOP);
     }
-    else if (edge.v1_.y == edge.v2_.y && edge.v1_.y == -0.5) {
+    else if (edge.v1.y == edge.v2.y && edge.v1.y == -0.5) {
       faces.Add(FaceOrientation.BOTTOM);
     }
 
@@ -328,9 +337,7 @@ public class AdjacencyData : MonoBehaviour {
       for (int b = 0; b < 3; b++) {
         int i2 = triangleArray[a * 3 + b];
         if (i1 < i2) {
-          Edge newEdge = new Edge();
-          newEdge.v1_ = mesh.vertices[i1];
-          newEdge.v2_ = mesh.vertices[i2];
+          Edge newEdge = new Edge(mesh.vertices[i1], mesh.vertices[i2]);
           newEdge.faceIndex[0] = a;
           newEdge.faceIndex[1] = a;
           edgeArray[edgeCount] = newEdge;
@@ -379,7 +386,7 @@ public class AdjacencyData : MonoBehaviour {
           bool foundEdge = false;
           for (int edgeIndex = firstEdge[i2]; edgeIndex != -1; edgeIndex = firstEdge[nextEdge + edgeIndex]) {
             Edge edge = edgeArray[edgeIndex];
-            if ((edge.v2_ == mesh.vertices[i1]) && (edge.faceIndex[0] == edge.faceIndex[1])) {
+            if ((edge.v2 == mesh.vertices[i1]) && (edge.faceIndex[0] == edge.faceIndex[1])) {
               edgeArray[edgeIndex].faceIndex[1] = a;
               foundEdge = true;
               break;
@@ -387,9 +394,7 @@ public class AdjacencyData : MonoBehaviour {
           }
 
           if (!foundEdge) {
-            Edge newEdge = new Edge();
-            newEdge.v1_ = mesh.vertices[i1];
-            newEdge.v2_ = mesh.vertices[i2];
+            Edge newEdge = new Edge(mesh.vertices[i1], mesh.vertices[i2]);
             newEdge.faceIndex[0] = a;
             newEdge.faceIndex[1] = a;
             edgeArray[edgeCount] = newEdge;
