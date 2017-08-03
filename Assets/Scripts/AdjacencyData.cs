@@ -133,13 +133,14 @@ public class Edge {
   }
 }
 
+[System.Serializable]
 public class FaceAdjacency {
-  private int edges_id = 0;
+  [SerializeField] private int edges_id = 0;
   /// <summary>
   /// Index of the unused dimension (faces are 2D so one dimension is not used)
   /// </summary>
   private int unused_dimension_ = 0;
-  private FaceOrientation face_orientation_;
+  [SerializeField] private FaceOrientation face_orientation_;
   /// <summary>
   /// Stores the original edges from the mesh that make up the face
   /// </summary>
@@ -222,6 +223,10 @@ public class FaceAdjacency {
     return face_orientation_.GetHashCode() + original_edges_.GetHashCode();
   }
 
+  public override string ToString() {
+    return face_orientation_.ToString() + " " + edges_id;
+  }
+
   private void CalculateEdgesId() {
     for (int i = 0; i < match_edges_.Count; ++i) {
       edges_id += match_edges_[i].GetHashCode();
@@ -246,9 +251,10 @@ public class FaceAdjacency {
   }
 }
 
+[System.Serializable]
 [RequireComponent(typeof(MeshFilter))]
 public class AdjacencyData : MonoBehaviour {
-  private FaceAdjacency[] adjacencies_;
+  [SerializeField] private FaceAdjacency[] adjacencies_;
 
   // Use this for initialization
   void Start () {
