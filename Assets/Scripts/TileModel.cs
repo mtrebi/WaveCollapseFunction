@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // TODO Fix simmetry bugs
-// TODO Remove original edges_
 
 /// <summary>
 /// Face orientation of the imaginary cube placed in the world with X pointing out the scren, Y up and Z to the right
@@ -20,7 +19,7 @@ public enum FaceOrientation {
 /// <summary>
 /// Represents a line between two points in a 3D Space. Direction matters for hash comparision
 /// </summary>
-public class Edge3D {
+public class Edge {
   private Vector3 v1_,
                  v2_;
   // TODO face index!
@@ -38,12 +37,12 @@ public class Edge3D {
     }
   }
 
-  public Edge3D() {
+  public Edge() {
     v1_ = Vector3.zero;
     v2_ = Vector3.zero;
   }
 
-  public Edge3D(Vector3 v1, Vector3 v2, int face_index0, int face_index1) {
+  public Edge(Vector3 v1, Vector3 v2, int face_index0, int face_index1) {
     v1_ = v1;
     v2_ = v2;
 
@@ -51,7 +50,7 @@ public class Edge3D {
     this.faceIndex[1] = face_index1;
   }
 
-  public Edge3D (Edge3D edge) {
+  public Edge (Edge edge) {
     v1_ = edge.v1_;
     v2_ = edge.v2_;
 
@@ -75,7 +74,7 @@ public class Edge3D {
   /// </summary>
   /// <param name="edge"></param>
   /// <returns> -1 if this edge preceeds. 0 if equals. 1 if this edge is after</returns>
-  public int CompareTo(Edge3D edge) {
+  public int CompareTo(Edge edge) {
     switch (CompareTo(this.v1_, edge.v1_)) {
       case 0:
         return CompareTo(this.v2_, edge.v2_);
@@ -127,22 +126,37 @@ public class Edge3D {
   }
 
   public override bool Equals(object obj) {
-    var item = obj as Edge3D;
+    var item = obj as Edge;
     if (item == null) return false;
 
-    return this.v1_.Equals(item.v1_) && this.v2_.Equals(item.v2_)
-           || this.v1_.Equals(item.v2_) && this.v2_.Equals(item.v1_);
+    return (this.v1_ == item.v1_ && this.v2_ == item.v2_)
+           || (this.v1_ == item.v2_ && this.v2 == item.v1_);
   }
 
   public override int GetHashCode() {
     // TODO Improve hash function - Should be commutative on v1 and v2
     return v1.GetHashCode() ^ v2.GetHashCode();
+    /*
+    int hash1 = 166136261;
+    // Suitable nullity checks etc, of course :)
+    hash1 = (hash1 * 16777619) ^ v1.x.GetHashCode();
+    hash1 = (hash1 * 16777619) ^ v1.y.GetHashCode();
+    hash1 = (hash1 * 16777619) ^ v1.z.GetHashCode();
+
+    int hash2 = 166136261;
+    // Suitable nullity checks etc, of course :)
+    hash2 = (hash2 * 16777619) ^ v2.x.GetHashCode();
+    hash2 = (hash2 * 16777619) ^ v2.y.GetHashCode();
+    hash2 = (hash2 * 16777619) ^ v2.z.GetHashCode();
+
+    return hash1 ^ hash2;
+    */
   }
 }
 
 [System.Serializable]
 public class FaceAdjacency {
-  [SerializeField] private int edges_id_ = 0;
+  [SerializeField] private int edges_id_ = -1;
   /// <summary>
   /// Index of the used dimensions (faces are 2D so two dimension are needed)
   /// </summary>
@@ -153,7 +167,7 @@ public class FaceAdjacency {
   /// <summary>
   /// Stores the original edges from the mesh that make up the face
   /// </summary>
-  private List<Edge3D> original_edges_;
+  private List<Edge> original_edges_;
 
   public int EdgesId {
     get {
@@ -167,7 +181,7 @@ public class FaceAdjacency {
     }
   }
 
-  public List<Edge3D> Edges {
+  public List<Edge> Edges {
     get {
       return original_edges_;
     }
@@ -175,11 +189,11 @@ public class FaceAdjacency {
 
   public FaceAdjacency(FaceOrientation face_orientation) {
     face_orientation_ = face_orientation;
-    original_edges_ = new List<Edge3D>();
+    original_edges_ = new List<Edge>();
     CalculateFaceDimensions();
   }
 
-  public void AddEdge(Edge3D edge) {
+  public void AddEdge(Edge edge) {
     edge.SortEdgeVertices();
     original_edges_.Add(edge);
   }
@@ -189,21 +203,24 @@ public class FaceAdjacency {
   /// </summary>
   public void PostProcess() {
     // Sort edges
-    original_edges_.Sort(delegate (Edge3D edge1, Edge3D edge2) {
+    original_edges_.Sort(delegate (Edge edge1, Edge edge2) {
       return edge1.CompareTo(edge2);
     });
 
     // Calculate Face ID
-      // First and second dimension should be equals
-      // Third dimension should lay on one side (-.5 o .5) and be equals
+    // First and second dimension should be equals
+    // Third dimension should lay on one side (-.5 o .5) and be equals
+    edges_id_ = 0;
     for (int i = 0; i < original_edges_.Count; ++i) {
       Vector3 v1 = new Vector3(original_edges_[i].v1[dimension1_], original_edges_[i].v1[dimension2_], Mathf.Abs(original_edges_[i].v1[unused_dimension_]));
       Vector3 v2 = new Vector3(original_edges_[i].v2[dimension1_], original_edges_[i].v2[dimension2_], Mathf.Abs(original_edges_[i].v1[unused_dimension_]));
-      
+
       if (v1.z == .5 && v2.z == .5) {
         // Edge lays on a side
-        Edge3D new_edge = new Edge3D(v1, v2, original_edges_[i].faceIndex[0], original_edges_[i].faceIndex[1]);
-        edges_id_ += new_edge.GetHashCode();
+        Edge new_edge = new Edge(v1, v2, original_edges_[i].faceIndex[0], original_edges_[i].faceIndex[1]);
+        // TODO better hash combination
+        edges_id_ *= new_edge.GetHashCode();
+        Debug.Log(new_edge.GetHashCode());
       }
     }
   }
@@ -214,8 +231,8 @@ public class FaceAdjacency {
   }
 
   public void Draw(Color color) {
-    foreach (Edge3D edge in original_edges_) {
-      Debug.DrawLine(edge.v1, edge.v2, color, 1000.0f, false);
+    foreach (Edge edge in original_edges_) {
+      Debug.DrawLine(edge.v1, edge.v2, color, 1.0f, false);
     }
   }
 
@@ -307,8 +324,9 @@ public class TileAdjacencies {
     for (int adjacency_i = 0; adjacency_i < tile_adjacencies.Adjacencies.Length; ++adjacency_i) {
       FaceAdjacency adjacency = tile_adjacencies.Adjacencies[adjacency_i];
       for (int edge_i = 0; edge_i < adjacency.Edges.Count; ++edge_i) {
-        Edge3D rotated_edge;
+        Edge rotated_edge;
         FaceOrientation rotated_orientation;
+        //TODO delete Edge test_edge = new Edge(new Vector3(0.5f, 0.5f, 0.5f), new Vector3(0.5f, -0.5f, 0.5f), 0, 0);
         RotateEdge(out rotated_edge, out rotated_orientation, adjacency.Edges[edge_i], adjacency.Orientation, y_rotation);
         adjacencies_[(int) rotated_orientation].Edges.Add(rotated_edge);
       }
@@ -319,19 +337,19 @@ public class TileAdjacencies {
     }
   }
 
-  private void RotateEdge(out Edge3D rotated_edge, out FaceOrientation rotated_orientation, Edge3D original_edge, FaceOrientation original_orientation, int y_rotation) {
+  private void RotateEdge(out Edge rotated_edge, out FaceOrientation rotated_orientation, Edge original_edge, FaceOrientation original_orientation, int y_rotation) {
     int rotation_steps = Mathf.Abs(y_rotation / 90);
     rotated_orientation = (FaceOrientation)(((int)original_orientation + rotation_steps) % 4);
     Vector3 v1 = Mathematics.RotateAroundPoint(original_edge.v1, Vector3.up, new Vector3(0, y_rotation, 0));
     Vector3 v2 = Mathematics.RotateAroundPoint(original_edge.v2, Vector3.up, new Vector3(0, y_rotation, 0));
 
-    rotated_edge = new Edge3D(v1, v2, original_edge.faceIndex[0], original_edge.faceIndex[1]);
+    rotated_edge = new Edge(v1, v2, original_edge.faceIndex[0], original_edge.faceIndex[1]);
   }
 
   private void CalculateAdjacencies(Mesh mesh) {
-    Edge3D[] outer_edges = BuildManifoldEdges(mesh);
+    Edge[] outer_edges = BuildManifoldEdges(mesh);
 
-    foreach (Edge3D edge in outer_edges) {
+    foreach (Edge edge in outer_edges) {
       FaceOrientation[] involved_faces = GetFaceOrientationOfEdge(edge);
       foreach (FaceOrientation face_orientation in involved_faces) {
         adjacencies_[(int)face_orientation].AddEdge(edge);
@@ -346,9 +364,9 @@ public class TileAdjacencies {
   /// <summary>
   /// Checks on which side of the imaginary cube the edge lays
   /// </summary>
-  /// <param name="edge"> Edge3D to check </param>
+  /// <param name="edge"> Edge to check </param>
   /// <returns> Returns on which side the edge lays. Can return None if the edge doesnt lay on any side </returns>
-  private FaceOrientation[] GetFaceOrientationOfEdge(Edge3D edge) {
+  private FaceOrientation[] GetFaceOrientationOfEdge(Edge edge) {
     List<FaceOrientation> faces = new List<FaceOrientation>();
 
     if (edge.v1.x == edge.v2.x && edge.v1.x == 0.5) {
@@ -377,21 +395,21 @@ public class TileAdjacencies {
 
   /// Builds an array of edges that connect to only one triangle.
   /// In other words, the outline of the mesh    
-  private static Edge3D[] BuildManifoldEdges(Mesh mesh) {
+  private static Edge[] BuildManifoldEdges(Mesh mesh) {
     // Build a edge list for all unique edges in the mesh
-    Edge3D[] all_edges = BuildEdges(mesh);
+    Edge[] all_edges = BuildEdges(mesh);
 
-    HashSet<Edge3D> culledEdges = new HashSet<Edge3D>();
+    HashSet<Edge> culledEdges = new HashSet<Edge>();
 
-    foreach (Edge3D edge in all_edges) {
+    foreach (Edge edge in all_edges) {
       if (edge.faceIndex[0] == edge.faceIndex[1]) {
         culledEdges.Add(edge);
       }
     }
 
-    Edge3D[] edges = new Edge3D[culledEdges.Count];
+    Edge[] edges = new Edge[culledEdges.Count];
     culledEdges.CopyTo(edges);
-
+    
     return edges;
   }
 
@@ -401,7 +419,7 @@ public class TileAdjacencies {
   /// will get two edges adjoining one triangle.
   /// Often this is not a problem but you can fix it by welding vertices 
   /// and passing in the triangle array of the welded vertices.
-  private static Edge3D[] BuildEdges(Mesh mesh) {
+  private static Edge[] BuildEdges(Mesh mesh) {
     int vertexCount = mesh.vertexCount;
     int[] triangleArray = mesh.triangles;
     int maxEdgeCount = triangleArray.Length;
@@ -419,7 +437,7 @@ public class TileAdjacencies {
     // For each edge found, the edge index is stored in a linked list of edges
     // belonging to the lower-numbered vertex index i. This allows us to quickly
     // find an edge in the second pass whose higher-numbered vertex index is i.
-    Edge3D[] edgeArray = new Edge3D[maxEdgeCount];
+    Edge[] edgeArray = new Edge[maxEdgeCount];
 
     int edgeCount = 0;
     for (int a = 0; a < triangleCount; a++) {
@@ -428,7 +446,7 @@ public class TileAdjacencies {
         int i2 = triangleArray[a * 3 + b];
         if (i1 < i2) {
           // asdfafafafa
-          Edge3D newEdge = new Edge3D(mesh.vertices[i1], mesh.vertices[i2], a, a);
+          Edge newEdge = new Edge(mesh.vertices[i1], mesh.vertices[i2], a, a);
           edgeArray[edgeCount] = newEdge;
 
           int edgeIndex = firstEdge[i1];
@@ -474,7 +492,7 @@ public class TileAdjacencies {
         if (i1 > i2) {
           bool foundEdge = false;
           for (int edgeIndex = firstEdge[i2]; edgeIndex != -1; edgeIndex = firstEdge[nextEdge + edgeIndex]) {
-            Edge3D edge = edgeArray[edgeIndex];
+            Edge edge = edgeArray[edgeIndex];
             if ((edge.v2 == mesh.vertices[i1]) && (edge.faceIndex[0] == edge.faceIndex[1])) {
               edgeArray[edgeIndex].faceIndex[1] = a;
               foundEdge = true;
@@ -483,7 +501,7 @@ public class TileAdjacencies {
           }
 
           if (!foundEdge) {
-            Edge3D newEdge = new Edge3D(mesh.vertices[i1], mesh.vertices[i2], a, a);
+            Edge newEdge = new Edge(mesh.vertices[i1], mesh.vertices[i2], a, a);
             edgeArray[edgeCount] = newEdge;
             edgeCount++;
           }
@@ -492,7 +510,7 @@ public class TileAdjacencies {
       }
     }
 
-    Edge3D[] compactedEdges = new Edge3D[edgeCount];
+    Edge[] compactedEdges = new Edge[edgeCount];
     for (int e = 0; e < edgeCount; e++) {
       compactedEdges[e] = edgeArray[e];
     }
@@ -558,5 +576,27 @@ public class TileModel : MonoBehaviour {
 
   void Start () {
     Initialize();
+  }
+
+  public bool draw_north,
+    draw_south,
+    draw_east,
+    draw_west,
+    draw_top,
+    draw_bottom;
+
+  void Update() {
+    if (draw_north)
+      adjacencies_.Adjacencies[(int)FaceOrientation.NORTH].Draw(Color.red);
+    if (draw_south)
+      adjacencies_.Adjacencies[(int)FaceOrientation.SOUTH].Draw(Color.red);
+    if (draw_east)
+      adjacencies_.Adjacencies[(int)FaceOrientation.EAST].Draw(Color.red);
+    if (draw_west)
+      adjacencies_.Adjacencies[(int)FaceOrientation.WEST].Draw(Color.red);
+    if (draw_top)
+      adjacencies_.Adjacencies[(int)FaceOrientation.TOP].Draw(Color.red);
+    if (draw_bottom)
+      adjacencies_.Adjacencies[(int)FaceOrientation.BOTTOM].Draw(Color.red);
   }
 }
