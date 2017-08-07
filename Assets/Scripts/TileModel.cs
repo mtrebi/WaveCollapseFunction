@@ -18,7 +18,7 @@ public enum FaceOrientation {
 }
 
 /// <summary>
-/// Represents a line between two points in a 3D Space
+/// Represents a line between two points in a 3D Space. Direction matters for hash comparision
 /// </summary>
 public class Edge3D {
   private Vector3 v1_,
@@ -122,15 +122,21 @@ public class Edge3D {
     return result;
   }
 
+  public override string ToString() {
+    return v1.ToString() + " <--> " + v2.ToString();
+  }
+
   public override bool Equals(object obj) {
     var item = obj as Edge3D;
     if (item == null) return false;
 
-    return this.v1_.Equals(item.v1_) && this.v2_.Equals(item.v2_);
+    return this.v1_.Equals(item.v1_) && this.v2_.Equals(item.v2_)
+           || this.v1_.Equals(item.v2_) && this.v2_.Equals(item.v1_);
   }
 
   public override int GetHashCode() {
-    return v1_.GetHashCode() + v2_.GetHashCode();
+    // TODO Improve hash function - Should be commutative on v1 and v2
+    return v1.GetHashCode() ^ v2.GetHashCode();
   }
 }
 
@@ -204,7 +210,7 @@ public class FaceAdjacency {
 
   public bool Match(FaceAdjacency other_face) {
     // TODO add equals method to make sure it avoids hash collisions
-    return this.edges_id_.Equals(other_face.edges_id_);
+    return this.edges_id_.Equals(other_face.edges_id_); // Compare original edges and dont care dimension to be 0.5 or -0.5
   }
 
   public void Draw(Color color) {
@@ -316,77 +322,9 @@ public class TileAdjacencies {
   private void RotateEdge(out Edge3D rotated_edge, out FaceOrientation rotated_orientation, Edge3D original_edge, FaceOrientation original_orientation, int y_rotation) {
     int rotation_steps = Mathf.Abs(y_rotation / 90);
     rotated_orientation = (FaceOrientation)(((int)original_orientation + rotation_steps) % 4);
+    Vector3 v1 = Mathematics.RotateAroundPoint(original_edge.v1, Vector3.up, new Vector3(0, y_rotation, 0));
+    Vector3 v2 = Mathematics.RotateAroundPoint(original_edge.v2, Vector3.up, new Vector3(0, y_rotation, 0));
 
-    Vector3 v1 = Vector3.zero, 
-            v2 = Vector3.zero;
-    switch (rotation_steps) {
-      case 1:
-        switch (original_orientation) {
-          case FaceOrientation.NORTH:
-          case FaceOrientation.SOUTH:
-          case FaceOrientation.EAST:// TODO mal
-          case FaceOrientation.WEST:
-            // Swap X and Z values
-            v1 = new Vector3(original_edge.v1.z, original_edge.v1.y, original_edge.v1.x);
-            v2 = new Vector3(original_edge.v2.z, original_edge.v2.y, original_edge.v2.x);
-            break;
-          case FaceOrientation.TOP:
-          case FaceOrientation.BOTTOM:
-            // TODO something
-            // Swap X and Z values
-            v1 = new Vector3(original_edge.v1.z, original_edge.v1.y, original_edge.v1.x);
-            v2 = new Vector3(original_edge.v2.z, original_edge.v2.y, original_edge.v2.x);
-            break;
-        }
-        break;
-      case 2:
-        switch (original_orientation) {
-          case FaceOrientation.NORTH:// mal
-          case FaceOrientation.SOUTH:
-            // Negate X
-            v1 = new Vector3(-original_edge.v1.x, original_edge.v1.y, original_edge.v1.z);
-            v2 = new Vector3(-original_edge.v2.x, original_edge.v2.y, original_edge.v2.z);
-            break;
-          case FaceOrientation.EAST:
-          case FaceOrientation.WEST:
-            // Negate Z
-            v1 = new Vector3(original_edge.v1.x, original_edge.v1.y, -original_edge.v1.z);
-            v2 = new Vector3(original_edge.v2.x, original_edge.v2.y, -original_edge.v2.z);
-            break;
-          case FaceOrientation.TOP:
-          case FaceOrientation.BOTTOM:
-            // TODO something
-            // Negate Z
-            v1 = new Vector3(original_edge.v1.x, original_edge.v1.y, -original_edge.v1.z);
-            v2 = new Vector3(original_edge.v2.x, original_edge.v2.y, -original_edge.v2.z);
-            break;
-        }
-        break;
-      case 3:
-        // todo  TODOS MAL
-        switch (original_orientation) {
-          case FaceOrientation.NORTH:
-          case FaceOrientation.SOUTH:
-            // Swap X and Z values and negate new Z
-            v1 = new Vector3(original_edge.v1.x, original_edge.v1.y, -original_edge.v1.z);
-            v2 = new Vector3(original_edge.v2.x, original_edge.v2.y, -original_edge.v2.z);
-            break;
-          case FaceOrientation.EAST:
-          case FaceOrientation.WEST:
-            // Swap Z and X values and negate new X
-            v1 = new Vector3(-original_edge.v1.z, original_edge.v1.y, -original_edge.v1.x);
-            v2 = new Vector3(-original_edge.v2.z, original_edge.v2.y, -original_edge.v2.x);
-            break;
-          case FaceOrientation.TOP:
-          case FaceOrientation.BOTTOM:
-            // TODO something
-            // Swap X and Z values and negate new Z
-            v1 = new Vector3(original_edge.v1.x, original_edge.v1.y, -original_edge.v1.z);
-            v2 = new Vector3(original_edge.v2.x, original_edge.v2.y, -original_edge.v2.z);
-            break;
-        }
-        break;
-    }
     rotated_edge = new Edge3D(v1, v2, original_edge.faceIndex[0], original_edge.faceIndex[1]);
   }
 
@@ -444,6 +382,7 @@ public class TileAdjacencies {
     Edge3D[] all_edges = BuildEdges(mesh);
 
     HashSet<Edge3D> culledEdges = new HashSet<Edge3D>();
+
     foreach (Edge3D edge in all_edges) {
       if (edge.faceIndex[0] == edge.faceIndex[1]) {
         culledEdges.Add(edge);
@@ -488,6 +427,7 @@ public class TileAdjacencies {
       for (int b = 0; b < 3; b++) {
         int i2 = triangleArray[a * 3 + b];
         if (i1 < i2) {
+          // asdfafafafa
           Edge3D newEdge = new Edge3D(mesh.vertices[i1], mesh.vertices[i2], a, a);
           edgeArray[edgeCount] = newEdge;
 
@@ -561,11 +501,6 @@ public class TileAdjacencies {
   }
 }
 
-public struct SymmetricFace {
-  TileAdjacencies adjacencies;
-  Vector3 rotation;
-}
-
 [System.Serializable]
 [RequireComponent(typeof(MeshFilter))]
 public class TileModel : MonoBehaviour {
@@ -589,7 +524,7 @@ public class TileModel : MonoBehaviour {
     tile_instances[0] = new TileInstance(this.gameObject, Quaternion.identity, probability_, adjacencies_);
 
     for (int i = 1; i < tile_instances.Length; ++i) {
-      int y_rotation = 90 * (i + 1); //(360 / (symmetric_tiles.Length + 1)) * (i + 1);
+      int y_rotation = 90 * i; 
       tile_instances[i] = GenerateInstance(y_rotation);
     }
 
