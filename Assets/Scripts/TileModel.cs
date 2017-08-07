@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // TODO Fix simmetry bugs
+// TODO Remove original edges_
 
 /// <summary>
 /// Face orientation of the imaginary cube placed in the world with X pointing out the scren, Y up and Z to the right
@@ -17,7 +18,7 @@ public enum FaceOrientation {
 }
 
 /// <summary>
-/// Represents a line between two points in a 3D Object (Mesh)
+/// Represents a line between two points in a 3D Space
 /// </summary>
 public class Edge3D {
   private Vector3 v1_,
@@ -133,104 +134,6 @@ public class Edge3D {
   }
 }
 
-/// <summary>
-/// Represents a line between two points in a 2D Object (Face)
-/// </summary>
-public class Edge2D {
-  private Vector2 v1_,
-                 v2_;
-
-  public Vector3 v1 {
-    get {
-      return v1_;
-    }
-  }
-
-  public Vector3 v2 {
-    get {
-      return v2_;
-    }
-  }
-
-  public Edge2D() {
-    v1_ = Vector3.zero;
-    v2_ = Vector3.zero;
-  }
-
-  public Edge2D(Vector3 v1, Vector3 v2) {
-    v1_ = v1;
-    v2_ = v2;
-  }
-
-  public Edge2D(Edge2D edge) {
-    v1_ = edge.v1_;
-    v2_ = edge.v2_;
-  }
-
-  /// <summary>
-  /// Sorts the vertices of the edge given the priority (from highest to lowest) x, z, y
-  /// </summary>
-  public void SortEdgeVertices() {
-    if (CompareTo(v1_, v2_) == 1) {
-      Vector3 aux = v1_;
-      v1_ = v2_;
-      v2_ = aux;
-    }
-  }
-
-  /// <summary>
-  /// Compare this edge to another edge to see which one is smaller given the priority (from highest to lowest) x, z, y
-  /// </summary>
-  /// <param name="edge"></param>
-  /// <returns> -1 if this edge preceeds. 0 if equals. 1 if this edge is after</returns>
-  public int CompareTo(Edge2D edge) {
-    switch (CompareTo(this.v1_, edge.v1_)) {
-      case 0:
-        return CompareTo(this.v2_, edge.v2_);
-      case -1:
-        return -1;
-      case 1:
-        return 1;
-    }
-    // Should never get here
-    return 0;
-  }
-
-  /// <summary>
-  /// Compare a vertex with another to see which one is smaller given the priority (from highest to lowest) x, z, y
-  /// </summary>
-  /// <param name="v1"></param>
-  /// <param name="v2"></param>
-  /// <returns> -1 if this vertex preceeds. 0 if equals. 1 if this vertex is after</returns>
-  private int CompareTo(Vector2 v1, Vector2 v2) {
-    int result = 0;
-
-    if (v1.x < v2.x) {
-      result = -1;
-    }
-    else if (v1.x > v2.x) {
-      result = 1;
-    }
-    else if (v1.y < v2.y) {
-      result = -1;
-    } else if (v1.y > v2.y) {
-      result = 1;
-    }
-    return result;
-  }
-
-  public override bool Equals(object obj) {
-    var item = obj as Edge2D;
-    if (item == null) return false;
-
-    return this.v1_.Equals(item.v1_) && this.v2_.Equals(item.v2_);
-  }
-
-  public override int GetHashCode() {
-    return v1_.GetHashCode() + v2_.GetHashCode();
-  }
-}
-
 [System.Serializable]
 public class FaceAdjacency {
   [SerializeField] private int edges_id_ = 0;
@@ -238,16 +141,13 @@ public class FaceAdjacency {
   /// Index of the used dimensions (faces are 2D so two dimension are needed)
   /// </summary>
   private int dimension1_ = 0,
-              dimension2_ = 0;
+              dimension2_ = 0,
+              unused_dimension_ = 0;
   [SerializeField] private FaceOrientation face_orientation_;
   /// <summary>
   /// Stores the original edges from the mesh that make up the face
   /// </summary>
   private List<Edge3D> original_edges_;
-  /// <summary>
-  /// Stores a slightly modified version of the edges to speedup face comparision. The modification consists in replacing by 0 the unused dimension.
-  /// </summary>
-  private List<Edge2D> match_edges_;
 
   public int EdgesId {
     get {
@@ -287,22 +187,23 @@ public class FaceAdjacency {
       return edge1.CompareTo(edge2);
     });
 
-    match_edges_ = new List<Edge2D>(original_edges_.Count);
-
-    // Set to zero unused dimension to ease comparision
+    // Calculate Face ID
+      // First and second dimension should be equals
+      // Third dimension should lay on one side (-.5 o .5) and be equals
     for (int i = 0; i < original_edges_.Count; ++i) {
-      Vector2 v1 = new Vector2(original_edges_[i].v1[dimension1_], original_edges_[i].v1[dimension2_]);
-      Vector2 v2 = new Vector2(original_edges_[i].v2[dimension1_], original_edges_[i].v2[dimension2_]);
-
-      Edge2D new_edge = new Edge2D(v1, v2);
-      match_edges_.Insert(i, new_edge);
+      Vector3 v1 = new Vector3(original_edges_[i].v1[dimension1_], original_edges_[i].v1[dimension2_], Mathf.Abs(original_edges_[i].v1[unused_dimension_]));
+      Vector3 v2 = new Vector3(original_edges_[i].v2[dimension1_], original_edges_[i].v2[dimension2_], Mathf.Abs(original_edges_[i].v1[unused_dimension_]));
+      
+      if (v1.z == .5 && v2.z == .5) {
+        // Edge lays on a side
+        Edge3D new_edge = new Edge3D(v1, v2, original_edges_[i].faceIndex[0], original_edges_[i].faceIndex[1]);
+        edges_id_ += new_edge.GetHashCode();
+      }
     }
-
-    CalculateEdgesId();
   }
 
   public bool Match(FaceAdjacency other_face) {
-    // TODO add equals method to make sure it avoids collisions
+    // TODO add equals method to make sure it avoids hash collisions
     return this.edges_id_.Equals(other_face.edges_id_);
   }
 
@@ -334,17 +235,12 @@ public class FaceAdjacency {
   }
 
   public override int GetHashCode() {
+    // TODO Review original edges get hash code
     return face_orientation_.GetHashCode() + original_edges_.GetHashCode();
   }
 
   public override string ToString() {
     return face_orientation_.ToString() + " " + edges_id_;
-  }
-
-  private void CalculateEdgesId() {
-    for (int i = 0; i < match_edges_.Count; ++i) {
-      edges_id_ += match_edges_[i].GetHashCode();
-    }
   }
 
   private void CalculateFaceDimensions() {
@@ -353,11 +249,13 @@ public class FaceAdjacency {
       case FaceOrientation.BOTTOM:
         // y is not used
         dimension1_ = 0;
+        unused_dimension_ = 1;
         dimension2_ = 2;
         break;
       case FaceOrientation.NORTH:
       case FaceOrientation.SOUTH:
         // x is not used
+        unused_dimension_ = 0;
         dimension1_ = 1;
         dimension2_ = 2;
         break;
@@ -366,6 +264,7 @@ public class FaceAdjacency {
         // z is not used
         dimension1_ = 0;
         dimension2_ = 1;
+        unused_dimension_ = 2;
         break;
     }
   }
