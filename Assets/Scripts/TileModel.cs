@@ -14,11 +14,36 @@ public enum SymmetryType {
 /// </summary>
 public enum FaceOrientation {
   NORTH,
-  WEST,
-  SOUTH,
   EAST,
+  SOUTH,
+  WEST,
   TOP,
   BOTTOM
+}
+
+static class FaceOrientationMethods {
+  public static FaceOrientation Opposite(this FaceOrientation orientation) {
+    switch (orientation) {
+      case FaceOrientation.NORTH:
+        return FaceOrientation.SOUTH;
+      case FaceOrientation.WEST:
+        return FaceOrientation.EAST;
+      case FaceOrientation.SOUTH:
+        return FaceOrientation.NORTH;
+      case FaceOrientation.EAST:
+        return FaceOrientation.WEST;
+      case FaceOrientation.TOP:
+        return FaceOrientation.BOTTOM;
+      case FaceOrientation.BOTTOM:
+        return FaceOrientation.TOP;
+    }
+    return (FaceOrientation)(-1);
+  }
+
+  public static FaceOrientation Rotate(this FaceOrientation orientation, int rotation_steps) {
+    FaceOrientation rotated_orientation = (FaceOrientation)(((int)orientation + rotation_steps) % 4);
+    return rotated_orientation;
+  }
 }
 
 /// <summary>
@@ -235,9 +260,9 @@ public class FaceAdjacency {
     return this.edges_id_ == other_face.edges_id_; // Compare original edges and dont care dimension to be 0.5 or -0.5
   }
 
-  public void Draw(Color color) {
+  public void Draw(Color color, float time = 1.0f) {
     foreach (Edge edge in edges) {
-      Debug.DrawLine(edge.v1, edge.v2, color, 1.0f, false);
+      Debug.DrawLine(edge.v1, edge.v2, color, time, false);
     }
   }
 
@@ -329,10 +354,8 @@ public class TileAdjacencies {
     for (int adjacency_i = 0; adjacency_i < tile_adjacencies.Adjacencies.Length; ++adjacency_i) {
       FaceAdjacency adjacency = tile_adjacencies.Adjacencies[adjacency_i];
       for (int edge_i = 0; edge_i < adjacency.Edges.Count; ++edge_i) {
-        Edge rotated_edge;
-        FaceOrientation rotated_orientation;
-        //TODO delete Edge test_edge = new Edge(new Vector3(0.5f, 0.5f, 0.5f), new Vector3(0.5f, -0.5f, 0.5f), 0, 0);
-        RotateEdge(out rotated_edge, out rotated_orientation, adjacency.Edges[edge_i], adjacency.Orientation, y_rotation);
+        FaceOrientation rotated_orientation = adjacency.Orientation.Rotate(Mathf.Abs(y_rotation / 90));
+        Edge rotated_edge = RotateEdge(adjacency.Edges[edge_i], y_rotation);
         adjacencies_[(int) rotated_orientation].Edges.Add(rotated_edge);
       }
     }
@@ -342,13 +365,13 @@ public class TileAdjacencies {
     }
   }
 
-  private void RotateEdge(out Edge rotated_edge, out FaceOrientation rotated_orientation, Edge original_edge, FaceOrientation original_orientation, int y_rotation) {
-    int rotation_steps = Mathf.Abs(y_rotation / 90);
-    rotated_orientation = (FaceOrientation)(((int)original_orientation + rotation_steps) % 4);
+
+  private Edge RotateEdge(Edge original_edge, int y_rotation) {
     Vector3 v1 = Mathematics.RotateAroundPoint(original_edge.v1, Vector3.up, new Vector3(0, y_rotation, 0));
     Vector3 v2 = Mathematics.RotateAroundPoint(original_edge.v2, Vector3.up, new Vector3(0, y_rotation, 0));
 
-    rotated_edge = new Edge(v1, v2, original_edge.faceIndex[0], original_edge.faceIndex[1]);
+    Edge rotated_edge = new Edge(v1, v2, original_edge.faceIndex[0], original_edge.faceIndex[1]);
+    return rotated_edge;
   }
 
   private void CalculateAdjacencies(Mesh mesh) {
@@ -382,10 +405,10 @@ public class TileAdjacencies {
     }
 
     if (edge.v1.z == edge.v2.z && edge.v1.z == 0.5) {
-      faces.Add(FaceOrientation.WEST);
+      faces.Add(FaceOrientation.EAST);
     }
     else if (edge.v1.z == edge.v2.z && edge.v1.z == -0.5) {
-      faces.Add(FaceOrientation.EAST);
+      faces.Add(FaceOrientation.WEST);
     }
 
     if (edge.v1.y == edge.v2.y && edge.v1.y == 0.5) {
@@ -533,10 +556,28 @@ public class TileAdjacencies {
 
 [System.Serializable]
 public class TileModel {
-  private GameObject prefab_;
-  private Quaternion prefab_orientation_;
-  private float probability_;
-  private TileAdjacencies adjacencies_;
+  [SerializeField] private GameObject prefab_;
+  [SerializeField] private Quaternion prefab_orientation_;
+  [SerializeField] private float probability_;
+  [SerializeField] private TileAdjacencies adjacencies_;
+
+  public GameObject Prefab {
+    get {
+      return prefab_;
+    }
+  }
+
+  public Quaternion Orientation {
+    get {
+      return prefab_orientation_;
+    }
+  }
+
+  public float Probability {
+    get {
+      return probability_;
+    }
+  }
 
   public TileAdjacencies Adjacencies {
     get {
