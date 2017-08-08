@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEditor;
 using UnityEngine;
-
+/*
 public class UIManager : MonoBehaviour {
   public GameObject state_prefab_;
   private GameObject state_list_;
@@ -49,3 +49,4 @@ public class UIManager : MonoBehaviour {
     }
   }
 }
+*/
