@@ -15,7 +15,7 @@ public class TileFactory : MonoBehaviour {
   void Start() {
     instance_ = this;
   }
-
+ 
   /// <summary>
   /// Instantiates a Tile with a Placeholer child
   /// </summary>
@@ -23,31 +23,17 @@ public class TileFactory : MonoBehaviour {
   /// <param name="z"> Z Position of the tile in the grid</param>
   /// <param name="possible_states"> List of states that tile can take</param>
   /// <returns> Instantiated Tile </returns>
-  public Tile CreateTilePlaceholder(Transform parent, int x, int y, int z, List<TileState> possible_states) {
+  public Tile CreateDefaultTile(Transform parent, int x, int y, int z, List<TileModel> available_states) {
     Tile tile = Object.Instantiate(placeholder_prefab, new Vector3(x, y, z), Quaternion.identity).GetComponent<Tile>();
     tile.transform.parent = parent;
-    tile.Initialize("Tile", x, y, z, possible_states);
+    tile.Initialize("Tile", x, y, z, available_states);
     return tile;
   }
 
-  /// <summary>
-  /// Instantiates a TileData object
-  /// </summary>
-  /// <param name="parent"> Parent of the new tile</param>
-  /// <param name="x"> X Position of the tile in the grid</param>
-  /// <param name="y"> Y Position of the tile in the grid</param>
-  /// <param name="z"> Z Position of the tile in the grid</param>
-  /// <param name="state"> State of the tile (determines prefab_ and rotation)</param>
-  /// <returns> The new instantiated tile </returns>
-  public TileData CreateTileData(Transform parent, int x, int y, int z, TileState state) {
-    // TODO improve no rendering of base and empty tiles
-    if (state.Prefab.name.Contains("base") || state.Prefab.name.Contains("empty")) {
-      return null;
-    }
-
-    TileData tile_data = Object.Instantiate(state.Prefab, new Vector3(x, y, z), state.PrefabOrientation).GetComponent<TileData>();
-    tile_data.transform.parent = parent;
-    tile_data.name = state.Prefab.name;
-    return tile_data;
+  public GameObject CreateTileModel(Transform parent, int x, int y, int z, TileModel model) {
+    GameObject tile = Object.Instantiate(model.Prefab, new Vector3(x, y, z), model.Orientation);
+    tile.transform.parent = parent;
+    tile.name = model.Prefab.name;
+    return tile;
   }
 }
