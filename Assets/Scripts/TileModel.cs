@@ -17,7 +17,7 @@ public enum FaceOrientation {
 }
 
 /// <summary>
-/// Represents a line between two points in a 3D Space. Direction matters for hash comparision
+/// Represents a line between two points in a 3D Space. Direction doesn-t matter. Edge(v1, v2) is equals to Edge(v2, v1)
 /// </summary>
 public class Edge {
   private Vector3 v1_,
@@ -134,23 +134,25 @@ public class Edge {
   }
 
   public override int GetHashCode() {
-    // TODO Improve hash function - Should be commutative on v1 and v2
-    return v1.GetHashCode() ^ v2.GetHashCode();
-    /*
-    int hash1 = 166136261;
-    // Suitable nullity checks etc, of course :)
-    hash1 = (hash1 * 16777619) ^ v1.x.GetHashCode();
-    hash1 = (hash1 * 16777619) ^ v1.y.GetHashCode();
-    hash1 = (hash1 * 16777619) ^ v1.z.GetHashCode();
+    int hash1, hash2;
+    unchecked // Overflow is fine, just wrap
+    {
+      hash1 = (int)2166136261;
+      // Suitable nullity checks etc, of course :)
+      // Suitable nullity checks etc, of course :)
+      hash1 = (hash1 * 16777619) + System.Math.Round(v1.x, 5).GetHashCode();
+      hash1 = (hash1 * 16777619) + System.Math.Round(v1.y, 5).GetHashCode();
+      hash1 = (hash1 * 16777619) + System.Math.Round(v1.z, 5).GetHashCode();
 
-    int hash2 = 166136261;
-    // Suitable nullity checks etc, of course :)
-    hash2 = (hash2 * 16777619) ^ v2.x.GetHashCode();
-    hash2 = (hash2 * 16777619) ^ v2.y.GetHashCode();
-    hash2 = (hash2 * 16777619) ^ v2.z.GetHashCode();
+      hash2 = (int)2166136261;
+      // Suitable nullity checks etc, of course :)
+      // Suitable nullity checks etc, of course :)
+      hash2 = (hash2 * 16777619) + System.Math.Round(v2.x, 5).GetHashCode();
+      hash2 = (hash2 * 16777619) + System.Math.Round(v2.y, 5).GetHashCode();
+      hash2 = (hash2 * 16777619) + System.Math.Round(v2.z, 5).GetHashCode();
+    }
 
-    return hash1 ^ hash2;
-    */
+    return hash1 + hash2;
   }
 }
 
@@ -167,7 +169,7 @@ public class FaceAdjacency {
   /// <summary>
   /// Stores the original edges from the mesh that make up the face
   /// </summary>
-  private List<Edge> original_edges_;
+  private List<Edge> edges;
 
   public int EdgesId {
     get {
@@ -183,19 +185,19 @@ public class FaceAdjacency {
 
   public List<Edge> Edges {
     get {
-      return original_edges_;
+      return edges;
     }
   }
 
   public FaceAdjacency(FaceOrientation face_orientation) {
     face_orientation_ = face_orientation;
-    original_edges_ = new List<Edge>();
+    edges = new List<Edge>();
     CalculateFaceDimensions();
   }
 
   public void AddEdge(Edge edge) {
     edge.SortEdgeVertices();
-    original_edges_.Add(edge);
+    edges.Add(edge);
   }
 
   /// <summary>
@@ -203,7 +205,7 @@ public class FaceAdjacency {
   /// </summary>
   public void PostProcess() {
     // Sort edges
-    original_edges_.Sort(delegate (Edge edge1, Edge edge2) {
+    edges.Sort(delegate (Edge edge1, Edge edge2) {
       return edge1.CompareTo(edge2);
     });
 
@@ -211,27 +213,27 @@ public class FaceAdjacency {
     // First and second dimension should be equals
     // Third dimension should lay on one side (-.5 o .5) and be equals
     edges_id_ = 0;
-    for (int i = 0; i < original_edges_.Count; ++i) {
-      Vector3 v1 = new Vector3(original_edges_[i].v1[dimension1_], original_edges_[i].v1[dimension2_], Mathf.Abs(original_edges_[i].v1[unused_dimension_]));
-      Vector3 v2 = new Vector3(original_edges_[i].v2[dimension1_], original_edges_[i].v2[dimension2_], Mathf.Abs(original_edges_[i].v1[unused_dimension_]));
+    for (int i = 0; i < edges.Count; ++i) {
+      Vector3 v1 = new Vector3(edges[i].v1[dimension1_], edges[i].v1[dimension2_], Mathf.Abs(edges[i].v1[unused_dimension_]));
+      Vector3 v2 = new Vector3(edges[i].v2[dimension1_], edges[i].v2[dimension2_], Mathf.Abs(edges[i].v1[unused_dimension_]));
 
       if (v1.z == .5 && v2.z == .5) {
         // Edge lays on a side
-        Edge new_edge = new Edge(v1, v2, original_edges_[i].faceIndex[0], original_edges_[i].faceIndex[1]);
+        Edge new_edge = new Edge(v1, v2, edges[i].faceIndex[0], edges[i].faceIndex[1]);
         // TODO better hash combination
-        edges_id_ *= new_edge.GetHashCode();
-        Debug.Log(new_edge.GetHashCode());
+        edges_id_ = edges_id_.GetHashCode() ^ new_edge.GetHashCode();
       }
     }
+    Debug.Log(edges_id_.GetHashCode());
   }
 
   public bool Match(FaceAdjacency other_face) {
     // TODO add equals method to make sure it avoids hash collisions
-    return this.edges_id_.Equals(other_face.edges_id_); // Compare original edges and dont care dimension to be 0.5 or -0.5
+    return this.edges_id_ == other_face.edges_id_; // Compare original edges and dont care dimension to be 0.5 or -0.5
   }
 
   public void Draw(Color color) {
-    foreach (Edge edge in original_edges_) {
+    foreach (Edge edge in edges) {
       Debug.DrawLine(edge.v1, edge.v2, color, 1.0f, false);
     }
   }
@@ -244,12 +246,12 @@ public class FaceAdjacency {
       return false;
     }
 
-    if (original_edges_.Count != item.original_edges_.Count) {
+    if (edges.Count != item.edges.Count) {
       return false;
     }
 
-    for (int i = 0; i < original_edges_.Count; ++i) {
-      if (original_edges_[i].Equals(item.original_edges_[i])) {
+    for (int i = 0; i < edges.Count; ++i) {
+      if (edges[i].Equals(item.edges[i])) {
         return false;
       }
     }
@@ -259,7 +261,7 @@ public class FaceAdjacency {
 
   public override int GetHashCode() {
     // TODO Review original edges get hash code
-    return face_orientation_.GetHashCode() + original_edges_.GetHashCode();
+    return face_orientation_.GetHashCode() + edges.GetHashCode();
   }
 
   public override string ToString() {
@@ -409,7 +411,14 @@ public class TileAdjacencies {
 
     Edge[] edges = new Edge[culledEdges.Count];
     culledEdges.CopyTo(edges);
-    
+
+    /* TODO remove test code
+    int[] hashes = new int[edges.Length];
+    for (int i = 0; i < hashes.Length; ++i) {
+      hashes[i] = edges[i].GetHashCode();
+    }
+    */
+
     return edges;
   }
 
