@@ -2,7 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// TODO Fix simmetry bugs
+public enum SymmetryType {
+  X,
+  T,
+  I,
+  L
+}
 
 /// <summary>
 /// Face orientation of the imaginary cube placed in the world with X pointing out the scren, Y up and Z to the right
@@ -527,11 +532,11 @@ public class TileAdjacencies {
 }
 
 [System.Serializable]
-[RequireComponent(typeof(MeshFilter))]
-public class TileModel : MonoBehaviour {
-  public float probability_;
-  public SymmetryType symmetry_;
-  [SerializeField] private TileAdjacencies adjacencies_;
+public class TileModel {
+  private GameObject prefab_;
+  private Quaternion prefab_orientation_;
+  private float probability_;
+  private TileAdjacencies adjacencies_;
 
   public TileAdjacencies Adjacencies {
     get {
@@ -539,26 +544,35 @@ public class TileModel : MonoBehaviour {
     }
   }
 
-  public void Initialize() {
-    adjacencies_ = new TileAdjacencies(GetComponent<MeshFilter>().sharedMesh);
+  public TileModel(GameObject prefab, float probability) {
+    prefab_ = prefab;
+    probability_ = probability;
+    adjacencies_ = new TileAdjacencies(prefab_.GetComponent<MeshFilter>().sharedMesh);
   }
 
-  public TileInstance[] GetTileInstances() {
-    TileInstance[] tile_instances = new TileInstance[GetCardinality(symmetry_)];
+  public TileModel(GameObject prefab, Quaternion orientation, float probability, TileAdjacencies adjacencies) {
+    prefab_ = prefab;
+    prefab_orientation_ = orientation;
+    probability_ = probability;
+    adjacencies_ = adjacencies;
+  }
 
-    tile_instances[0] = new TileInstance(this.gameObject, Quaternion.identity, probability_, adjacencies_);
+  public TileModel[] GetSymmetricModels(SymmetryType symmetry) {
+    TileModel[] models = new TileModel[GetCardinality(symmetry)];
 
-    for (int i = 1; i < tile_instances.Length; ++i) {
-      int y_rotation = 90 * i; 
-      tile_instances[i] = GenerateInstance(y_rotation);
+    models[0] = new TileModel(prefab_, Quaternion.identity, probability_, adjacencies_);
+
+    for (int i = 1; i < models.Length; ++i) {
+      int y_rotation = 90 * i;
+      models[i] = GenerateModel(y_rotation);
     }
 
-    return tile_instances;
+    return models;
   }
 
   private int GetCardinality(SymmetryType symmetry) {
     int cardinality = 0;
-    switch (symmetry_) {
+    switch (symmetry) {
       case SymmetryType.X:
         cardinality = 1;
         break;
@@ -575,35 +589,9 @@ public class TileModel : MonoBehaviour {
     return cardinality;
   }
 
-  private TileInstance GenerateInstance(int y_rotation) {
+  private TileModel GenerateModel(int y_rotation) {
     TileAdjacencies instance_adjacencies = new TileAdjacencies(adjacencies_, y_rotation);
-    TileInstance tile_instance = new TileInstance(this.gameObject, Quaternion.Euler(0, y_rotation, 0), probability_, instance_adjacencies);
-    return tile_instance;
-  }
-
-  void Start () {
-    Initialize();
-  }
-
-  public bool draw_north,
-    draw_south,
-    draw_east,
-    draw_west,
-    draw_top,
-    draw_bottom;
-
-  void Update() {
-    if (draw_north)
-      adjacencies_.Adjacencies[(int)FaceOrientation.NORTH].Draw(Color.red);
-    if (draw_south)
-      adjacencies_.Adjacencies[(int)FaceOrientation.SOUTH].Draw(Color.red);
-    if (draw_east)
-      adjacencies_.Adjacencies[(int)FaceOrientation.EAST].Draw(Color.red);
-    if (draw_west)
-      adjacencies_.Adjacencies[(int)FaceOrientation.WEST].Draw(Color.red);
-    if (draw_top)
-      adjacencies_.Adjacencies[(int)FaceOrientation.TOP].Draw(Color.red);
-    if (draw_bottom)
-      adjacencies_.Adjacencies[(int)FaceOrientation.BOTTOM].Draw(Color.red);
+    TileModel model = new TileModel(prefab_, Quaternion.Euler(0, y_rotation, 0), probability_, instance_adjacencies);
+    return model;
   }
 }
