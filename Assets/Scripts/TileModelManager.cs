@@ -5,9 +5,10 @@ using UnityEngine;
 /// <summary>
 /// Manages TileModels to generate instanciable 
 /// </summary>
+[System.Serializable]
 public class TileModelManager : MonoBehaviour {
   public GameObject[] tile_model_prefabs_;
-  private List<TileModel> tile_models_;
+  [SerializeField] private List<TileModel> tile_models_;
 
   public List<TileModel> TileModels {
     get {
@@ -32,7 +33,7 @@ public class TileModelManager : MonoBehaviour {
         TileModels.AddRange(models);
       }
       else {
-        Debug.LogWarning("Null prefab in Tile State Manager");
+        Debug.LogWarning("Null prefab in Tile Model Manager");
       }
     }
   }
