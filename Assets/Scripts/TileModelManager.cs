@@ -7,29 +7,29 @@ using UnityEngine;
 /// </summary>
 public class TileModelManager : MonoBehaviour {
   public GameObject[] tile_model_prefabs_;
-  private List<TileInstance> tile_instances_;
+  private List<TileModel> tile_models_;
 
-  public List<TileInstance> TileInstances {
+  public List<TileModel> TileModels {
     get {
-      return tile_instances_;
+      return tile_models_;
     }
 
     set {
-      tile_instances_ = value;
+      tile_models_ = value;
     }
   }
 
   // Use this for initialization
   void Awake() {
-    TileInstances = new List<TileInstance>();
+    TileModels = new List<TileModel>();
 
     foreach (GameObject tile_prefab in tile_model_prefabs_) {
       if (tile_prefab != null) {
-        TileModel tile_model = tile_prefab.GetComponent<TileModel>();
-        tile_model.Initialize();
+        TileData tile_data = tile_prefab.GetComponent<TileData>();
+        TileModel tile_model = new TileModel(tile_prefab, tile_data.Probability);
 
-        TileInstance[] instances = tile_model.GetTileInstances();
-        tile_instances_.AddRange(instances);
+        TileModel[] models = tile_model.GetSymmetricModels(tile_data.Symmetry);
+        TileModels.AddRange(models);
       }
       else {
         Debug.LogWarning("Null prefab in Tile State Manager");
