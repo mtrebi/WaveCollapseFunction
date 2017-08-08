@@ -41,7 +41,17 @@ static class FaceOrientationMethods {
   }
 
   public static FaceOrientation Rotate(this FaceOrientation orientation, int rotation_steps) {
-    FaceOrientation rotated_orientation = (FaceOrientation)(((int)orientation + rotation_steps) % 4);
+    FaceOrientation rotated_orientation;
+    switch (orientation){
+      case FaceOrientation.TOP:
+      case FaceOrientation.BOTTOM:
+        rotated_orientation = orientation;
+        break;
+      default:
+        rotated_orientation = (FaceOrientation)(((int)orientation + rotation_steps) % 4);
+        break;
+    }
+
     return rotated_orientation;
   }
 }
@@ -353,8 +363,8 @@ public class TileAdjacencies {
 
     for (int adjacency_i = 0; adjacency_i < tile_adjacencies.Adjacencies.Length; ++adjacency_i) {
       FaceAdjacency adjacency = tile_adjacencies.Adjacencies[adjacency_i];
+      FaceOrientation rotated_orientation = adjacency.Orientation.Rotate(Mathf.Abs(y_rotation / 90));
       for (int edge_i = 0; edge_i < adjacency.Edges.Count; ++edge_i) {
-        FaceOrientation rotated_orientation = adjacency.Orientation.Rotate(Mathf.Abs(y_rotation / 90));
         Edge rotated_edge = RotateEdge(adjacency.Edges[edge_i], y_rotation);
         adjacencies_[(int) rotated_orientation].Edges.Add(rotated_edge);
       }
