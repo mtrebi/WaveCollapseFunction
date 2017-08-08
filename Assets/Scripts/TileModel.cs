@@ -220,11 +220,9 @@ public class FaceAdjacency {
       if (v1.z == .5 && v2.z == .5) {
         // Edge lays on a side
         Edge new_edge = new Edge(v1, v2, edges[i].faceIndex[0], edges[i].faceIndex[1]);
-        // TODO better hash combination
-        edges_id_ = edges_id_.GetHashCode() ^ new_edge.GetHashCode();
+        edges_id_ = edges_id_.GetHashCode() + new_edge.GetHashCode();
       }
     }
-    Debug.Log(edges_id_.GetHashCode());
   }
 
   public bool Match(FaceAdjacency other_face) {
