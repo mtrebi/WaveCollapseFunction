@@ -8,9 +8,8 @@ public class Tile : MonoBehaviour {
               y_,
               z_;
 
-  // TileState
-  [SerializeField] private TileState final_state_;
-  [SerializeField] private List<TileState> available_states_;
+  [SerializeField] private TileModel model_;
+  [SerializeField] private List<TileModel> available_models_;
 
   // Entropy
   [SerializeField] private float last_entropy_;
@@ -23,43 +22,53 @@ public class Tile : MonoBehaviour {
   public int Z { get { return z_; } }
 
   /// <summary>
-  /// Final State of the Tile that determines its rendered shape
+  /// Final Model of the Tile that determines its rendered shape
   /// </summary>
-  public TileState State {
+  public TileModel Model {
     get {
-      return final_state_;
-    }
-    set {
-      final_state_ = value;
-      available_states_.Clear();
-      available_states_.Add(final_state_);
+      return model_;
     }
   }
 
   /// <summary>
-  /// List of available states that could (eventually) be the final state of the Tile
+  /// List of available models that could (eventually) be the final model of the Tile
   /// </summary>
-  public List<TileState> AvailableStates {
+  public List<TileModel> AvailableModels {
     get {
-      return available_states_;
+      return available_models_;
     }
   }
 
   /// <summary>
-  /// Check if tile can be collapsed into a final tile state
+  /// Check if tile can be collapsed into a final tile model
   /// </summary>
   /// <returns>Returns true if tile can collapse. False otherwise</returns>
   public bool CanCollapse() {
-    return available_states_.Count != 0;
+    return available_models_.Count != 0;
   }
 
   /// <summary>
-  /// Check if the Tile already collaped into a final state
+  /// Collapse Tile into a TileModel
+  /// </summary>
+  /// <param name="model"></param>
+  public void Collapse(TileModel model) {
+    model_ = model;
+    available_models_.Clear();
+    available_models_.Add(model_);
+
+    this.transform.FindChild("Placeholder").gameObject.SetActive(false);
+    TileFactory.Instance.CreateTileModel(this.transform.FindChild("Model"), x_, y_, z_, this.model_);
+  }
+
+  /// <summary>
+  /// Check if the Tile already collaped into a final model
   /// </summary>
   /// <returns> True if Tile already collapsed </returns>
   public bool Collapsed() {
-    return final_state_ != null;
+    return model_ != null;
   }
+
+
 
   /// <summary>
   /// Initialize tile Game object
@@ -68,8 +77,8 @@ public class Tile : MonoBehaviour {
   /// <param name="x"> X position</param>
   /// <param name="y"> Y position</param>
   /// <param name="z"> Z position</param>
-  /// <param name="possible_states"> possible states that tile may take </param>
-  public void Initialize(string name, int x, int y, int z, List<TileState> possible_states) {
+  /// <param name="available_models"> possible models that tile may take </param>
+  public void Initialize(string name, int x, int y, int z, List<TileModel> available_models) {
     this.gameObject.name = name;
 
     x_ = x;
@@ -77,8 +86,8 @@ public class Tile : MonoBehaviour {
     z_ = z;
 
     update_entropy_ = true;
-    final_state_ = null;
-    available_states_ = possible_states;
+    model_ = null;
+    available_models_ = available_models;
     total_probability_ = TotalProbability();
     max_entropy_ = GetEntropy();
   }
@@ -93,8 +102,8 @@ public class Tile : MonoBehaviour {
     }
 
     float entropy = 0;
-    foreach (TileState available_state in available_states_) {
-      float base_p = available_state.Probability;
+    foreach (TileModel available_model in available_models_) {
+      float base_p = available_model.Probability;
       float p = base_p / total_probability_;
 
       entropy += -p * Mathf.Log(p, 2);
@@ -110,13 +119,15 @@ public class Tile : MonoBehaviour {
   /// </summary>
   /// <param name="neighbor"></param>
   /// <returns>True if available states changed</returns>
-  public bool UpdateAvailableStates(Tile neighbor, Direction direction) {
+  public bool UpdateAvailableStates(Tile neighbor, FaceOrientation orientation) {
     bool changed = false;
-    for (int i = available_states_.Count - 1; i >= 0; --i) {
-      TileState current_tile_state = available_states_[i];
+    for (int i = available_models_.Count - 1; i >= 0; --i) {
+      TileModel current_model = available_models_[i];
       bool satisfy_any = false;
-      foreach (TileState neighbor_tile_state in neighbor.available_states_) {
-        if (current_tile_state.Satisfies(neighbor_tile_state, direction)) {
+      foreach (TileModel neighbor_model in neighbor.available_models_) {
+        // TODO REVIEW
+        if (current_model.Adjacencies.Adjacencies[(int)orientation]
+          .Match(neighbor_model.Adjacencies.Adjacencies[(int)orientation.Opposite()])) {
           satisfy_any = true;
           break;
         }
@@ -125,8 +136,7 @@ public class Tile : MonoBehaviour {
       if (!satisfy_any) {
         changed = true;
         update_entropy_ = true;
-        //total_probability_ -= available_states_[i].GetProbability();
-        available_states_.RemoveAt(i);
+        available_models_.RemoveAt(i);
       }
     }
 
@@ -138,27 +148,23 @@ public class Tile : MonoBehaviour {
   /// </summary>
   /// <param name="parent">Gameobject parent transform </param>
   public void Render(Transform parent) {
-    Transform placeholder = this.transform.FindChild("Placeholder");
-    if (final_state_ != null) {
-      // Render final state
-      placeholder.gameObject.SetActive(false);
-      TileFactory.Instance.CreateTileData(this.transform, x_, y_, z_, this.final_state_);
-    } else {
+    if (model_ == null) {
       // Render based on entropy
+      Transform placeholder = this.transform.FindChild("Placeholder");
       float scale = Mathf.Lerp(0.2f, 0.8f, last_entropy_ / max_entropy_);
       placeholder.localScale = new Vector3(scale, scale, scale);
     }
   }
 
   public override string ToString() {
-    return "("+ x_ + ", " + y_ + ", " + z_ +") - States: " + available_states_.Count + " --> " + final_state_;
+    return "("+ x_ + ", " + y_ + ", " + z_ +") - States: " + available_models_.Count + " --> " + model_;
   }
 
   private float TotalProbability() {
     float total_probability = 0;
-    foreach (TileState available_state in available_states_) {
-      total_probability += available_state.Probability;
+    foreach (TileModel model in available_models_) {
+      total_probability += model.Probability;
     }
     return total_probability;
-  } 
+  }
 }
