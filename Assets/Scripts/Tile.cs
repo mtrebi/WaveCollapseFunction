@@ -115,17 +115,17 @@ public class Tile : MonoBehaviour {
   }
 
   /// <summary>
-  /// Updates the available states of this tile based on the neighbor constraints
+  /// Updates the available models of this tile based on the neighbor constraints
   /// </summary>
   /// <param name="neighbor"></param>
-  /// <returns>True if available states changed</returns>
-  public bool UpdateAvailableStates(Tile neighbor, FaceOrientation orientation) {
+  /// <param name="orientation"> Which face of tile is connected with the neighbor tile</param>
+  /// <returns>True if available models changed</returns>
+  public bool UpdateAvailableModels(Tile neighbor, FaceOrientation orientation) {
     bool changed = false;
     for (int i = available_models_.Count - 1; i >= 0; --i) {
       TileModel current_model = available_models_[i];
       bool satisfy_any = false;
       foreach (TileModel neighbor_model in neighbor.available_models_) {
-        // TODO REVIEW
         if (current_model.Adjacencies.Adjacencies[(int)orientation]
           .Match(neighbor_model.Adjacencies.Adjacencies[(int)orientation.Opposite()])) {
           satisfy_any = true;
@@ -166,5 +166,27 @@ public class Tile : MonoBehaviour {
       total_probability += model.Probability;
     }
     return total_probability;
+  }
+
+  public bool draw_north,
+   draw_south,
+   draw_east,
+   draw_west,
+   draw_top,
+   draw_bottom;
+
+  void Update() {
+    if (draw_north)
+      model_.Adjacencies.Adjacencies[(int)FaceOrientation.NORTH].Draw(Color.red);
+    if (draw_south)
+      model_.Adjacencies.Adjacencies[(int)FaceOrientation.SOUTH].Draw(Color.red);
+    if (draw_east)
+      model_.Adjacencies.Adjacencies[(int)FaceOrientation.EAST].Draw(Color.red);
+    if (draw_west)
+      model_.Adjacencies.Adjacencies[(int)FaceOrientation.WEST].Draw(Color.red);
+    if (draw_top)
+      model_.Adjacencies.Adjacencies[(int)FaceOrientation.TOP].Draw(Color.red);
+    if (draw_bottom)
+      model_.Adjacencies.Adjacencies[(int)FaceOrientation.BOTTOM].Draw(Color.red);
   }
 }
