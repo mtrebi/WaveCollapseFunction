@@ -59,9 +59,9 @@ static class FaceOrientationMethods {
 /// <summary>
 /// Represents a line between two points in a 3D Space. Direction doesn-t matter. Edge(v1, v2) is equals to Edge(v2, v1)
 /// </summary>
+[System.Serializable]
 public class Edge {
-  private Vector3 v1_,
-                 v2_;
+  [SerializeField] private Vector3 v1_, v2_;
   // TODO face index!
   public int[] faceIndex = new int[2];
 
@@ -86,6 +86,9 @@ public class Edge {
     v1_ = v1;
     v2_ = v2;
 
+    v1_ = v1_.Round();
+    v2_ = v2_.Round();
+
     this.faceIndex[0] = face_index0;
     this.faceIndex[1] = face_index1;
   }
@@ -93,6 +96,9 @@ public class Edge {
   public Edge (Edge edge) {
     v1_ = edge.v1_;
     v2_ = edge.v2_;
+
+    v1_ = v1_.Round();
+    v2_ = v2_.Round();
 
     this.faceIndex[0] = edge.faceIndex[0];
     this.faceIndex[1] = edge.faceIndex[1];
@@ -102,7 +108,7 @@ public class Edge {
   /// Sorts the vertices of the edge given the priority (from highest to lowest) x, z, y
   /// </summary>
   public void SortEdgeVertices() {
-    if (CompareTo(v1_, v2_) == 1) {
+    if (v1_.CompareTo(v2_) == 1) {
       Vector3 aux = v1_;
       v1_ = v2_;
       v2_ = aux;
@@ -115,9 +121,9 @@ public class Edge {
   /// <param name="edge"></param>
   /// <returns> -1 if this edge preceeds. 0 if equals. 1 if this edge is after</returns>
   public int CompareTo(Edge edge) {
-    switch (CompareTo(this.v1_, edge.v1_)) {
+    switch (this.v1_.CompareTo(edge.v1_)) {
       case 0:
-        return CompareTo(this.v2_, edge.v2_);
+        return v2_.CompareTo(edge.v2_);
       case -1:
         return -1;
       case 1:
@@ -125,40 +131,6 @@ public class Edge {
     }
     // Should never get here
     return 0;
-  }
-
-  /// <summary>
-  /// Compare a vertex with another to see which one is smaller given the priority (from highest to lowest) x, z, y
-  /// </summary>
-  /// <param name="v1"></param>
-  /// <param name="v2"></param>
-  /// <returns> -1 if this vertex preceeds. 0 if equals. 1 if this vertex is after</returns>
-  private int CompareTo(Vector3 v1, Vector3 v2) {
-    int result = 0;
-
-    if (v1.x < v2.x) {
-      result = -1;
-    }
-    else if (v1.x > v2.x) {
-      result = 1;
-    }
-    else { // Same x
-      if (v1.z < v2.z) {
-        result = -1;
-      }
-      else if (v1.z > v2.z) {
-        result = 1;
-      }
-      else { // Same x and z
-        if (v1.y < v2.y) {
-          result = -1;
-        }
-        else if (v1.y > v2.y) {
-          result = 1;
-        }
-      }
-    }
-    return result;
   }
 
   public override string ToString() {
@@ -169,8 +141,8 @@ public class Edge {
     var item = obj as Edge;
     if (item == null) return false;
 
-    return (this.v1_ == item.v1_ && this.v2_ == item.v2_)
-           || (this.v1_ == item.v2_ && this.v2 == item.v1_);
+    return (this.v1_.CompareTo(item.v1_) == 0 && this.v2_.CompareTo(item.v2_) == 0)
+           || (this.v1_.CompareTo(item.v2_) == 0 && this.v2.CompareTo(item.v1_) == 0);
   }
 
   public override int GetHashCode() {
@@ -178,18 +150,14 @@ public class Edge {
     unchecked // Overflow is fine, just wrap
     {
       hash1 = (int)2166136261;
-      // Suitable nullity checks etc, of course :)
-      // Suitable nullity checks etc, of course :)
-      hash1 = (hash1 * 16777619) + System.Math.Round(v1.x, 5).GetHashCode();
-      hash1 = (hash1 * 16777619) + System.Math.Round(v1.y, 5).GetHashCode();
-      hash1 = (hash1 * 16777619) + System.Math.Round(v1.z, 5).GetHashCode();
+      hash1 = (hash1 * 16777619) + v1.x.GetHashCode();
+      hash1 = (hash1 * 16777619) + v1.y.GetHashCode();
+      hash1 = (hash1 * 16777619) + v1.z.GetHashCode();
 
       hash2 = (int)2166136261;
-      // Suitable nullity checks etc, of course :)
-      // Suitable nullity checks etc, of course :)
-      hash2 = (hash2 * 16777619) + System.Math.Round(v2.x, 5).GetHashCode();
-      hash2 = (hash2 * 16777619) + System.Math.Round(v2.y, 5).GetHashCode();
-      hash2 = (hash2 * 16777619) + System.Math.Round(v2.z, 5).GetHashCode();
+      hash2 = (hash2 * 16777619) + v2.x.GetHashCode();
+      hash2 = (hash2 * 16777619) + v2.y.GetHashCode();
+      hash2 = (hash2 * 16777619) + v2.z.GetHashCode();
     }
 
     return hash1 + hash2;
@@ -209,7 +177,7 @@ public class FaceAdjacency {
   /// <summary>
   /// Stores the original edges from the mesh that make up the face
   /// </summary>
-  private List<Edge> edges;
+  [SerializeField]  private List<Edge> edges;
 
   public int EdgesId {
     get {
@@ -298,8 +266,7 @@ public class FaceAdjacency {
   }
 
   public override int GetHashCode() {
-    // TODO Review original edges get hash code
-    return face_orientation_.GetHashCode() + edges.GetHashCode();
+    return face_orientation_.GetHashCode() + edges_id_.GetHashCode();
   }
 
   public override string ToString() {
@@ -366,6 +333,7 @@ public class TileAdjacencies {
       FaceOrientation rotated_orientation = adjacency.Orientation.Rotate(Mathf.Abs(y_rotation / 90));
       for (int edge_i = 0; edge_i < adjacency.Edges.Count; ++edge_i) {
         Edge rotated_edge = RotateEdge(adjacency.Edges[edge_i], y_rotation);
+        rotated_edge.SortEdgeVertices();
         adjacencies_[(int) rotated_orientation].Edges.Add(rotated_edge);
       }
     }
@@ -447,13 +415,6 @@ public class TileAdjacencies {
 
     Edge[] edges = new Edge[culledEdges.Count];
     culledEdges.CopyTo(edges);
-
-    /* TODO remove test code
-    int[] hashes = new int[edges.Length];
-    for (int i = 0; i < hashes.Length; ++i) {
-      hashes[i] = edges[i].GetHashCode();
-    }
-    */
 
     return edges;
   }
