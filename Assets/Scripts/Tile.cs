@@ -167,26 +167,4 @@ public class Tile : MonoBehaviour {
     }
     return total_probability;
   }
-
-  public bool draw_north,
-   draw_south,
-   draw_east,
-   draw_west,
-   draw_top,
-   draw_bottom;
-
-  void Update() {
-    if (draw_north)
-      model_.Adjacencies.Adjacencies[(int)FaceOrientation.NORTH].Draw(Color.red);
-    if (draw_south)
-      model_.Adjacencies.Adjacencies[(int)FaceOrientation.SOUTH].Draw(Color.red);
-    if (draw_east)
-      model_.Adjacencies.Adjacencies[(int)FaceOrientation.EAST].Draw(Color.red);
-    if (draw_west)
-      model_.Adjacencies.Adjacencies[(int)FaceOrientation.WEST].Draw(Color.red);
-    if (draw_top)
-      model_.Adjacencies.Adjacencies[(int)FaceOrientation.TOP].Draw(Color.red);
-    if (draw_bottom)
-      model_.Adjacencies.Adjacencies[(int)FaceOrientation.BOTTOM].Draw(Color.red);
-  }
 }
