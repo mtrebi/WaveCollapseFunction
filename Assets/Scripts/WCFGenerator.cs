@@ -20,7 +20,7 @@ public class WCFGenerator : MonoBehaviour {
 
 
   public bool random_start_;
-  public GameObject tile_state_manager_object_;
+  public GameObject model_manager_object_;
 
   private Tile[,,] wave_ = null;
   private bool[,,] wave_changed_ = null;
@@ -46,9 +46,11 @@ public class WCFGenerator : MonoBehaviour {
 
   private void Start() {
     InitializeWave();
+    List<TileModel> models = model_manager_object_.GetComponent<TileModelManager>().TileModels;
   }
 
   // Update is called once per frame
+  
   void Update() {
     switch (program_state_) {
       case ProgramState.INIT:
@@ -81,7 +83,7 @@ public class WCFGenerator : MonoBehaviour {
       wave_changed_ = new bool[width_, height_, depth_];
     }
 
-    List<TileState> states = tile_state_manager_object_.GetComponent<TileStateManager>().States;
+    List<TileModel> models = model_manager_object_.GetComponent<TileModelManager>().TileModels;
     for (int x = 0; x < width_; ++x) {
       for (int y = 0; y < height_; ++y) {
         for (int z = 0; z < depth_; ++z) {
@@ -89,19 +91,9 @@ public class WCFGenerator : MonoBehaviour {
             // TODO : Factory/ pool, null initialize
             Object.Destroy(wave_[x, y, z].gameObject);
           }
-          wave_[x, y, z] = TileFactory.Instance.CreateTilePlaceholder(this.transform, x, y, z, new List<TileState>(states));
+          wave_[x, y, z] = TileFactory.Instance.CreateDefaultTile(this.transform, x, y, z, new List<TileModel>(models));
           wave_changed_[x, y, z] = true;
         }
-      }
-    }
-
-    //TODO CollapseFloor(states.Find(x => x.Id.Equals(new Bin("11111111"))));
-  }
-
-  private void CollapseFloor(TileState state) {
-    for (int x = 0; x < width_; ++x) {
-      for (int z = 0; z < depth_; ++z) {
-        wave_[x, 0, z].State = state;
       }
     }
   }
@@ -171,24 +163,24 @@ public class WCFGenerator : MonoBehaviour {
   /// Collapse to tile to one final state
   /// </summary>
   public void Collapse(Tile tile) {
-    List<TileState> max_probabilities_states = new List<TileState>();
+    List<TileModel> max_probabilities_models = new List<TileModel>();
     float max_probability = float.MinValue;
 
-    foreach (TileState available_state in tile.AvailableStates) {
+    foreach (TileModel available_model in tile.AvailableModels) {
       // TODO better use of probabilities
-      float probability = available_state.Probability + Random.Range(randomness_min, randomness_max);
+      float probability = available_model.Probability + Random.Range(randomness_min, randomness_max);
 
       if (probability >= max_probability) {
         if (probability > max_probability) {
           max_probability = probability;
-          max_probabilities_states.Clear();
+          max_probabilities_models.Clear();
         }
-        max_probabilities_states.Add(available_state);
+        max_probabilities_models.Add(available_model);
       }
     }
 
-    int random_index = Random.Range(0, max_probabilities_states.Count);
-    tile.State = max_probabilities_states[random_index];
+    int random_index = Random.Range(0, max_probabilities_models.Count);
+    tile.Collapse(max_probabilities_models[random_index]);
   }
 
 
@@ -205,37 +197,42 @@ public class WCFGenerator : MonoBehaviour {
 
       foreach (Tile neighbor in neighbors) {
         if (!neighbor.Collapsed() 
-          && neighbor.UpdateAvailableStates(current_tile, GetDirection(neighbor, current_tile))) {
+          && neighbor.UpdateAvailableModels(current_tile, GetNeighborOrientation(neighbor, current_tile))) {
           remaining_tiles.Push(neighbor);
         }
       }
     }
   }
 
-
-  private Direction GetDirection (Tile tile, Tile neighbor) {
+  /// <summary>
+  /// Get which face of Tile is connected to Neighbor
+  /// </summary>
+  /// <param name="tile"></param>
+  /// <param name="neighbor"></param>
+  /// <returns></returns>
+  private FaceOrientation GetNeighborOrientation(Tile tile, Tile neighbor) {
     if (tile.X > neighbor.X) {
-      return Direction.NORTH;
+      return FaceOrientation.NORTH;
     }
     if (tile.X < neighbor.X) {
-      return Direction.SOUTH;
+      return FaceOrientation.SOUTH;
     }
 
     if (tile.Y < neighbor.Y) {
-      return Direction.TOP;
+      return FaceOrientation.TOP;
     }
     if (tile.Y > neighbor.Y) {
-      return Direction.BOTTOM;
+      return FaceOrientation.BOTTOM;
     }
 
     if (tile.Z < neighbor.Z) {
-      return Direction.EAST;
+      return FaceOrientation.EAST;
     }
     if (tile.Z > neighbor.Z) {
-      return Direction.WEST;
+      return FaceOrientation.WEST;
     }
 
-    return Direction.NORTH;
+    return FaceOrientation.NORTH;
   }
 
   /// <summary>
@@ -263,5 +260,3 @@ public class WCFGenerator : MonoBehaviour {
     return neighbors.ToArray();
   }
 }
-
-
