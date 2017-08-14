@@ -133,6 +133,10 @@ public class Edge {
     return 0;
   }
 
+  public void Draw(Color color, float time) {
+    Debug.DrawLine(v1, v2, color, time, false);
+  }
+
   public override string ToString() {
     return v1.ToString() + " <--> " + v2.ToString();
   }
@@ -261,7 +265,7 @@ public class FaceAdjacency {
 
   public void Draw(Color color, float time = 1.0f) {
     foreach (Edge edge in edges_) {
-      Debug.DrawLine(edge.v1, edge.v2, color, time, false);
+      edge.Draw(color, time);
     }
   }
 
@@ -382,6 +386,7 @@ public class TileAdjacencies {
 
     foreach (Edge edge in outer_edges) {
       FaceOrientation[] involved_faces = GetFaceOrientationOfEdge(edge);
+      Debug.Log(involved_faces.Length);
       foreach (FaceOrientation face_orientation in involved_faces) {
         adjacencies_[(int)face_orientation].AddEdge(edge);
       }
@@ -399,25 +404,32 @@ public class TileAdjacencies {
   /// <returns> Returns on which side the edge lays. Can return None if the edge doesnt lay on any side </returns>
   private FaceOrientation[] GetFaceOrientationOfEdge(Edge edge) {
     List<FaceOrientation> faces = new List<FaceOrientation>();
-
-    if (edge.v1.x == edge.v2.x && edge.v1.x == 0.5) {
+    
+    if (edge.v1.x > 0.5 || edge.v1.y > 0.5 || edge.v1.z > 0.5
+      || edge.v1.x < -0.5 || edge.v1.y < -0.5 || edge.v1.z < -0.5
+      || edge.v2.x > 0.5 || edge.v2.y > 0.5 || edge.v2.z > 0.5
+      || edge.v2.x < -0.5 || edge.v2.y < -0.5 || edge.v2.z < -0.5) {
+      Debug.LogWarning("Review model. Edges are out of boundaries. Overlaps may happen");
+    }
+    
+    if (Mathf.Approximately(edge.v1.x, edge.v2.x) && Mathf.Approximately(edge.v1.x, 0.5f)) {
       faces.Add(FaceOrientation.SOUTH);
     }
-    else if (edge.v1.x == edge.v2.x && edge.v1.x == -0.5) {
+    else if (Mathf.Approximately(edge.v1.x, edge.v2.x) && Mathf.Approximately(edge.v1.x, -0.5f)) {
       faces.Add(FaceOrientation.NORTH);
     }
 
-    if (edge.v1.z == edge.v2.z && edge.v1.z == 0.5) {
+    if (Mathf.Approximately(edge.v1.z, edge.v2.z) && Mathf.Approximately(edge.v1.z, 0.5f)) {
       faces.Add(FaceOrientation.EAST);
     }
-    else if (edge.v1.z == edge.v2.z && edge.v1.z == -0.5) {
+    else if (Mathf.Approximately(edge.v1.z, edge.v2.z) && Mathf.Approximately(edge.v1.z, -0.5f)) {
       faces.Add(FaceOrientation.WEST);
     }
 
-    if (edge.v1.y == edge.v2.y && edge.v1.y == 0.5) {
+    if (Mathf.Approximately(edge.v1.y, edge.v2.y) && Mathf.Approximately(edge.v1.y, 0.5f)) {
       faces.Add(FaceOrientation.TOP);
     }
-    else if (edge.v1.y == edge.v2.y && edge.v1.y == -0.5) {
+    else if (Mathf.Approximately(edge.v1.y, edge.v2.y) && Mathf.Approximately(edge.v1.y, -0.5f)) {
       faces.Add(FaceOrientation.BOTTOM);
     }
 
@@ -433,9 +445,10 @@ public class TileAdjacencies {
     HashSet<Edge> culledEdges = new HashSet<Edge>();
 
     foreach (Edge edge in all_edges) {
-      if (edge.faceIndex[0] == edge.faceIndex[1]) {
+      // TODO OPTIMIZE
+      //if (edge.faceIndex[0] == edge.faceIndex[1]) {
         culledEdges.Add(edge);
-      }
+      //}
     }
 
     Edge[] edges = new Edge[culledEdges.Count];
@@ -476,7 +489,6 @@ public class TileAdjacencies {
       for (int b = 0; b < 3; b++) {
         int i2 = triangleArray[a * 3 + b];
         if (i1 < i2) {
-          // asdfafafafa
           Edge newEdge = new Edge(mesh.vertices[i1], mesh.vertices[i2], a, a);
           edgeArray[edgeCount] = newEdge;
 
