@@ -11,6 +11,7 @@ ModelImporter:
     3300000: //RootNode
     4300000: pCube5
     4300002: model1
+    4300004: pCube8
   materials:
     importMaterials: 1
     materialName: 0
