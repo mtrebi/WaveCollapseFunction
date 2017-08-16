@@ -1,6 +1,6 @@
 fileFormatVersion: 2
-guid: 2253943da89dc4a41a511389ff1427fb
-timeCreated: 1502709229
+guid: 8b3579490620fd7439ca18077941baab
+timeCreated: 1502873226
 licenseType: Free
 ModelImporter:
   serializedVersion: 19
@@ -9,8 +9,8 @@ ModelImporter:
     400000: //RootNode
     2300000: //RootNode
     3300000: //RootNode
-    4300000: group18_pasted__group16_pasted__pasted__group14_pasted__pasted__pasted__group3_pasted__pasted__pasted__pasted__group2_pasted__pasted__pasted__pasted__pasted__pCube3
-    4300002: shape1
+    4300000: pCube5
+    4300002: model1
   materials:
     importMaterials: 1
     materialName: 0
