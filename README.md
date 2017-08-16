@@ -30,4 +30,6 @@ More advanced Procedural Generation using 5x5x5 Block Tiles. Algorithm can use a
 
 Even more advanced Procedural Generation using arbitrary meshes. Algorithm can automatically calculate how the different meshes match based on its geometry.
 
-![](https://github.com/mtrebi/WaveCollapseFunction/blob/master/Docs/Videos/mesh_generation_first.gif?raw=true)
+![](https://github.com/mtrebi/WaveCollapseFunction/blob/master/Docs/Videos/mesh_generation1.gif?raw=true)
+
+![](https://github.com/mtrebi/WaveCollapseFunction/blob/master/Docs/Videos/mesh_generation2.gif?raw=true)
