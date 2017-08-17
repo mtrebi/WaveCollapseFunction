@@ -133,8 +133,8 @@ public class Edge {
     return 0;
   }
 
-  public void Draw(Color color, float time) {
-    Debug.DrawLine(v1, v2, color, time, false);
+  public void Draw(Vector3 offset, Color color, float time) {
+    Debug.DrawLine(offset + v1, offset + v2, color, time, false);
   }
 
   public override string ToString() {
@@ -181,7 +181,7 @@ public class FaceAdjacency {
   /// <summary>
   /// Stores the original edges from the mesh that make up the face
   /// </summary>
-  [SerializeField]  private List<Edge> edges_;
+  [SerializeField] private List<Edge> edges_;
 
   public int EdgesId {
     get {
@@ -263,9 +263,9 @@ public class FaceAdjacency {
     return true;
   }
 
-  public void Draw(Color color, float time = 1.0f) {
+  public void Draw(Vector3 offset, Color color, float time = 1.0f) {
     foreach (Edge edge in edges_) {
-      edge.Draw(color, time);
+      edge.Draw(offset, color, time);
     }
   }
 
@@ -404,6 +404,7 @@ public class TileAdjacencies {
   private FaceOrientation[] GetFaceOrientationOfEdge(Edge edge) {
     List<FaceOrientation> faces = new List<FaceOrientation>();
 
+    // TODO Move to test
     if (edge.v1.x > 0.5 || edge.v1.y > 0.5 || edge.v1.z > 0.5
       || edge.v1.x < -0.5 || edge.v1.y < -0.5 || edge.v1.z < -0.5
       || edge.v2.x > 0.5 || edge.v2.y > 0.5 || edge.v2.z > 0.5
