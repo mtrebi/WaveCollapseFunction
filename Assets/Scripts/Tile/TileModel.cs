@@ -386,7 +386,6 @@ public class TileAdjacencies {
 
     foreach (Edge edge in outer_edges) {
       FaceOrientation[] involved_faces = GetFaceOrientationOfEdge(edge);
-      Debug.Log(involved_faces.Length);
       foreach (FaceOrientation face_orientation in involved_faces) {
         adjacencies_[(int)face_orientation].AddEdge(edge);
       }
@@ -404,7 +403,7 @@ public class TileAdjacencies {
   /// <returns> Returns on which side the edge lays. Can return None if the edge doesnt lay on any side </returns>
   private FaceOrientation[] GetFaceOrientationOfEdge(Edge edge) {
     List<FaceOrientation> faces = new List<FaceOrientation>();
-    
+
     if (edge.v1.x > 0.5 || edge.v1.y > 0.5 || edge.v1.z > 0.5
       || edge.v1.x < -0.5 || edge.v1.y < -0.5 || edge.v1.z < -0.5
       || edge.v2.x > 0.5 || edge.v2.y > 0.5 || edge.v2.z > 0.5
