@@ -27,7 +27,7 @@ public class TileModelManager : MonoBehaviour {
     foreach (GameObject tile_prefab in tile_model_prefabs_) {
       if (tile_prefab != null) {
         TileData tile_data = tile_prefab.GetComponent<TileData>();
-        TileModel tile_model = new TileModel(tile_prefab, tile_data.Probability);
+        TileModel tile_model = new TileModel(tile_prefab, tile_data.Probability, tile_data.Type);
 
         TileModel[] models = tile_model.GetSymmetricModels(tile_data.Symmetry);
         TileModels.AddRange(models);

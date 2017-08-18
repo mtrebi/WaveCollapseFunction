@@ -568,6 +568,7 @@ public class TileModel {
   [SerializeField] private Quaternion prefab_orientation_;
   [SerializeField] private float probability_;
   [SerializeField] private TileAdjacencies adjacencies_;
+  [SerializeField] private TileType type_;
 
   public GameObject Prefab {
     get {
@@ -587,29 +588,37 @@ public class TileModel {
     }
   }
 
+  public TileType Type {
+    get {
+      return type_;
+    }
+  }
+
   public TileAdjacencies Adjacencies {
     get {
       return adjacencies_;
     }
   }
 
-  public TileModel(GameObject prefab, float probability) {
+  public TileModel(GameObject prefab, float probability, TileType type) {
     prefab_ = prefab;
     probability_ = probability;
+    type_ = type;
     adjacencies_ = new TileAdjacencies(prefab_.GetComponent<MeshFilter>().sharedMesh);
   }
 
-  public TileModel(GameObject prefab, Quaternion orientation, float probability, TileAdjacencies adjacencies) {
+  public TileModel(GameObject prefab, Quaternion orientation, float probability, TileType type, TileAdjacencies adjacencies) {
     prefab_ = prefab;
     prefab_orientation_ = orientation;
     probability_ = probability;
+    type_ = type;
     adjacencies_ = adjacencies;
   }
 
   public TileModel[] GetSymmetricModels(SymmetryType symmetry) {
     TileModel[] models = new TileModel[GetCardinality(symmetry)];
 
-    models[0] = new TileModel(prefab_, Quaternion.identity, probability_, adjacencies_);
+    models[0] = new TileModel(prefab_, Quaternion.identity, probability_, type_, adjacencies_);
 
     for (int i = 1; i < models.Length; ++i) {
       int y_rotation = 90 * i;
@@ -640,7 +649,7 @@ public class TileModel {
 
   private TileModel GenerateModel(int y_rotation) {
     TileAdjacencies instance_adjacencies = new TileAdjacencies(adjacencies_, y_rotation);
-    TileModel model = new TileModel(prefab_, Quaternion.Euler(0, y_rotation, 0), probability_, instance_adjacencies);
+    TileModel model = new TileModel(prefab_, Quaternion.Euler(0, y_rotation, 0), probability_, type_, instance_adjacencies);
     return model;
   }
 }
