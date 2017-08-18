@@ -332,6 +332,7 @@ public class FaceAdjacency {
 [System.Serializable]
 public class TileAdjacencies {
   [SerializeField] private FaceAdjacency[] adjacencies_;
+  private string model_name_;
 
   public FaceAdjacency[] Adjacencies {
     get {
@@ -349,7 +350,8 @@ public class TileAdjacencies {
     adjacencies_[(int)FaceOrientation.BOTTOM] = new FaceAdjacency(FaceOrientation.BOTTOM);
   }
 
-  public TileAdjacencies(Mesh mesh) {
+  public TileAdjacencies(string name, Mesh mesh) {
+    model_name_ = name;
     InitializeAdjacencies();
     CalculateAdjacencies(mesh);
   }
@@ -409,7 +411,7 @@ public class TileAdjacencies {
       || edge.v1.x < -0.5 || edge.v1.y < -0.5 || edge.v1.z < -0.5
       || edge.v2.x > 0.5 || edge.v2.y > 0.5 || edge.v2.z > 0.5
       || edge.v2.x < -0.5 || edge.v2.y < -0.5 || edge.v2.z < -0.5) {
-      Debug.LogWarning("Review model. Edges are out of boundaries. Overlaps may happen");
+      Debug.LogError("Review " + model_name_ + ". Edges are out of boundaries. Overlaps may happen");
     }
     
     if (Mathf.Approximately(edge.v1.x, edge.v2.x) && Mathf.Approximately(edge.v1.x, 0.5f)) {
@@ -604,7 +606,7 @@ public class TileModel {
     prefab_ = prefab;
     probability_ = probability;
     type_ = type;
-    adjacencies_ = new TileAdjacencies(prefab_.GetComponent<MeshFilter>().sharedMesh);
+    adjacencies_ = new TileAdjacencies(prefab.name, prefab_.GetComponent<MeshFilter>().sharedMesh);
   }
 
   public TileModel(GameObject prefab, Quaternion orientation, float probability, TileType type, TileAdjacencies adjacencies) {
