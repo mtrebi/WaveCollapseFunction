@@ -384,14 +384,18 @@ public class TileAdjacencies {
   }
 
   private void CalculateAdjacencies(Mesh mesh) {
-    Edge[] outer_edges = BuildManifoldEdges(mesh);
+    if (mesh != null) {
+      Edge[] outer_edges = BuildManifoldEdges(mesh);
 
-    foreach (Edge edge in outer_edges) {
-      FaceOrientation[] involved_faces = GetFaceOrientationOfEdge(edge);
-      foreach (FaceOrientation face_orientation in involved_faces) {
-        adjacencies_[(int)face_orientation].AddEdge(edge);
+      foreach (Edge edge in outer_edges) {
+        FaceOrientation[] involved_faces = GetFaceOrientationOfEdge(edge);
+        foreach (FaceOrientation face_orientation in involved_faces) {
+          adjacencies_[(int)face_orientation].AddEdge(edge);
+        }
       }
     }
+
+    
 
     for (int i = 0; i < adjacencies_.Length; ++i) {
       adjacencies_[i].PostProcess();
