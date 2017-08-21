@@ -34,13 +34,62 @@ public class DebugTool : MonoBehaviour {
   void SpawnAllModels() {
     testing_tiles_ = new Tile[model_manager_.TileModels.Count, 1, 1];
 
-    for (int i = 0; i < model_manager_.TileModels.Count; ++i) {
+
+    TileModel previous = null, 
+      current = null;
+    int i = 0,
+      j = 0;
+    while (i < model_manager_.TileModels.Count) {
+      current = model_manager_.TileModels[i];
+      List<TileModel> model = new List<TileModel>() {
+        current
+      };
+
+      if (previous == null) {
+        // First iteration
+        testing_tiles_[i, 0, 0] = TileFactory.Instance.CreateDefaultTile(this.transform, i * 2, 0, j, model);
+      }
+      else {
+        if (previous.Prefab == current.Prefab) {
+          // Symmetric tile
+          ++j;
+          testing_tiles_[i, 0, 0] = TileFactory.Instance.CreateDefaultTile(this.transform, (i - j) * 2, 0, j * 2, model);
+        }
+        else {
+          // New (different) tile
+          j = 0;
+          testing_tiles_[i, 0, 0] = TileFactory.Instance.CreateDefaultTile(this.transform, i * 2, 0, j, model);
+        }
+      }
+      testing_tiles_[i, 0, 0].Collapse(current);
+      previous = current;
+      ++i;
+    }
+
+    /*
+      while (i < model_manager_.TileModels.Count) {
       List<TileModel> model = new List<TileModel>() {
         model_manager_.TileModels[i]
       };
       testing_tiles_[i, 0, 0] = TileFactory.Instance.CreateDefaultTile(this.transform, i * 2, 0, 0, model);
       testing_tiles_[i, 0, 0].Collapse(model_manager_.TileModels[i]);
-    }
+      
+      int j = 1;
+      while (true) {
+        if (i + j < model_manager_.TileModels.Count) {
+          if (model_manager_.TileModels[i].Prefab == model_manager_.TileModels[i + j].Prefab) {
+            testing_tiles_[i + j, 0, 0] = TileFactory.Instance.CreateDefaultTile(this.transform, i * 2, 0, j * 2, model);
+            ++j;
+          }else {
+            break;
+          }
+        }else {
+          break;
+        }
+      }
+      i += j;
+      ++i;
+    }*/
   }
 
   // Update is called once per frame
