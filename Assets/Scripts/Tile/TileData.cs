@@ -4,9 +4,8 @@ using UnityEngine;
 
 public enum TileType {
   GROUND,
-  WALL,
-  ROOF,
-  EMPTY
+  EMPTY,
+  OTHER
 }
 
 public class TileData : MonoBehaviour {
