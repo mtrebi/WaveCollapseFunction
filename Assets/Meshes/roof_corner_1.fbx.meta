@@ -1,6 +1,6 @@
 fileFormatVersion: 2
-guid: ac1a043a9349a7d4d8c76c7801d949ca
-timeCreated: 1503314283
+guid: cf89ae52faa517345a6d9a46f07fa9fb
+timeCreated: 1503324013
 licenseType: Free
 ModelImporter:
   serializedVersion: 19
@@ -9,8 +9,7 @@ ModelImporter:
     400000: //RootNode
     2300000: //RootNode
     3300000: //RootNode
-    4300000: wall_2:bbox2
-    4300002: roof_wall_2
+    4300000: roof_corner_1
   materials:
     importMaterials: 1
     materialName: 0

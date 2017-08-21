@@ -1,6 +1,6 @@
 fileFormatVersion: 2
-guid: cbb700be05a13a848acb997560b3ce5a
-timeCreated: 1502978215
+guid: 65cd63fcf0e29124cbb244fc10736353
+timeCreated: 1503324013
 licenseType: Free
 ModelImporter:
   serializedVersion: 19
@@ -9,7 +9,7 @@ ModelImporter:
     400000: //RootNode
     2300000: //RootNode
     3300000: //RootNode
-    4300000: model7
+    4300000: roof_side_1
   materials:
     importMaterials: 1
     materialName: 0
