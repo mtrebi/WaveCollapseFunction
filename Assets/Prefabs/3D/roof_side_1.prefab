@@ -24,7 +24,7 @@ GameObject:
   - component: {fileID: 65355349877300236}
   - component: {fileID: 114328678826763890}
   m_Layer: 0
-  m_Name: roof_wall_1
+  m_Name: roof_side_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -81,7 +81,7 @@ MeshFilter:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1443658097361866}
-  m_Mesh: {fileID: 4300006, guid: 67766e933c3896a4cb80cfc110bbf79c, type: 3}
+  m_Mesh: {fileID: 4300000, guid: 65cd63fcf0e29124cbb244fc10736353, type: 3}
 --- !u!65 &65355349877300236
 BoxCollider:
   m_ObjectHideFlags: 1
