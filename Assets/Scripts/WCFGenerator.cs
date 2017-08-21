@@ -55,7 +55,6 @@ public class WCFGenerator : MonoBehaviour {
 
   private void Start() {
     InitializeWave();
-    List<TileModel> models = model_manager_object_.GetComponent<TileModelManager>().TileModels;
   }
 
   // Update is called once per frame
