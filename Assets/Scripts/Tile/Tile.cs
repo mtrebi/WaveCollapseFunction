@@ -151,7 +151,8 @@ public class Tile : MonoBehaviour {
     if (model_ == null) {
       // Render based on entropy
       Transform placeholder = this.transform.FindChild("Placeholder");
-      float scale = Mathf.Lerp(0.2f, 0.8f, last_entropy_ / max_entropy_);
+
+      float scale = max_entropy_ == 0 ? 1 : Mathf.Lerp(0.2f, 0.8f, last_entropy_ / max_entropy_);
       placeholder.localScale = new Vector3(scale, scale, scale);
     }
   }
