@@ -410,11 +410,12 @@ public class TileAdjacencies {
   private FaceOrientation[] GetFaceOrientationOfEdge(Edge edge) {
     List<FaceOrientation> faces = new List<FaceOrientation>();
 
-    // TODO Move to test
-    if (edge.v1.x > 0.5 || edge.v1.y > 0.5 || edge.v1.z > 0.5
-      || edge.v1.x < -0.5 || edge.v1.y < -0.5 || edge.v1.z < -0.5
-      || edge.v2.x > 0.5 || edge.v2.y > 0.5 || edge.v2.z > 0.5
-      || edge.v2.x < -0.5 || edge.v2.y < -0.5 || edge.v2.z < -0.5) {
+    // TODO Use tile size here
+    float half_tile = 0.5f;
+    if (edge.v1.x > half_tile || edge.v1.y > half_tile || edge.v1.z > half_tile
+      || edge.v1.x < -half_tile || edge.v1.y < -half_tile || edge.v1.z < -half_tile
+      || edge.v2.x > half_tile || edge.v2.y > half_tile || edge.v2.z > half_tile
+      || edge.v2.x < -half_tile || edge.v2.y < -half_tile || edge.v2.z < -half_tile) {
       Debug.LogError("Review " + model_name_ + ". Edges are out of boundaries. Overlaps may happen");
     }
     
@@ -451,7 +452,7 @@ public class TileAdjacencies {
     HashSet<Edge> culledEdges = new HashSet<Edge>();
 
     foreach (Edge edge in all_edges) {
-      // TODO OPTIMIZE
+      // TODO OPTIMIZE --> All edges are being added
       //if (edge.faceIndex[0] == edge.faceIndex[1]) {
         culledEdges.Add(edge);
       //}
