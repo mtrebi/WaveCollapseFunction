@@ -8,6 +8,7 @@ using UnityEngine;
 [System.Serializable]
 public class TileModelManager : MonoBehaviour {
   public GameObject[] tile_model_prefabs_;
+  public bool use_symmetrics_;
   [SerializeField] private List<TileModel> tile_models_;
 
   public List<TileModel> TileModels {
@@ -28,9 +29,13 @@ public class TileModelManager : MonoBehaviour {
       if (tile_prefab != null) {
         TileData tile_data = tile_prefab.GetComponent<TileData>();
         TileModel tile_model = new TileModel(tile_prefab, tile_data.Probability, tile_data.Type);
+        TileModels.Add(tile_model);
 
-        TileModel[] models = tile_model.GetSymmetricModels(tile_data.Symmetry);
-        TileModels.AddRange(models);
+        if (use_symmetrics_) {
+          TileModel[] models = tile_model.GetSymmetricModels(tile_data.Symmetry);
+          TileModels.AddRange(models);
+        }
+
       }
       else {
         Debug.LogWarning("Null prefab in Tile Model Manager");

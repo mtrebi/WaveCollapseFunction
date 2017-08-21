@@ -625,10 +625,8 @@ public class TileModel {
   public TileModel[] GetSymmetricModels(SymmetryType symmetry) {
     TileModel[] models = new TileModel[GetCardinality(symmetry)];
 
-    models[0] = new TileModel(prefab_, Quaternion.identity, probability_, type_, adjacencies_);
-
-    for (int i = 1; i < models.Length; ++i) {
-      int y_rotation = 90 * i;
+    for (int i = 0; i < models.Length; ++i) {
+      int y_rotation = 90 * (i + 1);
       models[i] = GenerateModel(y_rotation);
     }
 
@@ -639,16 +637,16 @@ public class TileModel {
     int cardinality = 0;
     switch (symmetry) {
       case SymmetryType.X:
-        cardinality = 1;
+        cardinality = 0;
         break;
       case SymmetryType.L:
-        cardinality = 4;
+        cardinality = 3;
         break;
       case SymmetryType.T:
-        cardinality = 4;
+        cardinality = 3;
         break;
       case SymmetryType.I:
-        cardinality = 2;
+        cardinality = 1;
         break;
     }
     return cardinality;
