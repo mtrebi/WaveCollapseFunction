@@ -93,7 +93,7 @@ public class WCFGenerator : MonoBehaviour {
     }
 
     List<TileModel> all_models = model_manager_object_.GetComponent<TileModelManager>().TileModels;
-    List<TileModel> ground_models = all_models.Where(x => x.Type == TileType.GROUND).ToList();
+    List<TileModel> ground_models = all_models.Where(x => x.Type == TileType.GROUND || x.Type == TileType.EMPTY).ToList();
     List<TileModel> empty_models = all_models.Where(x => x.Type == TileType.EMPTY).ToList();
     List<TileModel> models;
 
@@ -108,7 +108,9 @@ public class WCFGenerator : MonoBehaviour {
           if (y == 0) {
             models = ground_models;
           }
-          else if (y == height_ - 1){
+          else if (y == height_ - 1 || 
+            x == 0 || x == width_ - 1 ||
+            z == 0 || z == depth_ - 1) {
             models = empty_models;
           }else {
             models = all_models;
