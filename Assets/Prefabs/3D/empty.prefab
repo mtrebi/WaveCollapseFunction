@@ -105,6 +105,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0b7898127b4fdf498e0c2bb6ffc7c34, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Probability: 0.2
+  Probability: 0.15
   Symmetry: 0
   Type: 1
