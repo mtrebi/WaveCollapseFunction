@@ -34,6 +34,8 @@ Even more advanced Procedural Generation using arbitrary meshes. Algorithm can a
 
 ![](https://github.com/mtrebi/WaveCollapseFunction/blob/master/Docs/Videos/mesh_generation2.gif?raw=true)
 
+![](https://github.com/mtrebi/WaveCollapseFunction/blob/master/Docs/Videos/mesh_generation3.gif?raw=true)
+
 ## TODO List
 
 * Add more Tile Models to create varied buildings
