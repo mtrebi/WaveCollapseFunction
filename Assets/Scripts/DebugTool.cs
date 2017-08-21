@@ -1,15 +1,46 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 using UnityEditor;
 
+public enum Mode {
+  TEST_MODEL,
+  TEST_WAVE
+}
+
 public class DebugTool : MonoBehaviour {
-  public WCFGenerator generator;
+  public Mode mode;
+
+  public WCFGenerator Generator;
   public GameObject FaceGizmoPrefab;
-  GameObject selected_;
-  GameObject[] face_gizmos_;
-  TileModel tile_model_;
+  public GameObject TileModelManagerPrefab;
+
+
+  private GameObject selected_;
+  private GameObject[] face_gizmos_;
+  private TileModel tile_model_;
+  private TileModelManager model_manager_;
+  private Tile[,,] testing_tiles_;
 
   void Start() {
     face_gizmos_ = new GameObject[6];
+    model_manager_ = TileModelManagerPrefab.GetComponent<TileModelManager>();
+
+    if (mode == Mode.TEST_MODEL) {
+      SpawnAllModels();
+    }
+  }
+
+  void SpawnAllModels() {
+    testing_tiles_ = new Tile[model_manager_.TileModels.Count, 1, 1];
+
+    for (int i = 0; i < model_manager_.TileModels.Count; ++i) {
+      List<TileModel> model = new List<TileModel>() {
+        model_manager_.TileModels[i]
+      };
+      testing_tiles_[i, 0, 0] = TileFactory.Instance.CreateDefaultTile(this.transform, i * 2, 0, 0, model);
+      testing_tiles_[i, 0, 0].Collapse(model_manager_.TileModels[i]);
+    }
   }
 
   // Update is called once per frame
@@ -23,7 +54,11 @@ public class DebugTool : MonoBehaviour {
     GameObject selected_gizmo = SelectedGizmo(out gizmo_orientation);
 
     if (selected_gizmo != null) {
-      HighlightMatchingFaces(tile_model_.Adjacencies.Adjacencies[(int)gizmo_orientation]);
+      if (mode == Mode.TEST_WAVE)
+        HighlightMatchingFaces(tile_model_.Adjacencies.Adjacencies[(int)gizmo_orientation], Generator.Wave);
+      if (mode == Mode.TEST_MODEL)
+        HighlightMatchingFaces(tile_model_.Adjacencies.Adjacencies[(int)gizmo_orientation], testing_tiles_);
+
       return;
     }
 
@@ -68,8 +103,8 @@ public class DebugTool : MonoBehaviour {
     return null;
   } 
 
-  private void HighlightMatchingFaces(FaceAdjacency adjacency) {
-    foreach(Tile tile in generator.Wave) {
+  private void HighlightMatchingFaces(FaceAdjacency adjacency, Tile[,,] tiles) {
+    foreach(Tile tile in tiles) {
       FaceAdjacency other = tile.Model.Adjacencies.Adjacencies[(int)adjacency.Orientation];
       FaceAdjacency other_opposite = tile.Model.Adjacencies.Adjacencies[(int)adjacency.Orientation.Opposite()];
 
