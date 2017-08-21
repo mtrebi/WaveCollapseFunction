@@ -1,6 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+
+// TODO: Different size tiles!
+// TODO: Backtracking
 
 public enum ProgramState {
   INIT,
@@ -38,6 +42,11 @@ public class WCFGenerator : MonoBehaviour {
     }
   }
 
+  public Tile[,,] Wave {
+    get {
+      return wave_;
+    }
+  }
 
   // Use this for initialization
   void Awake() {
@@ -83,7 +92,11 @@ public class WCFGenerator : MonoBehaviour {
       wave_changed_ = new bool[width_, height_, depth_];
     }
 
-    List<TileModel> models = model_manager_object_.GetComponent<TileModelManager>().TileModels;
+    List<TileModel> all_models = model_manager_object_.GetComponent<TileModelManager>().TileModels;
+    List<TileModel> ground_models = all_models.Where(x => x.Type == TileType.GROUND).ToList();
+    List<TileModel> empty_models = all_models.Where(x => x.Type == TileType.EMPTY).ToList();
+    List<TileModel> models;
+
     for (int x = 0; x < width_; ++x) {
       for (int y = 0; y < height_; ++y) {
         for (int z = 0; z < depth_; ++z) {
@@ -91,6 +104,16 @@ public class WCFGenerator : MonoBehaviour {
             // TODO : Factory/ pool, null initialize
             Object.Destroy(wave_[x, y, z].gameObject);
           }
+
+          if (y == 0) {
+            models = ground_models;
+          }
+          else if (y == height_ - 1){
+            models = empty_models;
+          }else {
+            models = all_models;
+          }
+
           wave_[x, y, z] = TileFactory.Instance.CreateDefaultTile(this.transform, x, y, z, new List<TileModel>(models));
           wave_changed_[x, y, z] = true;
         }
