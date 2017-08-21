@@ -24,7 +24,7 @@ GameObject:
   - component: {fileID: 65640294869247476}
   - component: {fileID: 114091349535208436}
   m_Layer: 0
-  m_Name: model5
+  m_Name: ground_wall_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
