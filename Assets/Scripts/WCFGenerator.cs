@@ -22,15 +22,12 @@ public class WCFGenerator : MonoBehaviour {
   public float randomness_min = 0,
                randomness_max = 0;
 
-
-  public bool random_start_;
   public GameObject model_manager_object_;
 
   private Tile[,,] wave_ = null;
   private bool[,,] wave_changed_ = null;
 
   private ProgramState program_state_ = ProgramState.INIT;
-  private bool first_iteration_ = true;
 
   public ProgramState ProgramState {
     get {
@@ -153,14 +150,6 @@ public class WCFGenerator : MonoBehaviour {
   /// </summary>
   /// <returns> Returns the tile with the lowest entropy that has not been collapsed yet</returns>
   private Tile Observe() {
-    if (first_iteration_) {
-      first_iteration_ = false;
-      if (random_start_) {
-        return wave_[Random.Range(0, width_), 0, Random.Range(0, depth_)];
-      }
-      return wave_[0, 0, 0];
-    }      
-
     Tile min_entropy_tile = null;
     float min_entropy = float.MaxValue;
 
