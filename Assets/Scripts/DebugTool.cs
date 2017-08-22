@@ -47,18 +47,18 @@ public class DebugTool : MonoBehaviour {
 
       if (previous == null) {
         // First iteration
-        testing_tiles_[i, 0, 0] = TileFactory.Instance.CreateDefaultTile(this.transform, i * 2, 0, j, model);
+        testing_tiles_[i, 0, 0] = TileFactory.Instance.CreateDefaultTile(this.transform, i, 0, j, model);
       }
       else {
         if (previous.Prefab == current.Prefab) {
           // Symmetric tile
           ++j;
-          testing_tiles_[i, 0, 0] = TileFactory.Instance.CreateDefaultTile(this.transform, (i - j) * 2, 0, j * 2, model);
+          testing_tiles_[i, 0, 0] = TileFactory.Instance.CreateDefaultTile(this.transform, (i - j), 0, j * 2, model);
         }
         else {
           // New (different) tile
           j = 0;
-          testing_tiles_[i, 0, 0] = TileFactory.Instance.CreateDefaultTile(this.transform, i * 2, 0, j, model);
+          testing_tiles_[i, 0, 0] = TileFactory.Instance.CreateDefaultTile(this.transform, i, 0, j, model);
         }
       }
       testing_tiles_[i, 0, 0].Collapse(current);
