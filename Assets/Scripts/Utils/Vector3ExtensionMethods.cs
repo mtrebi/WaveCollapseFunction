@@ -42,7 +42,7 @@ public static class Vector3ExtensionMethods {
   }
 
   //
-  public static Vector3 Round(this Vector3 v, int digits = 5) {
+  public static Vector3 Round(this Vector3 v, int digits = 3) {
     return new Vector3(
       (float)System.Math.Round(v.x, digits),
       (float)System.Math.Round(v.y, digits),
@@ -57,7 +57,7 @@ public static class Vector3ExtensionMethods {
   /// <param name="b"></param>
   /// <param name="epsilon">Comparing difference allowed</param>
   /// <returns>Returns true if a is equals to b. False otherwise</returns>
-  private static bool Equals(float a, float b, float epsilon = 0.0001f) {
+  private static bool Equals(float a, float b, float epsilon = 0.001f) {
     return System.Math.Abs(a - b) <= epsilon;
   }
 
@@ -68,7 +68,7 @@ public static class Vector3ExtensionMethods {
   /// <param name="b"></param>
   /// <param name="epsilon">Comparing difference allowed</param>
   /// <returns>Returns true if a is smaller than b. False otherwise</returns>
-  private static bool LessThan(float a, float b, float epsilon = 0.0001f) {
+  private static bool LessThan(float a, float b, float epsilon = 0.001f) {
     float diff = Mathf.Abs(a - b);
     if (diff > epsilon) {
       return a < b;
@@ -84,7 +84,7 @@ public static class Vector3ExtensionMethods {
   /// <param name="b"></param>
   /// <param name="epsilon">Comparing difference allowed</param>
   /// <returns>Returns true if a is greater than b. False otherwise</returns>
-  private static bool GreaterThan(float a, float b, float epsilon = 0.0001f) {
+  private static bool GreaterThan(float a, float b, float epsilon = 0.001f) {
     float diff = Mathf.Abs(a - b);
     if (diff > epsilon) {
       return a > b;
