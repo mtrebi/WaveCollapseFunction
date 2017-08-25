@@ -6,10 +6,21 @@ ModelImporter:
   serializedVersion: 19
   fileIDToRecycleName:
     100000: //RootNode
+    100002: pasted__group1
+    100004: roof_side_1
+    100006: roof_side_13
     400000: //RootNode
+    400002: pasted__group1
+    400004: roof_side_1
+    400006: roof_side_13
     2300000: //RootNode
+    2300002: roof_side_1
+    2300004: roof_side_13
     3300000: //RootNode
+    3300002: roof_side_1
+    3300004: roof_side_13
     4300000: roof_side_1
+    4300002: roof_side_13
   materials:
     importMaterials: 1
     materialName: 0

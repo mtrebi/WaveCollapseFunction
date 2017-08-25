@@ -1,20 +1,16 @@
 fileFormatVersion: 2
-guid: 20b4124773c1b1b48a1503634b52b467
-timeCreated: 1503324013
+guid: 72c66b2fed88bb64bb1c64fdad7b6434
+timeCreated: 1503659737
 licenseType: Free
 ModelImporter:
   serializedVersion: 19
   fileIDToRecycleName:
     100000: //RootNode
-    100002: roof_side_2
     400000: //RootNode
-    400002: roof_side_2
     2300000: //RootNode
-    2300002: roof_side_2
     3300000: //RootNode
-    3300002: roof_side_2
-    4300000: roof_side_2
-    4300002: pasted__bbox7
+    4300000: roof_1
+    4300002: roof_2
   materials:
     importMaterials: 1
     materialName: 0
