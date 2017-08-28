@@ -171,6 +171,9 @@ public class Edge {
 [System.Serializable]
 public class FaceAdjacency {
   [SerializeField] private int edges_id_ = -1;
+  [SerializeField] private int lower_outline_id_ = -1;
+  [SerializeField] private int upper_outline_id_ = -1;
+
   /// <summary>
   /// Index of the used dimensions (faces are 2D so two dimension are needed)
   /// </summary>
@@ -182,10 +185,24 @@ public class FaceAdjacency {
   /// Stores the original edges from the mesh that make up the face
   /// </summary>
   [SerializeField] private List<Edge> edges_;
+  [SerializeField] private List<Edge> lower_outline_;
+  [SerializeField] private List<Edge> upper_outline_;
 
   public int EdgesId {
     get {
       return edges_id_;
+    }
+  }
+
+  public int LowerOutlineId {
+    get {
+      return lower_outline_id_;
+    }
+  }
+
+  public int UpperOutlineId {
+    get {
+      return upper_outline_id_;
     }
   }
 
@@ -198,6 +215,18 @@ public class FaceAdjacency {
   public List<Edge> Edges {
     get {
       return edges_;
+    }
+  }
+
+  public List<Edge> LowerOutline {
+    get {
+      return lower_outline_;
+    }
+  }
+
+  public List<Edge> UpperOutline {
+    get {
+      return upper_outline_;
     }
   }
 
@@ -221,7 +250,7 @@ public class FaceAdjacency {
       return edge1.CompareTo(edge2);
     });
 
-    // Calculate Face ID
+    // Calculate Face ID and outlines
     // First and second dimension should be equals
     // Third dimension should lay on one side (-.5 o .5) and be equals
     edges_id_ = 0;
@@ -229,19 +258,41 @@ public class FaceAdjacency {
       Vector3 v1 = new Vector3(edges_[i].v1[dimension1_], edges_[i].v1[dimension2_], Mathf.Abs(edges_[i].v1[unused_dimension_]));
       Vector3 v2 = new Vector3(edges_[i].v2[dimension1_], edges_[i].v2[dimension2_], Mathf.Abs(edges_[i].v1[unused_dimension_]));
 
+      Edge new_edge = new Edge(v1, v2, edges_[i].faceIndex[0], edges_[i].faceIndex[1]);
+
+      // Build face id
       if (v1.z == .5 && v2.z == .5) {
         // Edge lays on a side
-        Edge new_edge = new Edge(v1, v2, edges_[i].faceIndex[0], edges_[i].faceIndex[1]);
         edges_id_ = edges_id_.GetHashCode() + new_edge.GetHashCode();
       }
+
+      // Build outlines
+      /*
+      if (lower_outline_.Count == 0) {
+        lower_outline_[0] = new_edge;
+      }
+      else if (lower_outline_.Count > 0) {
+        Edge previous_edge = lower_outline_[i - 1];
+        if (previous_edge.v1[dimension2_].CompareTo(new_edge.v1[dimension2_]) > 0) {
+          lower_outline_[i - 1] = new_edge;
+        }else if (previous_edge.v1[dimension2_].CompareTo(new_edge.v1[dimension2_]) <= 0
+          && previous_edge.v2.CompareTo(new_edge.v1) == 0) {
+          lower_outline_[i] = new_edge;
+        }// End condition_, we are exacly at the end of the face
+      }
+      */
     }
   }
 
   public bool Match(FaceAdjacency other_face) {
+    return ExactMatch(other_face);
+  }
+
+  private bool ExactMatch(FaceAdjacency other_face) {
     if (this.edges_id_ != other_face.edges_id_) {
       return false;
     }
-
+    
     // Make sure they match by comparing each edge
     if (edges_.Count != other_face.Edges.Count) {
       return false;
@@ -262,7 +313,28 @@ public class FaceAdjacency {
     }
     return true;
   }
+  /*
+  private bool OutlineMatch(FaceAdjacency other_face) {
+    // TODO Optimize with upper and lower profile matching
+    bool continous_matching = false;
 
+    for (int i = 0; i < edges_.Count; ++i) {
+      Vector3 this_v1 = new Vector3(edges_[i].v1[dimension1_], edges_[i].v1[dimension2_], Mathf.Abs(edges_[i].v1[unused_dimension_]));
+      Vector3 this_v2 = new Vector3(edges_[i].v2[dimension1_], edges_[i].v2[dimension2_], Mathf.Abs(edges_[i].v1[unused_dimension_]));
+      Edge this_edge = new Edge(this_v1, this_v2, 0, 0);
+
+      Vector3 other_v1 = new Vector3(other_face.edges_[i].v1[other_face.dimension1_], other_face.edges_[i].v1[other_face.dimension2_], Mathf.Abs(other_face.edges_[i].v1[other_face.unused_dimension_]));
+      Vector3 other_v2 = new Vector3(other_face.edges_[i].v2[other_face.dimension1_], other_face.edges_[i].v2[other_face.dimension2_], Mathf.Abs(other_face.edges_[i].v1[other_face.unused_dimension_]));
+      Edge other_edge = new Edge(other_v1, other_v2, 0, 0);
+
+      if (!this_edge.Equals(other_edge)) {
+        return false;
+      }
+    }
+
+
+  }
+  */
   public void Draw(Vector3 offset, Color color, float time = 1.0f) {
     foreach (Edge edge in edges_) {
       edge.Draw(offset, color, time);
@@ -452,10 +524,9 @@ public class TileAdjacencies {
     HashSet<Edge> culledEdges = new HashSet<Edge>();
 
     foreach (Edge edge in all_edges) {
-      // TODO OPTIMIZE --> All edges are being added
-      //if (edge.faceIndex[0] == edge.faceIndex[1]) {
+      if (edge.faceIndex[0] == edge.faceIndex[1]) {
         culledEdges.Add(edge);
-      //}
+      }
     }
 
     Edge[] edges = new Edge[culledEdges.Count];
