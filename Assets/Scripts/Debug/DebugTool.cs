@@ -13,15 +13,11 @@ public class DebugTool : MonoBehaviour {
 
   public WCFGenerator Generator;
   public GameObject FaceGizmoPrefab;
-  public GameObject VertexPrefab;
-  public GameObject LinePrefab;
   public GameObject TileModelManagerPrefab;
 
 
   private GameObject selected_;
   private GameObject[] face_gizmos_;
-  private GameObject[] face_edges_;
-
   private TileModel tile_model_;
   private TileModelManager model_manager_;
   private Tile[,,] testing_tiles_;
@@ -69,6 +65,31 @@ public class DebugTool : MonoBehaviour {
       previous = current;
       ++i;
     }
+
+    /*
+      while (i < model_manager_.TileModels.Count) {
+      List<TileModel> model = new List<TileModel>() {
+        model_manager_.TileModels[i]
+      };
+      testing_tiles_[i, 0, 0] = TileFactory.Instance.CreateDefaultTile(this.transform, i * 2, 0, 0, model);
+      testing_tiles_[i, 0, 0].Collapse(model_manager_.TileModels[i]);
+      
+      int j = 1;
+      while (true) {
+        if (i + j < model_manager_.TileModels.Count) {
+          if (model_manager_.TileModels[i].Prefab == model_manager_.TileModels[i + j].Prefab) {
+            testing_tiles_[i + j, 0, 0] = TileFactory.Instance.CreateDefaultTile(this.transform, i * 2, 0, j * 2, model);
+            ++j;
+          }else {
+            break;
+          }
+        }else {
+          break;
+        }
+      }
+      i += j;
+      ++i;
+    }*/
   }
 
   // Update is called once per frame
@@ -144,19 +165,6 @@ public class DebugTool : MonoBehaviour {
         other_opposite.Draw(tile.transform.position, Color.red, 1f);
       }
     }
-  }
-
-
-  private void DrawFaceEdges(FaceAdjacency face, Vector3 offset) {
-
-    /*
-    foreach (Edge edge in face.Edges) {
-      Object.Instantiate(VertexPrefab, offset + edge.v1, Quaternion.identity, this.transform);
-      Object.Instantiate(VertexPrefab, offset + edge.v2, Quaternion.identity, this.transform);
-
-
-      //edge.Draw(offset, color, time);
-    }*/
   }
 
   private void DrawFaceGizmos() {
