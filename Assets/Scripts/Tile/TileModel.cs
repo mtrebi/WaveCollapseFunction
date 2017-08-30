@@ -245,6 +245,7 @@ public class FaceAdjacency {
   }
 
   private bool ExactMatch(FaceAdjacency other_face) {
+    // TODO Use bitwise operations after constructing a bitwise string of edges
     if (this.edges_id_ != other_face.edges_id_) {
       return false;
     }
