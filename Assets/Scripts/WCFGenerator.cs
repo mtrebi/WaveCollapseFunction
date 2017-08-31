@@ -15,9 +15,9 @@ public enum ProgramState {
 }
 
 public class WCFGenerator : MonoBehaviour {
-  private int width_,
-             height_,
-             depth_;
+  private int width_ = 5,
+             height_ = 5,
+             depth_ = 5;
 
   public int number_buildings = 0; // TODO: Base is a Connected graph where i can go from start to start by a side that is not 0
   public float randomness_min = 0,
@@ -28,7 +28,7 @@ public class WCFGenerator : MonoBehaviour {
   private Tile[,,] wave_ = null;
   private bool[,,] wave_changed_ = null;
 
-  private ProgramState program_state_ = ProgramState.INIT;
+  private ProgramState program_state_ = ProgramState.STOPPED;
 
 
   public int Width {
@@ -83,7 +83,6 @@ public class WCFGenerator : MonoBehaviour {
   }
 
   private void Start() {
-    InitializeWave();
   }
 
   // Update is called once per frame
@@ -91,6 +90,7 @@ public class WCFGenerator : MonoBehaviour {
   void Update() {
     switch (program_state_) {
       case ProgramState.INIT:
+        Debug.Log("Starting...");
         InitializeWave();
         program_state_ = ProgramState.RUNNING;
         break;
@@ -149,6 +149,22 @@ public class WCFGenerator : MonoBehaviour {
         }
       }
     }
+  }
+
+  // TODO multiple destroys
+  public void DestroyWave() {
+    for (int x = 0; x < width_; ++x) {
+      for (int y = 0; y < height_; ++y) {
+        for (int z = 0; z < depth_; ++z) {
+          if (wave_ != null && wave_[x, y, z] != null) {
+            // TODO : Factory/ pool, null initialize
+            Object.Destroy(wave_[x, y, z].gameObject);
+          }
+        }
+      }
+    }
+    wave_ = null;
+    wave_changed_ = null;
   }
 
   private void GenerateWave() {
