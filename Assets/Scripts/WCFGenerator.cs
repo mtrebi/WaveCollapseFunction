@@ -15,10 +15,11 @@ public enum ProgramState {
 }
 
 public class WCFGenerator : MonoBehaviour {
-  public int width_,
+  private int width_,
              height_,
              depth_;
 
+  public int number_buildings = 0; // TODO: Base is a Connected graph where i can go from start to start by a side that is not 0
   public float randomness_min = 0,
                randomness_max = 0;
 
@@ -28,6 +29,37 @@ public class WCFGenerator : MonoBehaviour {
   private bool[,,] wave_changed_ = null;
 
   private ProgramState program_state_ = ProgramState.INIT;
+
+
+  public int Width {
+    get {
+      return width_;
+    }
+
+    set {
+      width_ = value;
+    }
+  }
+
+  public int Depth {
+    get {
+      return depth_;
+    }
+
+    set {
+      depth_ = value;
+    }
+  }
+
+  public int Height {
+    get {
+      return height_;
+    }
+
+    set {
+      height_ = value;
+    }
+  }
 
   public ProgramState ProgramState {
     get {
