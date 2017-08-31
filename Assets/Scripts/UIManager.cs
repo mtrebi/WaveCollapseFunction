@@ -3,50 +3,73 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEditor;
 using UnityEngine;
-/*
-public class UIManager : MonoBehaviour {
-  public GameObject state_prefab_;
-  private GameObject state_list_;
 
+public class UIManager : MonoBehaviour {
+  // TODO Interactive UI to build tiles by clicking!
+  // Show available states
+  // Collapse to one state
+
+  public GameObject generator;
+  public GameObject camera;
+
+  private WCFGenerator WCFGenerator_;
+
+  private int width_ = 5, 
+              height_ = 5, 
+              depth_ = 5;
 	// Use this for initialization
 	void Start () {
-    state_list_ = this.transform.FindChild("Canvas/StatesList/StateListGrid").gameObject;
-    AssetPreview.SetPreviewTextureCacheSize(1000);
+    WCFGenerator_ = generator.GetComponent<WCFGenerator>();
   }
 
   // Update is called once per frame
   void Update() {
-    if (Input.GetMouseButtonDown(0)) {
-      Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-      RaycastHit hit;
-      if (Physics.Raycast(ray, out hit)) {
-        Tile tile =  hit.transform.gameObject.GetComponent<Tile>();
-        // TODO> Tile has collapsed!
-        UpdateStatesUI(tile.AvailableStates);
-      }else {
-        UpdateStatesUI(null);
-      }
+
+  }
+
+  public void SetWidth(string width) {
+    if (!System.String.IsNullOrEmpty(width)) {
+      width_ = System.Int32.Parse(width);
+    }
+    else {
+      width_ = 0;
     }
   }
 
-  private void UpdateStatesUI(List<TileState> states) {
-    ClearStatesUI();
-
-    if (states == null) {
-      return;
+  public void SetDepth(string depth) {
+    if (!System.String.IsNullOrEmpty(depth)) {
+      depth_ = System.Int32.Parse(depth);
     }
-
-    foreach(TileState state in states) {
-      GameObject state_ui = Instantiate(state_prefab_);
-      state_ui.transform.SetParent(state_list_.transform);
-      state_ui.GetComponentInChildren<Text>().text = state.ToString();
+    else {
+      depth_ = 0;
     }
   }
 
-  private void ClearStatesUI() {
-    foreach (Transform child in state_list_.transform) {
-      Destroy(child.gameObject);
+  public void SetHeight(string height) {
+    if (!System.String.IsNullOrEmpty(height)) {
+      height_ = System.Int32.Parse(height);
+    }
+    else {
+      height_ = 0;
+    }
+  }
+
+  public void ChangeZoom(float zoom) {
+    camera.GetComponent<Camera>().orthographicSize = zoom;
+  }
+
+  public void Generate() {
+    if (width_ != 0 &&
+      depth_ != 0 &&
+      height_ != 0) {
+
+      WCFGenerator_.DestroyWave();
+      WCFGenerator_.Width = width_;
+      WCFGenerator_.Depth = depth_;
+      WCFGenerator_.Height = height_;
+      WCFGenerator_.ProgramState = ProgramState.INIT;
+    }else {
+      Debug.Log("Dimensions must be bigger than 0");
     }
   }
 }
-*/
