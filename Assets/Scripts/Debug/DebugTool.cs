@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿#if (UNITY_EDITOR) 
+
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
@@ -65,31 +66,6 @@ public class DebugTool : MonoBehaviour {
       previous = current;
       ++i;
     }
-
-    /*
-      while (i < model_manager_.TileModels.Count) {
-      List<TileModel> model = new List<TileModel>() {
-        model_manager_.TileModels[i]
-      };
-      testing_tiles_[i, 0, 0] = TileFactory.Instance.CreateDefaultTile(this.transform, i * 2, 0, 0, model);
-      testing_tiles_[i, 0, 0].Collapse(model_manager_.TileModels[i]);
-      
-      int j = 1;
-      while (true) {
-        if (i + j < model_manager_.TileModels.Count) {
-          if (model_manager_.TileModels[i].Prefab == model_manager_.TileModels[i + j].Prefab) {
-            testing_tiles_[i + j, 0, 0] = TileFactory.Instance.CreateDefaultTile(this.transform, i * 2, 0, j * 2, model);
-            ++j;
-          }else {
-            break;
-          }
-        }else {
-          break;
-        }
-      }
-      i += j;
-      ++i;
-    }*/
   }
 
   // Update is called once per frame
@@ -212,3 +188,5 @@ public class DebugTool : MonoBehaviour {
     }
   }
 }
+
+#endif
