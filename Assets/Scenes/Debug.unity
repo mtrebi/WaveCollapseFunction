@@ -276,6 +276,17 @@ MonoBehaviour:
   - {fileID: 1525309457441458, guid: 97fccc8e55db2e446bec2335f6fa4cc9, type: 2}
   - {fileID: 1103247886728400, guid: 94a767e77a14f6a42b619323507e5dca, type: 2}
   - {fileID: 1549991606627146, guid: d9ef6c612623f5a47a5668bf77a0fb2b, type: 2}
+  - {fileID: 1037418643999032, guid: 81073b5b39820e54c80386dfa9f6d442, type: 2}
+  - {fileID: 1443658097361866, guid: abcf09d7016b6b04186e48a754641dee, type: 2}
+  - {fileID: 1525309457441458, guid: cb01dfb2d4355f342a849cf14ae1cc98, type: 2}
+  - {fileID: 1525309457441458, guid: ba1465f89aa3d814c8f3365b122c788e, type: 2}
+  - {fileID: 1037418643999032, guid: eeeef4c8de1b4b844b5f76fc88a62e12, type: 2}
+  - {fileID: 1037418643999032, guid: 5d9d30b2af9e23b4fa64b48a8b4d2be4, type: 2}
+  - {fileID: 1549991606627146, guid: 2ca38a1a02d17f248b90f01127424bb0, type: 2}
+  - {fileID: 1525309457441458, guid: 6aa840d8e9ffaac4c90edc63cd400f87, type: 2}
+  - {fileID: 1525309457441458, guid: 8019ae0007febd9469bb4ba650604e63, type: 2}
+  - {fileID: 1525309457441458, guid: bda970f6153b27b4c9b6bfaf59d2d2ff, type: 2}
+  - {fileID: 1525309457441458, guid: 1f1a3cbc7583fd14caaec3ded8cea674, type: 2}
   tile_models_: []
 --- !u!4 &1213644317
 Transform:
@@ -322,7 +333,6 @@ MonoBehaviour:
   depth_: 5
   randomness_min: 0.2
   randomness_max: 0.5
-  random_start_: 1
   model_manager_object_: {fileID: 1213644315}
 --- !u!4 &1412083940
 Transform:
