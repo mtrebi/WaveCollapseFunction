@@ -12,10 +12,9 @@ public class Tile : MonoBehaviour {
   [SerializeField] private List<TileModel> available_models_;
 
   // Entropy
-  [SerializeField] private float last_entropy_;
+  [SerializeField] private float entropy_;
   private float max_entropy_;
   private float total_probability_;
-  private bool update_entropy_;
 
   public int X { get { return x_; } }
   public int Y { get { return y_; } }
@@ -85,33 +84,33 @@ public class Tile : MonoBehaviour {
     y_ = y;
     z_ = z;
 
-    update_entropy_ = true;
     model_ = null;
     available_models_ = available_models;
     total_probability_ = TotalProbability();
-    max_entropy_ = GetEntropy();
+    max_entropy_ = GetMaxEntropy();
+    entropy_ = max_entropy_;
   }
 
   /// <summary>
   /// Calculate entropy of the tile given the available patterns
   /// </summary>
   /// <returns> Returns the entropy </returns>
-  public float GetEntropy() {
-    if (!update_entropy_) {
-      return last_entropy_;
-    }
-
-    float entropy = 0;
+  public float GetMaxEntropy() {
+    entropy_ = 0;
     foreach (TileModel available_model in available_models_) {
-      float base_p = available_model.Probability;
-      float p = base_p / total_probability_;
-
-      entropy += -p * Mathf.Log(p, 2);
+      float p = available_model.Probability / total_probability_;
+      entropy_ += -p * Mathf.Log(p, 2);
     }
 
+    return entropy_;
+  }
 
-    update_entropy_ = false;
-    return last_entropy_ = entropy;
+  /// <summary>
+  /// Gets entropy of the tile given the available patterns
+  /// </summary>
+  /// <returns> Returns the entropy </returns>
+  public float GetEntropy() {
+    return entropy_;
   }
 
   /// <summary>
@@ -135,8 +134,7 @@ public class Tile : MonoBehaviour {
 
       if (!satisfy_any) {
         changed = true;
-        update_entropy_ = true;
-        available_models_.RemoveAt(i);
+        RemoveAvailableModel(i);
       }
     }
 
@@ -152,13 +150,19 @@ public class Tile : MonoBehaviour {
       // Render based on entropy
       Transform placeholder = this.transform.FindChild("Placeholder");
 
-      float scale = max_entropy_ == 0 ? 1 : Mathf.Lerp(0.2f, 0.8f, last_entropy_ / max_entropy_);
+      float scale = max_entropy_ == 0 ? 1 : Mathf.Lerp(0.2f, 0.8f, entropy_ / max_entropy_);
       placeholder.localScale = new Vector3(scale, scale, scale);
     }
   }
 
   public override string ToString() {
     return "("+ x_ + ", " + y_ + ", " + z_ +") - States: " + available_models_.Count + " --> " + model_;
+  }
+
+  private void RemoveAvailableModel(int index) {
+    float p = available_models_[index].Probability / total_probability_;
+    entropy_ -= -p * Mathf.Log(p, 2);
+    available_models_.RemoveAt(index);
   }
 
   private float TotalProbability() {
