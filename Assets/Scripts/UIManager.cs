@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine.UI;
-using UnityEditor;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class UIManager : MonoBehaviour {
   // TODO Interactive UI to build tiles by clicking!
