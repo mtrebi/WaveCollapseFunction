@@ -665,4 +665,8 @@ public class TileModel {
     TileModel model = new TileModel(prefab_, Quaternion.Euler(0, y_rotation, 0), probability_, type_, instance_adjacencies);
     return model;
   }
+
+  public override string ToString() {
+    return prefab_.name;
+  }
 }
