@@ -36,10 +36,5 @@ Even more advanced Procedural Generation using arbitrary meshes. Algorithm can a
 
 ![](https://github.com/mtrebi/WaveCollapseFunction/blob/master/Docs/Videos/mesh_generation3.gif?raw=true)
 
-## TODO List
 
-* Add more Tile Models to create varied buildings
-* Add more heuristics to better tune buildings
-* Add variations to Tile Models with small modifications to add realism
-* Modify algorithm to allow Tile Models to have different sizes
-* Add backtracking 
+<p align="center"> <a href="https://youtu.be/OQLh7t7De3I" target="_blank"><img src="http://img.youtube.com/vi/OQLh7t7De3I/0.jpg" title="Procedurally generating buildings using WCF" /></a> </p>
