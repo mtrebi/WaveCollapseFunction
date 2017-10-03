@@ -32,10 +32,10 @@ public class TileFactory : MonoBehaviour {
 
   public GameObject CreateTileModel(Transform parent, int x, int y, int z, TileModel model) {
     // Do not render emtpy tiles
-    if (model.Type == TileType.EMPTY) {
+    if (model.Type == Type.EMPTY) {
       return null;
     }
-    GameObject tile = Object.Instantiate(model.Prefab, new Vector3(x, y, z), model.Orientation);
+    GameObject tile = Object.Instantiate(model.Prefab, new Vector3(x, y, z), model.PrefabOrientation);
     tile.transform.parent = parent;
     tile.name = model.Prefab.name;
     return tile;

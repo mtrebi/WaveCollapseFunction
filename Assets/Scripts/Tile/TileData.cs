@@ -2,14 +2,20 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum TileType {
+public enum Type {
   GROUND,
   EMPTY,
   OTHER
 }
 
+public enum SymmetryType {
+  QUAD,
+  DOUBLE,
+  NONE
+}
+
 public class TileData : MonoBehaviour {
   public float Probability;
   public SymmetryType Symmetry;
-  public TileType Type;
+  public Type Type;
 }
