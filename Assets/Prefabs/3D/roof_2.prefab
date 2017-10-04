@@ -106,5 +106,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Probability: 0.45
-  Symmetry: 0
+  Symmetry: 2
   Type: 2

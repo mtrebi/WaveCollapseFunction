@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum SymmetryType {
-  X,
-  T,
-  I,
-  L
+public enum TileOrientation {
+  NORTH_EAST,
+  EAST_SOUTH,
+  SOUTH_WEST,
+  WEST_NORTH,
+  NONE
 }
 
 /// <summary>
@@ -583,7 +584,11 @@ public class TileModel {
   [SerializeField] private Quaternion prefab_orientation_;
   [SerializeField] private float probability_;
   [SerializeField] private TileAdjacencies adjacencies_;
-  [SerializeField] private TileType type_;
+  [SerializeField] private Type type_;
+  [SerializeField] private SymmetryType symmetry_type_;
+  [SerializeField] private TileOrientation tile_orientation_;
+
+  
 
   public GameObject Prefab {
     get {
@@ -591,9 +596,15 @@ public class TileModel {
     }
   }
 
-  public Quaternion Orientation {
+  public Quaternion PrefabOrientation {
     get {
       return prefab_orientation_;
+    }
+  }
+
+  public TileOrientation TileOrientation {
+    get {
+      return tile_orientation_;
     }
   }
 
@@ -603,7 +614,7 @@ public class TileModel {
     }
   }
 
-  public TileType Type {
+  public Type Type {
     get {
       return type_;
     }
@@ -615,27 +626,28 @@ public class TileModel {
     }
   }
 
-  public TileModel(GameObject prefab, float probability, TileType type) {
+  public TileModel(GameObject prefab, float probability, Type type) {
     prefab_ = prefab;
     probability_ = probability;
     type_ = type;
     adjacencies_ = new TileAdjacencies(prefab.name, prefab_.GetComponent<MeshFilter>().sharedMesh);
+    tile_orientation_ = CalculateTileOrientation();
   }
 
-  public TileModel(GameObject prefab, Quaternion orientation, float probability, TileType type, TileAdjacencies adjacencies) {
+  public TileModel(GameObject prefab, Quaternion orientation, float probability, Type type, TileAdjacencies adjacencies, TileOrientation tile_orientation) {
     prefab_ = prefab;
     prefab_orientation_ = orientation;
     probability_ = probability;
     type_ = type;
     adjacencies_ = adjacencies;
+    tile_orientation_ = tile_orientation;
   }
 
   public TileModel[] GetSymmetricModels(SymmetryType symmetry) {
     TileModel[] models = new TileModel[GetCardinality(symmetry)];
 
     for (int i = 0; i < models.Length; ++i) {
-      int y_rotation = 90 * (i + 1);
-      models[i] = GenerateModel(y_rotation);
+      models[i] = GenerateModel(i);
     }
 
     return models;
@@ -644,26 +656,58 @@ public class TileModel {
   private int GetCardinality(SymmetryType symmetry) {
     int cardinality = 0;
     switch (symmetry) {
-      case SymmetryType.X:
+      case SymmetryType.NONE:
         cardinality = 0;
         break;
-      case SymmetryType.L:
+      case SymmetryType.QUAD:
         cardinality = 3;
         break;
-      case SymmetryType.T:
-        cardinality = 3;
-        break;
-      case SymmetryType.I:
+      case SymmetryType.DOUBLE:
         cardinality = 1;
         break;
     }
     return cardinality;
   }
 
-  private TileModel GenerateModel(int y_rotation) {
+  private TileModel GenerateModel(int rotation_steps) {
+    int y_rotation = 90 * (rotation_steps + 1);
+
     TileAdjacencies instance_adjacencies = new TileAdjacencies(adjacencies_, y_rotation);
-    TileModel model = new TileModel(prefab_, Quaternion.Euler(0, y_rotation, 0), probability_, type_, instance_adjacencies);
+    TileOrientation tile_orientation = RotateTileOrientation(tile_orientation_, rotation_steps);
+    TileModel model = new TileModel(prefab_, Quaternion.Euler(0, y_rotation, 0), probability_, type_, instance_adjacencies, tile_orientation);
     return model;
+  }
+
+  private TileOrientation CalculateTileOrientation() {
+    if (adjacencies_.Adjacencies[(int)FaceOrientation.NORTH].EdgesId != 0
+      && adjacencies_.Adjacencies[(int)FaceOrientation.EAST].EdgesId != 0
+      ) {
+      return TileOrientation.NORTH_EAST;
+    }
+
+    if (adjacencies_.Adjacencies[(int)FaceOrientation.EAST].EdgesId != 0
+  && adjacencies_.Adjacencies[(int)FaceOrientation.SOUTH].EdgesId != 0
+  ) {
+      return TileOrientation.EAST_SOUTH;
+    }
+
+    if (adjacencies_.Adjacencies[(int)FaceOrientation.SOUTH].EdgesId != 0
+  && adjacencies_.Adjacencies[(int)FaceOrientation.WEST].EdgesId != 0
+  ) {
+      return TileOrientation.SOUTH_WEST;
+    }
+
+    if (adjacencies_.Adjacencies[(int)FaceOrientation.WEST].EdgesId != 0
+  && adjacencies_.Adjacencies[(int)FaceOrientation.NORTH].EdgesId != 0
+  ) {
+      return TileOrientation.WEST_NORTH;
+    }
+
+    return TileOrientation.NONE;
+  } 
+
+  private TileOrientation RotateTileOrientation(TileOrientation tile_orientation, int rotation_steps) {
+    return (TileOrientation) (((int)tile_orientation + rotation_steps) % 4);
   }
 
   public override string ToString() {
