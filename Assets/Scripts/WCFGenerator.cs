@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-// TODO: Different size tiles!
 // TODO: Backtracking
 
 public enum ProgramState {
@@ -15,21 +14,38 @@ public enum ProgramState {
 }
 
 public class WCFGenerator : MonoBehaviour {
-  private int width_ = 5,
-             height_ = 5,
-             depth_ = 5;
+  private int width_,
+             height_,
+             depth_;
 
-  public int number_buildings = 0; // TODO: Base is a Connected graph where i can go from start to start by a side that is not 0
   public float randomness_min = 0,
                randomness_max = 0;
 
+  /// <summary>
+  /// Reference to the model manager object that contains all tile models used by the Tile Objects
+  /// </summary>
   public GameObject model_manager_object_;
 
+  /// <summary>
+  /// Stores each Tile Object that is rendered to create the object
+  /// </summary>
   private Tile[,,] wave_ = null;
+
+  /// <summary>
+  /// Stores a flag that indicates if the wave_ structure has changed since the last frame
+  /// </summary>
   private bool[,,] wave_changed_ = null;
 
   private ProgramState program_state_ = ProgramState.STOPPED;
 
+  private int[] available_corners_counter_,
+                collapsed_corners_counter_;
+
+
+  // Models
+  private List<TileModel> all_models_,
+                          ground_models_,
+                          empty_models_;
 
   public int Width {
     get {
@@ -83,6 +99,13 @@ public class WCFGenerator : MonoBehaviour {
   }
 
   private void Start() {
+    // Initialize models structure
+    all_models_ = model_manager_object_.GetComponent<TileModelManager>().TileModels;
+    ground_models_ = all_models_.Where(x => x.Type == Type.GROUND || x.Type == Type.EMPTY).ToList();
+    empty_models_ = all_models_.Where(x => x.Type == Type.EMPTY).ToList();
+
+    available_corners_counter_ = new int[4];
+    collapsed_corners_counter_ = new int[4];
   }
 
   // Update is called once per frame
@@ -120,11 +143,6 @@ public class WCFGenerator : MonoBehaviour {
       wave_changed_ = new bool[width_, height_, depth_];
     }
 
-    List<TileModel> all_models = model_manager_object_.GetComponent<TileModelManager>().TileModels;
-    List<TileModel> ground_models = all_models.Where(x => x.Type == TileType.GROUND || x.Type == TileType.EMPTY).ToList();
-    List<TileModel> empty_models = all_models.Where(x => x.Type == TileType.EMPTY).ToList();
-    List<TileModel> models;
-
     for (int x = 0; x < width_; ++x) {
       for (int y = 0; y < height_; ++y) {
         for (int z = 0; z < depth_; ++z) {
@@ -133,25 +151,23 @@ public class WCFGenerator : MonoBehaviour {
             Object.Destroy(wave_[x, y, z].gameObject);
           }
 
-          if (y == 0) {
-            models = ground_models;
-          }
-          else if (y == height_ - 1 || 
-            x == 0 || x == width_ - 1 ||
-            z == 0 || z == depth_ - 1) {
-            models = empty_models;
-          }else {
-            models = all_models;
-          }
-
+          List<TileModel> models = GetTileModelsList(x, y, z);
           wave_[x, y, z] = TileFactory.Instance.CreateDefaultTile(this.transform, x, y, z, new List<TileModel>(models));
           wave_changed_[x, y, z] = true;
+
+
+          // TODO CHECK MODELS AnD COUNT
+          //models.Where(x => x.TileOrientation != TileOrientation.NONE);
+          //--available_corners_counter_[(int)collapse_model.TileOrientation];
+
+
+
+
         }
       }
     }
   }
 
-  // TODO multiple destroys
   public void DestroyWave() {
     for (int x = 0; x < width_; ++x) {
       for (int y = 0; y < height_; ++y) {
@@ -228,7 +244,6 @@ public class WCFGenerator : MonoBehaviour {
     float max_probability = float.MinValue;
 
     foreach (TileModel available_model in tile.AvailableModels) {
-      // TODO better use of probabilities
       float probability = available_model.Probability + Random.Range(randomness_min, randomness_max);
 
       if (probability >= max_probability) {
@@ -241,7 +256,8 @@ public class WCFGenerator : MonoBehaviour {
     }
 
     int random_index = Random.Range(0, max_probabilities_models.Count);
-    tile.Collapse(max_probabilities_models[random_index]);
+    TileModel collapse_model = max_probabilities_models[random_index];
+    tile.Collapse(collapse_model);
   }
 
 
@@ -319,5 +335,26 @@ public class WCFGenerator : MonoBehaviour {
       }
     }
     return neighbors.ToArray();
+  }
+
+  private List<TileModel> GetTileModelsList(int x, int y, int z) {
+    if (y == 0) {
+      return ground_models_;
+    }
+
+    if (y == height_ - 1 ||
+      x == 0 || x == width_ - 1 ||
+      z == 0 || z == depth_ - 1) {
+      return empty_models_;
+    }
+
+    return all_models_; 
+  }
+
+  bool CanFinish() {
+    return true;
+    // MInimo 4
+    // Los que sean mayor que 4 se tienen que contrarestar con su counter
+    // 1 por cada INV que haya
   }
 }
