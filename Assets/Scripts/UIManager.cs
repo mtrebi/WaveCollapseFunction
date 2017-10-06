@@ -10,9 +10,9 @@ public class UIManager : MonoBehaviour {
 
   private WCFGenerator WCFGenerator_;
 
-  private int width_ = 5, 
+  private int width_ = 8, 
               height_ = 5, 
-              depth_ = 5;
+              depth_ = 8;
 	// Use this for initialization
 	void Start () {
     WCFGenerator_ = generator.GetComponent<WCFGenerator>();
