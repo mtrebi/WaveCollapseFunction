@@ -464,7 +464,7 @@ MonoBehaviour:
   m_CaretColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_CustomCaretColor: 0
   m_SelectionColor: {r: 0.65882355, g: 0.80784315, b: 1, a: 0.7529412}
-  m_Text: 5
+  m_Text: 8
   m_CaretBlinkRate: 0.85
   m_CaretWidth: 1
   m_ReadOnly: 0
@@ -780,7 +780,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 5
+  m_Text: 8
 --- !u!222 &689419309
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1485,7 +1485,7 @@ MonoBehaviour:
   m_CaretColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_CustomCaretColor: 0
   m_SelectionColor: {r: 0.65882355, g: 0.80784315, b: 1, a: 0.7529412}
-  m_Text: 5
+  m_Text: 8
   m_CaretBlinkRate: 0.85
   m_CaretWidth: 1
   m_ReadOnly: 0
@@ -1778,7 +1778,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 12e343ce61660ae42957c9b8869aab81, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  number_buildings: 0
   randomness_min: 0.3
   randomness_max: 0.5
   model_manager_object_: {fileID: 1213644315}
@@ -2241,7 +2240,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 5
+  m_Text: 8
 --- !u!222 &1769706328
 CanvasRenderer:
   m_ObjectHideFlags: 0
