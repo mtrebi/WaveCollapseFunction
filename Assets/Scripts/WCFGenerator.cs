@@ -18,6 +18,8 @@ public class WCFGenerator : MonoBehaviour {
              height_,
              depth_;
 
+  private int current_layer_ = 0;
+
   public float randomness_min = 0,
                randomness_max = 0;
 
@@ -135,6 +137,7 @@ public class WCFGenerator : MonoBehaviour {
   }
 
   private void InitializeWave() {
+    current_layer_ = 0;
     if (wave_ == null) {
       wave_ = new Tile[width_, height_, depth_];
     }
@@ -184,7 +187,11 @@ public class WCFGenerator : MonoBehaviour {
   }
 
   private void GenerateWave() {
-    Tile min_entropy_tile = Observe();
+    Tile min_entropy_tile = ObserveLayer();
+    if (!min_entropy_tile) {
+      ChangeLayer();
+      min_entropy_tile = ObserveLayer();
+    }
 
     if (min_entropy_tile == null) {
       program_state_ = ProgramState.FINISHED;
@@ -197,9 +204,39 @@ public class WCFGenerator : MonoBehaviour {
     }
 
     Collapse(min_entropy_tile);
-    Propagate(min_entropy_tile);
+    PropagateSideEntropy(min_entropy_tile);
   }
   
+  private void ChangeLayer() {
+    if (current_layer_ == height_ - 1) {
+      return;
+    }
+    ++current_layer_;
+    PropagateFromBottomLayer();
+    for (int x = 0; x < width_; ++x) {
+      for (int z = 0; z < depth_; ++z) {
+        PropagateSideEntropy(wave_[x, current_layer_, z]);
+      }
+    }
+  }
+
+  // Propagate entropy from current layer to top one
+  private void PropagateFromBottomLayer() {
+    for (int x = 0; x < width_; ++x) {
+      for (int z = 0; z < depth_; ++z) {
+        Tile tile = wave_[x, current_layer_, z];
+        Tile[] upper_neighbors = GetBottomNeighbors(tile);
+        wave_changed_[tile.X, tile.Y, tile.Z] = true;
+
+        foreach (Tile neighbor in upper_neighbors) {
+          if (!neighbor.Collapsed()) {
+            neighbor.UpdateAvailableModels(tile, GetNeighborOrientation(neighbor, tile));
+          }
+        }
+      }
+    }
+  }
+
   private void RenderWave() {
     foreach (Tile tile in wave_) {
       if (wave_changed_[tile.X, tile.Y, tile.Z]) {
@@ -210,24 +247,22 @@ public class WCFGenerator : MonoBehaviour {
   }
 
   /// <summary>
-  /// Observation step of WCF. Searches for the tile with lowest entropy
+  /// Observation step of WCF. Searches for the tile with lowest entropy in the current layer
   /// </summary>
-  /// <returns> Returns the tile with the lowest entropy that has not been collapsed yet</returns>
-  private Tile Observe() {
+  /// <returns> Returns the tile with the lowest entropy that has not been collapsed yet in the current layer. Returns null if all Tiles of the current layer have collapsed.</returns>
+  private Tile ObserveLayer() {
     Tile min_entropy_tile = null;
     float min_entropy = float.MaxValue;
 
     for (int x = 0; x < width_; ++x) {
-      for (int y = 0; y < height_; ++y) {
-        for (int z = 0; z < depth_; ++z) {
-          Tile tile = wave_[x, y, z];
-          if (!tile.Collapsed()) {
-            float current_entropy = tile.GetEntropy();
+      for (int z = 0; z < depth_; ++z) {
+        Tile tile = wave_[x, current_layer_, z];
+        if (!tile.Collapsed()) {
+          float current_entropy = tile.GetEntropy();
 
-            if (current_entropy < min_entropy) {
-              min_entropy_tile = tile;
-              min_entropy = current_entropy;
-            }
+          if (current_entropy < min_entropy) {
+            min_entropy_tile = tile;
+            min_entropy = current_entropy;
           }
         }
       }
@@ -261,14 +296,14 @@ public class WCFGenerator : MonoBehaviour {
   }
 
 
-  private void Propagate(Tile tile_changed) {
+  private void PropagateSideEntropy(Tile tile_changed) {
     Stack<Tile> remaining_tiles = new Stack<Tile>();
 
     remaining_tiles.Push(tile_changed);
 
     while (remaining_tiles.Count != 0) {
       Tile current_tile = remaining_tiles.Pop();
-      Tile[] neighbors = GetNeighbors(current_tile);
+      Tile[] neighbors = GetSideNeighbors(current_tile);
 
       wave_changed_[current_tile.X, current_tile.Y, current_tile.Z] = true;
 
@@ -313,29 +348,41 @@ public class WCFGenerator : MonoBehaviour {
   }
 
   /// <summary>
-  /// Get neighbors of a given tile
+  /// Get upper neighbors of a given tile
+  /// </summary>
+  /// <param name="tile"></param>
+  /// <returns> An array that contains the upper neighbor tiles </returns>
+  private Tile[] GetBottomNeighbors(Tile tile) {
+    List<Tile> neighbors = new List<Tile>();
+    if (tile.Y - 1 >= 0) {
+      neighbors.Add(wave_[tile.X, tile.Y - 1, tile.Z]);
+    }
+
+    return neighbors.ToArray();
+  }
+
+  /// <summary>
+  /// Get side neighbors of a given tile (north, south, east, west)
   /// </summary>
   /// <param name="tile"></param>
   /// <returns> An array that contains the neighbor tiles </returns>
-  private Tile[] GetNeighbors(Tile tile) {
+  private Tile[] GetSideNeighbors(Tile tile) {
     List<Tile> neighbors = new List<Tile>();
     for (int x = tile.X - 1; x <= tile.X + 1; ++x) {
-      for (int y = tile.Y - 1; y <= tile.Y + 1; ++y) {
-        for (int z = tile.Z - 1; z <= tile.Z + 1; ++z) {
-          if (((x == tile.X && y == tile.Y && z != tile.Z)         
-              ||(x == tile.X && y != tile.Y && z == tile.Z)
-              ||(x != tile.X && y == tile.Y && z == tile.Z))
-              && (x >= 0 && x < width_)
-              && (y >= 0 && y < height_)
-              && (z >= 0 && z < depth_)
-          ) {
-            neighbors.Add(wave_[x, y, z]);
-          }
+      for (int z = tile.Z - 1; z <= tile.Z + 1; ++z) {
+        if (((x == tile.X &&  z != tile.Z)
+            || (x == tile.X && z == tile.Z)
+            || (x != tile.X && z == tile.Z))
+            && (x >= 0 && x < width_)
+            && (z >= 0 && z < depth_)
+        ) {
+          neighbors.Add(wave_[x, tile.Y, z]);
         }
       }
     }
     return neighbors.ToArray();
   }
+
 
   private List<TileModel> GetTileModelsList(int x, int y, int z) {
     if (y == 0) {
