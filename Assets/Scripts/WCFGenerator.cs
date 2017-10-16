@@ -108,8 +108,6 @@ public class WCFGenerator : MonoBehaviour {
 
     available_corners_counter_ = new int[4];
     collapsed_corners_counter_ = new int[4];
-
-    // TODO FIX THIS --> Add outer box with air!!!!
   }
 
   void Update() {
@@ -160,15 +158,6 @@ public class WCFGenerator : MonoBehaviour {
           List<TileModel> models = GetTileModelsList(x, y, z);
           wave_[x, y, z] = TileFactory.Instance.CreateDefaultTile(this.transform, x, y, z, new List<TileModel>(models));
           wave_changed_[x, y, z] = true;
-
-
-          // TODO CHECK MODELS AnD COUNT
-          //models.Where(x => x.TileOrientation != TileOrientation.NONE);
-          //--available_corners_counter_[(int)collapse_model.TileOrientation];
-
-
-
-
         }
       }
     }
@@ -385,7 +374,7 @@ public class WCFGenerator : MonoBehaviour {
 
   private List<TileModel> GetTileModelsList(int x, int y, int z) {
     // Outter side
-    if (x == 0 || x == width_ - 1 || z == 0 || z == depth_ - 1) {
+    if (x == 0 || x == width_ - 1 || z == 0 || z == depth_ - 1 || y == height_ -1) {
       return empty_models_;
     }
 
