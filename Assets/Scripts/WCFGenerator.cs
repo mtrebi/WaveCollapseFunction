@@ -108,10 +108,10 @@ public class WCFGenerator : MonoBehaviour {
 
     available_corners_counter_ = new int[4];
     collapsed_corners_counter_ = new int[4];
+
+    // TODO FIX THIS --> Add outer box with air!!!!
   }
 
-  // Update is called once per frame
-  
   void Update() {
     switch (program_state_) {
       case ProgramState.INIT:
@@ -370,12 +370,8 @@ public class WCFGenerator : MonoBehaviour {
     List<Tile> neighbors = new List<Tile>();
     for (int x = tile.X - 1; x <= tile.X + 1; ++x) {
       for (int z = tile.Z - 1; z <= tile.Z + 1; ++z) {
-        if (((x == tile.X &&  z != tile.Z)
-            || (x == tile.X && z == tile.Z)
-            || (x != tile.X && z == tile.Z))
-            && (x >= 0 && x < width_)
-            && (z >= 0 && z < depth_)
-        ) {
+        if ((x >= 0 && x < width_) && (z >= 0 && z < depth_) &&
+            ((x == tile.X &&  z != tile.Z) || (x != tile.X && z == tile.Z))) {
           neighbors.Add(wave_[x, tile.Y, z]);
         }
       }
@@ -385,16 +381,17 @@ public class WCFGenerator : MonoBehaviour {
 
 
   private List<TileModel> GetTileModelsList(int x, int y, int z) {
+    // Outter side
+    if (x == 0 || x == width_ - 1 || z == 0 || z == depth_ - 1) {
+      return empty_models_;
+    }
+
+    // Bottom layer
     if (y == 0) {
       return ground_models_;
     }
 
-    if (y == height_ - 1 ||
-      x == 0 || x == width_ - 1 ||
-      z == 0 || z == depth_ - 1) {
-      return empty_models_;
-    }
-
+    // Rest
     return all_models_; 
   }
 
