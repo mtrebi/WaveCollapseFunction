@@ -113,6 +113,9 @@ public class WCFGenerator : MonoBehaviour {
   }
 
   void Update() {
+    // TODO SPEED
+    //for(int i = 0; i < 9e7; ++i) {}
+
     switch (program_state_) {
       case ProgramState.INIT:
         Debug.Log("Starting...");
@@ -225,12 +228,12 @@ public class WCFGenerator : MonoBehaviour {
     for (int x = 0; x < width_; ++x) {
       for (int z = 0; z < depth_; ++z) {
         Tile tile = wave_[x, current_layer_, z];
-        Tile[] upper_neighbors = GetBottomNeighbors(tile);
+        Tile[] bottom_neighbors = GetBottomNeighbors(tile);
         wave_changed_[tile.X, tile.Y, tile.Z] = true;
 
-        foreach (Tile neighbor in upper_neighbors) {
-          if (!neighbor.Collapsed()) {
-            neighbor.UpdateAvailableModels(tile, GetNeighborOrientation(neighbor, tile));
+        foreach (Tile neighbor in bottom_neighbors) {
+          if (!tile.Collapsed()) {
+            tile.UpdateAvailableModels(neighbor, GetNeighborOrientation(tile, neighbor));
           }
         }
       }
