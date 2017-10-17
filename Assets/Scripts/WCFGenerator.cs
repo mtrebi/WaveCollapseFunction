@@ -40,13 +40,10 @@ public class WCFGenerator : MonoBehaviour {
 
   private ProgramState program_state_ = ProgramState.STOPPED;
 
-  private int[] available_corners_counter_,
-                collapsed_corners_counter_;
-
-
   // Models
   private List<TileModel> all_models_,
                           ground_models_,
+                          roof_models_,
                           empty_models_;
 
   public int Width {
@@ -104,10 +101,8 @@ public class WCFGenerator : MonoBehaviour {
     // Initialize models structure
     all_models_ = model_manager_object_.GetComponent<TileModelManager>().TileModels;
     ground_models_ = all_models_.Where(x => x.Type == Type.GROUND || x.Type == Type.EMPTY).ToList();
+    roof_models_ = all_models_.Where(x => x.Type == Type.ROOF || x.Type == Type.EMPTY).ToList();
     empty_models_ = all_models_.Where(x => x.Type == Type.EMPTY).ToList();
-
-    available_corners_counter_ = new int[4];
-    collapsed_corners_counter_ = new int[4];
   }
 
   void Update() {
@@ -374,7 +369,7 @@ public class WCFGenerator : MonoBehaviour {
 
   private List<TileModel> GetTileModelsList(int x, int y, int z) {
     // Outter side
-    if (x == 0 || x == width_ - 1 || z == 0 || z == depth_ - 1 || y == height_ -1) {
+    if (x == 0 || x == width_ - 1 || z == 0 || z == depth_ - 1) {
       return empty_models_;
     }
 
@@ -383,7 +378,12 @@ public class WCFGenerator : MonoBehaviour {
       return ground_models_;
     }
 
-    // Rest
+    // Top layer
+    if (y == height_ - 1) {
+      return roof_models_;
+    }
+
+    // Others
     return all_models_; 
   }
 
