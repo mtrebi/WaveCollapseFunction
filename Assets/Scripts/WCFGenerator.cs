@@ -194,8 +194,6 @@ public class WCFGenerator : MonoBehaviour {
         break;
       case ProgramState.FINISHED:
         Debug.Log("Program finished successfully...");
-        Debug.Log("MayBeClosed" + MayBeClosedBuilding());
-        Debug.Log("Closed" + ClosedBuilding());
         program_state_ = ProgramState.STOPPED;
         break;
     }
@@ -291,7 +289,8 @@ public class WCFGenerator : MonoBehaviour {
 
         foreach (Tile neighbor in bottom_neighbors) {
           if (!tile.Collapsed()) {
-            tile.UpdateAvailableModels(neighbor, GetNeighborOrientation(tile, neighbor), available_corners_);
+            List<TileModel> removed_models = tile.UpdateAvailableModels(neighbor, GetNeighborOrientation(tile, neighbor));
+            available_corners_.Decrease(removed_models);
           }
         }
       }
@@ -353,6 +352,8 @@ public class WCFGenerator : MonoBehaviour {
 
     int random_index = Random.Range(0, max_probabilities_models.Count);
     TileModel collapsed_model = max_probabilities_models[random_index];
+
+    available_corners_.Decrease(tile.AvailableModels);
     tile.Collapse(collapsed_model);
     collapsed_corners_.Increase(collapsed_model);
   }
@@ -370,9 +371,12 @@ public class WCFGenerator : MonoBehaviour {
       wave_changed_[current_tile.X, current_tile.Y, current_tile.Z] = true;
 
       foreach (Tile neighbor in neighbors) {
-        if (!neighbor.Collapsed() 
-          && neighbor.UpdateAvailableModels(current_tile, GetNeighborOrientation(neighbor, current_tile), available_corners_)) {
-          remaining_tiles.Push(neighbor);
+        if (!neighbor.Collapsed()) {
+          List<TileModel> removed_models = neighbor.UpdateAvailableModels(current_tile, GetNeighborOrientation(neighbor, current_tile));
+          if (removed_models.Count != 0) {
+            remaining_tiles.Push(neighbor);
+            available_corners_.Decrease(removed_models);
+          }
         }
       }
     }
