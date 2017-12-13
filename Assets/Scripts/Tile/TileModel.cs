@@ -647,7 +647,7 @@ public class TileModel {
     TileModel[] models = new TileModel[GetCardinality(symmetry)];
 
     for (int i = 0; i < models.Length; ++i) {
-      models[i] = GenerateModel(i);
+      models[i] = GenerateModel(i + 1);
     }
 
     return models;
@@ -670,7 +670,7 @@ public class TileModel {
   }
 
   private TileModel GenerateModel(int rotation_steps) {
-    int y_rotation = 90 * (rotation_steps + 1);
+    int y_rotation = 90 * (rotation_steps);
 
     TileAdjacencies instance_adjacencies = new TileAdjacencies(adjacencies_, y_rotation);
     TileOrientation tile_orientation = RotateTileOrientation(tile_orientation_, rotation_steps);
@@ -680,8 +680,8 @@ public class TileModel {
 
   private TileOrientation CalculateTileOrientation() {
     if (adjacencies_.Adjacencies[(int)FaceOrientation.NORTH].EdgesId != 0
-      && adjacencies_.Adjacencies[(int)FaceOrientation.EAST].EdgesId != 0
-      ) {
+  && adjacencies_.Adjacencies[(int)FaceOrientation.EAST].EdgesId != 0
+  ) {
       return TileOrientation.NORTH_EAST;
     }
 
