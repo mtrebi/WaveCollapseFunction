@@ -10,7 +10,6 @@ public class Tile : MonoBehaviour {
 
   [SerializeField] private TileModel model_;
   [SerializeField] private List<TileModel> available_models_;
-  private CornerTypeCounter available_corner_counter_;
 
   // Entropy
   [SerializeField] private float entropy_;
@@ -40,15 +39,6 @@ public class Tile : MonoBehaviour {
   }
 
   /// <summary>
-  /// Corner Counter to track how many corners of each type are available
-  /// </summary>
-  public CornerTypeCounter AvailableCorners {
-    get {
-      return available_corner_counter_;
-    }
-  }
-
-  /// <summary>
   /// Check if tile can be collapsed into a final tile model
   /// </summary>
   /// <returns>Returns true if tile can collapse. False otherwise</returns>
@@ -62,7 +52,6 @@ public class Tile : MonoBehaviour {
   /// <param name="model"></param>
   public void Collapse(TileModel model) {
     model_ = model;
-    available_corner_counter_.Decrease(available_models_);
     available_models_.Clear();
     available_models_.Add(model_);
 
@@ -97,7 +86,6 @@ public class Tile : MonoBehaviour {
 
     model_ = null;
     available_models_ = available_models;
-    available_corner_counter_.Increase(available_models);
     total_probability_ = TotalProbability();
     max_entropy_ = GetMaxEntropy();
     entropy_ = max_entropy_;
@@ -130,9 +118,9 @@ public class Tile : MonoBehaviour {
   /// </summary>
   /// <param name="neighbor"></param>
   /// <param name="orientation"> Which face of tile is connected with the neighbor tile</param>
-  /// <returns>True if available models changed</returns>
-  public bool UpdateAvailableModels(Tile neighbor, FaceOrientation orientation) {
-    bool changed = false;
+  /// <returns> List of rejected Models</returns>
+  public List<TileModel> UpdateAvailableModels(Tile neighbor, FaceOrientation orientation) {
+    List<TileModel> removed_models = new List<TileModel>();
     for (int i = available_models_.Count - 1; i >= 0; --i) {
       TileModel current_model = available_models_[i];
       bool satisfy_any = false;
@@ -145,13 +133,11 @@ public class Tile : MonoBehaviour {
       }
 
       if (!satisfy_any) {
-        changed = true;
-        available_corner_counter_.Decrease(available_models_[i]);
-        RemoveAvailableModel(i);
+        removed_models.Add(RemoveAvailableModel(i));
       }
     }
 
-    return changed;
+    return removed_models;
   }
 
   /// <summary>
@@ -172,10 +158,12 @@ public class Tile : MonoBehaviour {
     return "("+ x_ + ", " + y_ + ", " + z_ +") - States: " + available_models_.Count + " --> " + model_;
   }
 
-  private void RemoveAvailableModel(int index) {
+  private TileModel RemoveAvailableModel(int index) {
     float p = available_models_[index].Probability / total_probability_;
     entropy_ -= -p * Mathf.Log(p, 2);
+    TileModel removed_model = available_models_[index];
     available_models_.RemoveAt(index);
+    return removed_model;
   }
 
   private float TotalProbability() {
