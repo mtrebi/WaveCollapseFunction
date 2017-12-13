@@ -10,6 +10,7 @@ public class Tile : MonoBehaviour {
 
   [SerializeField] private TileModel model_;
   [SerializeField] private List<TileModel> available_models_;
+  private CornerTypeCounter available_corner_counter_;
 
   // Entropy
   [SerializeField] private float entropy_;
@@ -39,6 +40,15 @@ public class Tile : MonoBehaviour {
   }
 
   /// <summary>
+  /// Corner Counter to track how many corners of each type are available
+  /// </summary>
+  public CornerTypeCounter AvailableCorners {
+    get {
+      return available_corner_counter_;
+    }
+  }
+
+  /// <summary>
   /// Check if tile can be collapsed into a final tile model
   /// </summary>
   /// <returns>Returns true if tile can collapse. False otherwise</returns>
@@ -52,6 +62,7 @@ public class Tile : MonoBehaviour {
   /// <param name="model"></param>
   public void Collapse(TileModel model) {
     model_ = model;
+    available_corner_counter_.Decrease(available_models_);
     available_models_.Clear();
     available_models_.Add(model_);
 
@@ -86,6 +97,7 @@ public class Tile : MonoBehaviour {
 
     model_ = null;
     available_models_ = available_models;
+    available_corner_counter_.Increase(available_models);
     total_probability_ = TotalProbability();
     max_entropy_ = GetMaxEntropy();
     entropy_ = max_entropy_;
@@ -134,6 +146,7 @@ public class Tile : MonoBehaviour {
 
       if (!satisfy_any) {
         changed = true;
+        available_corner_counter_.Decrease(available_models_[i]);
         RemoveAvailableModel(i);
       }
     }
