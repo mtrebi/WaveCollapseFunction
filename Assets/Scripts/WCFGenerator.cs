@@ -5,6 +5,70 @@ using UnityEngine;
 
 // TODO: Backtracking
 
+public struct CornerTypeCounter {
+  public int wn,
+      ne,
+      es,
+      sw;
+
+  public bool IsZero() {
+    return wn == 0 && 
+          ne == 0 && 
+          es == 0 && 
+          sw == 0;
+  }
+
+  public void Reset() {
+    wn = ne = es = sw = 0;
+  }
+
+  public void Increase(List<TileModel> models) {
+    foreach(TileModel model in models) {
+      this.Increase(model);
+    }
+  }
+
+  public void Increase(TileModel model){
+    switch (model.TileOrientation) {
+      case TileOrientation.NORTH_EAST:
+        ++ne;
+        break;
+      case TileOrientation.EAST_SOUTH:
+        ++es;
+        break;
+      case TileOrientation.SOUTH_WEST:
+        ++sw;
+        break;
+      case TileOrientation.WEST_NORTH:
+        ++wn;
+        break;
+    }
+  }
+
+  public void Decrease(List<TileModel> models) {
+    foreach (TileModel model in models) {
+      this.Decrease(model);
+    }
+  }
+
+  public void Decrease(TileModel model) {
+    switch (model.TileOrientation) {
+      case TileOrientation.NORTH_EAST:
+        --ne;
+        break;
+      case TileOrientation.EAST_SOUTH:
+        --es;
+        break;
+      case TileOrientation.SOUTH_WEST:
+        --sw;
+        break;
+      case TileOrientation.WEST_NORTH:
+        --wn;
+        break;
+    }
+  }
+}
+
 public enum ProgramState {
   INIT,
   RUNNING,
@@ -45,6 +109,9 @@ public class WCFGenerator : MonoBehaviour {
                           ground_models_,
                           roof_models_,
                           empty_models_;
+
+  private CornerTypeCounter collapsed_corners_,
+                            available_corners_;
 
   public int Width {
     get {
@@ -106,7 +173,7 @@ public class WCFGenerator : MonoBehaviour {
   }
 
   void Update() {
-    // TODO SPEED
+    // TODO SPEED Sleep
     //for(int i = 0; i < 9e7; ++i) {}
 
     switch (program_state_) {
@@ -127,12 +194,17 @@ public class WCFGenerator : MonoBehaviour {
         break;
       case ProgramState.FINISHED:
         Debug.Log("Program finished successfully...");
+        Debug.Log("MayBeClosed" + MayBeClosedBuilding());
+        Debug.Log("Closed" + ClosedBuilding());
         program_state_ = ProgramState.STOPPED;
         break;
     }
   }
 
   private void InitializeWave() {
+    collapsed_corners_.Reset();
+    available_corners_.Reset();
+
     current_layer_ = 0;
     if (wave_ == null) {
       wave_ = new Tile[width_, height_, depth_];
@@ -151,8 +223,10 @@ public class WCFGenerator : MonoBehaviour {
           }
 
           List<TileModel> models = GetTileModelsList(x, y, z);
-          wave_[x, y, z] = TileFactory.Instance.CreateDefaultTile(this.transform, x, y, z, new List<TileModel>(models));
+          Tile new_tile = TileFactory.Instance.CreateDefaultTile(this.transform, x, y, z, new List<TileModel>(models));
+          wave_[x, y, z] = new_tile;
           wave_changed_[x, y, z] = true;
+          available_corners_.Increase(new_tile.AvailableModels);
         }
       }
     }
@@ -217,7 +291,7 @@ public class WCFGenerator : MonoBehaviour {
 
         foreach (Tile neighbor in bottom_neighbors) {
           if (!tile.Collapsed()) {
-            tile.UpdateAvailableModels(neighbor, GetNeighborOrientation(tile, neighbor));
+            tile.UpdateAvailableModels(neighbor, GetNeighborOrientation(tile, neighbor), available_corners_);
           }
         }
       }
@@ -278,8 +352,9 @@ public class WCFGenerator : MonoBehaviour {
     }
 
     int random_index = Random.Range(0, max_probabilities_models.Count);
-    TileModel collapse_model = max_probabilities_models[random_index];
-    tile.Collapse(collapse_model);
+    TileModel collapsed_model = max_probabilities_models[random_index];
+    tile.Collapse(collapsed_model);
+    collapsed_corners_.Increase(collapsed_model);
   }
 
 
@@ -296,7 +371,7 @@ public class WCFGenerator : MonoBehaviour {
 
       foreach (Tile neighbor in neighbors) {
         if (!neighbor.Collapsed() 
-          && neighbor.UpdateAvailableModels(current_tile, GetNeighborOrientation(neighbor, current_tile))) {
+          && neighbor.UpdateAvailableModels(current_tile, GetNeighborOrientation(neighbor, current_tile), available_corners_)) {
           remaining_tiles.Push(neighbor);
         }
       }
@@ -387,10 +462,15 @@ public class WCFGenerator : MonoBehaviour {
     return all_models_; 
   }
 
-  bool CanFinish() {
-    return true;
-    // MInimo 4
-    // Los que sean mayor que 4 se tienen que contrarestar con su counter
-    // 1 por cada INV que haya
+  private bool ClosedBuilding() {
+    return collapsed_corners_.wn > 1 && collapsed_corners_.wn == collapsed_corners_.es &&
+            collapsed_corners_.ne > 1 && collapsed_corners_.ne == collapsed_corners_.sw;
+  }
+
+  private bool MayBeClosedBuilding() {
+    return(collapsed_corners_.wn + available_corners_.wn) >= collapsed_corners_.es &&
+        (collapsed_corners_.es + available_corners_.es) >= collapsed_corners_.wn &&
+        (collapsed_corners_.ne + available_corners_.ne) >= collapsed_corners_.sw &&
+        (collapsed_corners_.sw + available_corners_.sw) >= collapsed_corners_.ne;
   }
 }
