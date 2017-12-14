@@ -4,6 +4,10 @@ using System.Linq;
 using UnityEngine;
 
 // TODO: Backtracking
+// TODO> Initialize layer corner counter!!!!
+// TODO: Use number of buildings in formula! 
+// or simply limit formula to accept 1 building if not possible
+
 
 public struct CornerTypeCounter {
   public int wn,
@@ -180,6 +184,7 @@ public class WCFGenerator : MonoBehaviour {
       case ProgramState.INIT:
         Debug.Log("Starting...");
         InitializeWave();
+        InitializeLayer(current_layer_);
         program_state_ = ProgramState.RUNNING;
         break;
       case ProgramState.RUNNING:
@@ -193,6 +198,7 @@ public class WCFGenerator : MonoBehaviour {
         program_state_ = ProgramState.INIT;
         break;
       case ProgramState.FINISHED:
+        MayBeClosedBuilding();
         Debug.Log("Program finished successfully...");
         program_state_ = ProgramState.STOPPED;
         break;
@@ -200,9 +206,6 @@ public class WCFGenerator : MonoBehaviour {
   }
 
   private void InitializeWave() {
-    collapsed_corners_.Reset();
-    available_corners_.Reset();
-
     current_layer_ = 0;
     if (wave_ == null) {
       wave_ = new Tile[width_, height_, depth_];
@@ -224,8 +227,21 @@ public class WCFGenerator : MonoBehaviour {
           Tile new_tile = TileFactory.Instance.CreateDefaultTile(this.transform, x, y, z, new List<TileModel>(models));
           wave_[x, y, z] = new_tile;
           wave_changed_[x, y, z] = true;
-          available_corners_.Increase(new_tile.AvailableModels);
         }
+      }
+    }
+  }
+
+  private void InitializeLayer(int current_layer) {
+    current_layer_ = current_layer;
+    collapsed_corners_.Reset();
+    available_corners_.Reset();
+
+    for (int x = 0; x < width_; ++x) {
+      for (int z = 0; z < depth_; ++z) {
+        Tile tile = wave_[x, current_layer_, z];
+        wave_changed_[x, current_layer_, z] = true;
+        available_corners_.Increase(tile.AvailableModels);
       }
     }
   }
@@ -246,6 +262,12 @@ public class WCFGenerator : MonoBehaviour {
   }
 
   private void GenerateWave() {
+    if (!MayBeClosedBuilding()) {
+      Debug.Log("Can't close building...");
+      program_state_ = ProgramState.FAILED;
+      return;
+    }
+
     Tile min_entropy_tile = ObserveLayer();
     if (!min_entropy_tile) {
       ChangeLayer();
@@ -270,7 +292,9 @@ public class WCFGenerator : MonoBehaviour {
     if (current_layer_ == height_ - 1) {
       return;
     }
-    ++current_layer_;
+
+    InitializeLayer(current_layer_ + 1);
+
     PropagateFromBottomLayer();
     for (int x = 0; x < width_; ++x) {
       for (int z = 0; z < depth_; ++z) {
