@@ -85,46 +85,46 @@ public enum ProgramState {
 
 public class WCFGenerator : MonoBehaviour {
   #region DATA MEMBERS
-  private int width_,
-             height_,
-             depth_;
+    #region PUBLIC
+    public float randomness_min = 0,
+                  randomness_max = 0;
 
-  private int current_layer_ = 0;
+    public int number_buildings_min_,
+                number_buildings_max_ = 3;
+    #endregion
 
-  public float randomness_min = 0,
-               randomness_max = 0;
+    #region PRIVATE
 
-  public int number_buildings_min_ = 3;
-  public int number_buildings_max_ = 3;
+    private int width_,
+               height_,
+               depth_;
 
-  /// <summary>
-  /// Reference to the model manager object that contains all tile models used by the Tile Objects
-  /// </summary>
-  public GameObject model_manager_object_;
+    private int current_layer_ = 0;
 
-  /// <summary>
-  /// Stores each Tile Object that is rendered to create the object
-  /// </summary>
-  private Tile[,,] wave_ = null;
 
-  /// <summary>
-  /// Stores a flag that indicates if the wave_ structure has changed since the last frame
-  /// </summary>
-  private bool[,,] wave_changed_ = null;
 
-  private ProgramState program_state_ = ProgramState.STOPPED;
+    /// <summary>
+    /// Reference to the model manager object that contains all tile models used by the Tile Objects
+    /// </summary>
+    public GameObject model_manager_object_;
 
-  // Models
-  private List<TileModel> all_models_,
-                          ground_models_,
-                          roof_models_,
-                          empty_models_;
+    /// <summary>
+    /// Stores each Tile Object that is rendered to create the object
+    /// </summary>
+    private Tile[,,] wave_ = null;
 
-  private CornerTypeCounter collapsed_corners_,
-                            available_corners_;
+    /// <summary>
+    /// Stores a flag that indicates if the wave_ structure has changed since the last frame
+    /// </summary>
+    private bool[,,] wave_changed_ = null;
 
-  private Graph<Tile> graph_;
+    private ProgramState program_state_ = ProgramState.STOPPED;
 
+    private CornerTypeCounter collapsed_corners_,
+                              available_corners_;
+
+    private Graph<Tile> graph_;
+    #endregion
   #endregion
 
   #region GETTERS
@@ -184,11 +184,6 @@ public class WCFGenerator : MonoBehaviour {
   }
 
   void Start() {
-    // Initialize models structure
-    all_models_ = model_manager_object_.GetComponent<TileModelManager>().TileModels;
-    ground_models_ = all_models_.Where(x => x.Type == Type.GROUND || x.Type == Type.EMPTY).ToList();
-    roof_models_ = all_models_.Where(x => x.Type == Type.ROOF || x.Type == Type.EMPTY).ToList();
-    empty_models_ = all_models_.Where(x => x.Type == Type.EMPTY).ToList();
   }
 
   void Update() {
@@ -234,6 +229,12 @@ public class WCFGenerator : MonoBehaviour {
       wave_changed_ = new bool[width_, height_, depth_];
     }
 
+    // Initialize models structure
+    List<TileModel>  all_models     = model_manager_object_.GetComponent<TileModelManager>().TileModels;
+    List<TileModel>  ground_models  = all_models.Where(x => x.Type == Type.GROUND || x.Type == Type.EMPTY).ToList();
+    List<TileModel>  roof_models    = all_models.Where(x => x.Type == Type.ROOF || x.Type == Type.EMPTY).ToList();
+    List<TileModel>  empty_models   = all_models.Where(x => x.Type == Type.EMPTY).ToList();
+
     for (int x = 0; x < width_; ++x) {
       for (int y = 0; y < height_; ++y) {
         for (int z = 0; z < depth_; ++z) {
@@ -242,7 +243,7 @@ public class WCFGenerator : MonoBehaviour {
             Object.Destroy(wave_[x, y, z].gameObject);
           }
 
-          List<TileModel> models = GetTileModelsList(x, y, z);
+          List<TileModel> models = GetTileModelsList(x, y, z, all_models, ground_models, roof_models, empty_models);
           Tile new_tile = TileFactory.Instance.CreateDefaultTile(this.transform, x, y, z, new List<TileModel>(models));
           wave_[x, y, z] = new_tile;
           wave_changed_[x, y, z] = true;
@@ -493,24 +494,24 @@ public class WCFGenerator : MonoBehaviour {
   }
 
 
-  private List<TileModel> GetTileModelsList(int x, int y, int z) {
+  private List<TileModel> GetTileModelsList(int x, int y, int z, List<TileModel> all_models, List<TileModel> ground_models, List<TileModel> roof_models, List<TileModel> empty_models) {
     // Outter side
     if (x == 0 || x == width_ - 1 || z == 0 || z == depth_ - 1) {
-      return empty_models_;
+      return empty_models;
     }
 
     // Bottom layer
     if (y == 0) {
-      return ground_models_;
+      return ground_models;
     }
 
     // Top layer
     if (y == height_ - 1) {
-      return roof_models_;
+      return roof_models;
     }
 
     // Others
-    return all_models_; 
+    return all_models; 
   }
 
   private bool ClosedBuilding() {
