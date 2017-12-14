@@ -4,10 +4,12 @@ using System.Linq;
 using UnityEngine;
 
 // TODO: Backtracking
-// TODO> Initialize layer corner counter!!!!
+
 // TODO: Use number of buildings in formula! 
 // or simply limit formula to accept 1 building if not possible
 
+  // TODO Separated Renderer that draws debug things too
+  // TODO do we really need to count corners???? Is it enough with the graph?
 
 public struct CornerTypeCounter {
   public int wn,
@@ -82,6 +84,7 @@ public enum ProgramState {
 }
 
 public class WCFGenerator : MonoBehaviour {
+  #region DATA MEMBERS
   private int width_,
              height_,
              depth_;
@@ -90,6 +93,9 @@ public class WCFGenerator : MonoBehaviour {
 
   public float randomness_min = 0,
                randomness_max = 0;
+
+  public int number_buildings_min_ = 3;
+  public int number_buildings_max_ = 3;
 
   /// <summary>
   /// Reference to the model manager object that contains all tile models used by the Tile Objects
@@ -116,6 +122,12 @@ public class WCFGenerator : MonoBehaviour {
 
   private CornerTypeCounter collapsed_corners_,
                             available_corners_;
+
+  private Graph<Tile> graph_;
+
+  #endregion
+
+  #region GETTERS
 
   public int Width {
     get {
@@ -162,13 +174,16 @@ public class WCFGenerator : MonoBehaviour {
       return wave_;
     }
   }
+  
+  #endregion  
 
-  // Use this for initialization
+  #region UNITY METHODS
+
   void Awake() {
 
   }
 
-  private void Start() {
+  void Start() {
     // Initialize models structure
     all_models_ = model_manager_object_.GetComponent<TileModelManager>().TileModels;
     ground_models_ = all_models_.Where(x => x.Type == Type.GROUND || x.Type == Type.EMPTY).ToList();
@@ -188,7 +203,7 @@ public class WCFGenerator : MonoBehaviour {
         program_state_ = ProgramState.RUNNING;
         break;
       case ProgramState.RUNNING:
-        GenerateWave();
+        Generate();
         RenderWave();
         break;
       case ProgramState.STOPPED:
@@ -204,6 +219,10 @@ public class WCFGenerator : MonoBehaviour {
         break;
     }
   }
+
+  #endregion
+
+  #region MAIN METHODS
 
   private void InitializeWave() {
     current_layer_ = 0;
@@ -246,7 +265,7 @@ public class WCFGenerator : MonoBehaviour {
     }
   }
 
-  public void DestroyWave() {
+  public void Reset() {
     for (int x = 0; x < width_; ++x) {
       for (int y = 0; y < height_; ++y) {
         for (int z = 0; z < depth_; ++z) {
@@ -261,7 +280,7 @@ public class WCFGenerator : MonoBehaviour {
     wave_changed_ = null;
   }
 
-  private void GenerateWave() {
+  private void Generate() {
     if (!MayBeClosedBuilding()) {
       Debug.Log("Can't close building...");
       program_state_ = ProgramState.FAILED;
@@ -406,6 +425,10 @@ public class WCFGenerator : MonoBehaviour {
     }
   }
 
+  #endregion
+
+  #region HELPER METHODS
+
   /// <summary>
   /// Get which face of Tile is connected to Neighbor
   /// </summary>
@@ -501,4 +524,6 @@ public class WCFGenerator : MonoBehaviour {
         (collapsed_corners_.ne + available_corners_.ne) >= collapsed_corners_.sw &&
         (collapsed_corners_.sw + available_corners_.sw) >= collapsed_corners_.ne;
   }
+
+  #endregion
 }
