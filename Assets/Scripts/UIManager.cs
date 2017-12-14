@@ -59,7 +59,7 @@ public class UIManager : MonoBehaviour {
       depth_ != 0 &&
       height_ != 0) {
 
-      WCFGenerator_.DestroyWave();
+      WCFGenerator_.Reset();
       WCFGenerator_.Width = width_;
       WCFGenerator_.Depth = depth_;
       WCFGenerator_.Height = height_;
