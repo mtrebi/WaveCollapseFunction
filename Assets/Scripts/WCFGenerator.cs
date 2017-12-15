@@ -4,76 +4,16 @@ using System.Linq;
 using UnityEngine;
 
 // TODO: Backtracking
+// TODO Second camera always on top DEBUG UI
 
-// TODO: Use number of buildings in formula! 
-// or simply limit formula to accept 1 building if not possible
+// TODO GRaph thing
+  // On each iteration check how many graphs there are
+    // Restart if needed
+  // When layer has finished, clear graph and start again
 
-  // TODO Separated Renderer that draws debug things too
-  // TODO do we really need to count corners???? Is it enough with the graph?
-
-public struct CornerTypeCounter {
-  public int wn,
-      ne,
-      es,
-      sw;
-
-  public bool IsZero() {
-    return wn == 0 && 
-          ne == 0 && 
-          es == 0 && 
-          sw == 0;
-  }
-
-  public void Reset() {
-    wn = ne = es = sw = 0;
-  }
-
-  public void Increase(List<TileModel> models) {
-    foreach(TileModel model in models) {
-      this.Increase(model);
-    }
-  }
-
-  public void Increase(TileModel model){
-    switch (model.TileOrientation) {
-      case TileOrientation.NORTH_EAST:
-        ++ne;
-        break;
-      case TileOrientation.EAST_SOUTH:
-        ++es;
-        break;
-      case TileOrientation.SOUTH_WEST:
-        ++sw;
-        break;
-      case TileOrientation.WEST_NORTH:
-        ++wn;
-        break;
-    }
-  }
-
-  public void Decrease(List<TileModel> models) {
-    foreach (TileModel model in models) {
-      this.Decrease(model);
-    }
-  }
-
-  public void Decrease(TileModel model) {
-    switch (model.TileOrientation) {
-      case TileOrientation.NORTH_EAST:
-        --ne;
-        break;
-      case TileOrientation.EAST_SOUTH:
-        --es;
-        break;
-      case TileOrientation.SOUTH_WEST:
-        --sw;
-        break;
-      case TileOrientation.WEST_NORTH:
-        --wn;
-        break;
-    }
-  }
-}
+// TODO Separated Renderer that draws debug things too
+// TODO do we really need to count corners???? Is it enough with the graph?
+// TODO Many resetS???
 
 public enum ProgramState {
   INIT,
@@ -84,50 +24,46 @@ public enum ProgramState {
 }
 
 public class WCFGenerator : MonoBehaviour {
-  #region DATA MEMBERS
-    #region PUBLIC
-    public float randomness_min = 0,
+
+  #region Public Fields
+  public float randomness_min = 0,
                   randomness_max = 0;
 
-    public int number_buildings_min_,
-                number_buildings_max_ = 3;
-    #endregion
-
-    #region PRIVATE
-
-    private int width_,
-               height_,
-               depth_;
-
-    private int current_layer_ = 0;
-
-
-
-    /// <summary>
-    /// Reference to the model manager object that contains all tile models used by the Tile Objects
-    /// </summary>
-    public GameObject model_manager_object_;
-
-    /// <summary>
-    /// Stores each Tile Object that is rendered to create the object
-    /// </summary>
-    private Tile[,,] wave_ = null;
-
-    /// <summary>
-    /// Stores a flag that indicates if the wave_ structure has changed since the last frame
-    /// </summary>
-    private bool[,,] wave_changed_ = null;
-
-    private ProgramState program_state_ = ProgramState.STOPPED;
-
-    private CornerTypeCounter collapsed_corners_,
-                              available_corners_;
-
-    private Graph<Tile> graph_;
-    #endregion
+  public int number_buildings_min_,
+              number_buildings_max_ = 3;
   #endregion
 
-  #region GETTERS
+  #region Private Fields
+
+  private int width_,
+              height_,
+              depth_;
+
+  private int current_layer_ = -1;
+
+
+
+  /// <summary>
+  /// Reference to the model manager object that contains all tile models used by the Tile Objects
+  /// </summary>
+  public GameObject model_manager_object_;
+
+  /// <summary>
+  /// Stores each Tile Object that is rendered to create the object
+  /// </summary>
+  private Tile[,,] wave_ = null;
+
+  /// <summary>
+  /// Stores a flag that indicates if the wave_ structure has changed since the last frame
+  /// </summary>
+  private bool[,,] wave_changed_ = null;
+
+  private ProgramState program_state_ = ProgramState.STOPPED;
+
+  private Graph<Tile> graph_;
+  #endregion
+
+  #region Getters/Setters
 
   public int Width {
     get {
@@ -174,16 +110,23 @@ public class WCFGenerator : MonoBehaviour {
       return wave_;
     }
   }
-  
-  #endregion  
 
-  #region UNITY METHODS
+  public Graph<Tile> Graph {
+    get {
+      return graph_;
+    }
+  }
+
+  #endregion
+
+  #region Unity Methods
 
   void Awake() {
-
+    graph_ = new Graph<Tile>();
   }
 
   void Start() {
+
   }
 
   void Update() {
@@ -194,11 +137,10 @@ public class WCFGenerator : MonoBehaviour {
       case ProgramState.INIT:
         Debug.Log("Starting...");
         InitializeWave();
-        InitializeLayer(current_layer_);
         program_state_ = ProgramState.RUNNING;
         break;
       case ProgramState.RUNNING:
-        Generate();
+        GenerateWave();
         RenderWave();
         break;
       case ProgramState.STOPPED:
@@ -208,7 +150,6 @@ public class WCFGenerator : MonoBehaviour {
         program_state_ = ProgramState.INIT;
         break;
       case ProgramState.FINISHED:
-        MayBeClosedBuilding();
         Debug.Log("Program finished successfully...");
         program_state_ = ProgramState.STOPPED;
         break;
@@ -217,16 +158,19 @@ public class WCFGenerator : MonoBehaviour {
 
   #endregion
 
-  #region MAIN METHODS
+  #region Private Methods
 
   private void InitializeWave() {
-    current_layer_ = 0;
     if (wave_ == null) {
       wave_ = new Tile[width_, height_, depth_];
     }
 
     if (wave_changed_ == null) {
       wave_changed_ = new bool[width_, height_, depth_];
+    }
+
+    if (graph_ == null) {
+      graph_ = new Graph<Tile>();
     }
 
     // Initialize models structure
@@ -252,45 +196,10 @@ public class WCFGenerator : MonoBehaviour {
     }
   }
 
-  private void InitializeLayer(int current_layer) {
-    current_layer_ = current_layer;
-    collapsed_corners_.Reset();
-    available_corners_.Reset();
-
-    for (int x = 0; x < width_; ++x) {
-      for (int z = 0; z < depth_; ++z) {
-        Tile tile = wave_[x, current_layer_, z];
-        wave_changed_[x, current_layer_, z] = true;
-        available_corners_.Increase(tile.AvailableModels);
-      }
-    }
-  }
-
-  public void Reset() {
-    for (int x = 0; x < width_; ++x) {
-      for (int y = 0; y < height_; ++y) {
-        for (int z = 0; z < depth_; ++z) {
-          if (wave_ != null && wave_[x, y, z] != null) {
-            // TODO : Factory/ pool, null initialize
-            Object.Destroy(wave_[x, y, z].gameObject);
-          }
-        }
-      }
-    }
-    wave_ = null;
-    wave_changed_ = null;
-  }
-
-  private void Generate() {
-    if (!MayBeClosedBuilding()) {
-      Debug.Log("Can't close building...");
-      program_state_ = ProgramState.FAILED;
-      return;
-    }
-
+  private void GenerateWave() {
     Tile min_entropy_tile = ObserveLayer();
     if (!min_entropy_tile) {
-      ChangeLayer();
+      InitializeNextLayer();
       min_entropy_tile = ObserveLayer();
     }
 
@@ -303,42 +212,15 @@ public class WCFGenerator : MonoBehaviour {
       program_state_ = ProgramState.FAILED;
       return;
     }
+    /* TODO numberof buildings
+    if (graph_.NumberOfGraphs() > number_buildings_max_) {
+      program_state_ = ProgramState.FAILED;
+      Debug.Log("Wrong number of buildings...");
+      return;
+    }*/
 
     Collapse(min_entropy_tile);
     PropagateSideEntropy(min_entropy_tile);
-  }
-  
-  private void ChangeLayer() {
-    if (current_layer_ == height_ - 1) {
-      return;
-    }
-
-    InitializeLayer(current_layer_ + 1);
-
-    PropagateFromBottomLayer();
-    for (int x = 0; x < width_; ++x) {
-      for (int z = 0; z < depth_; ++z) {
-        PropagateSideEntropy(wave_[x, current_layer_, z]);
-      }
-    }
-  }
-
-  // Propagate entropy from current layer to top one
-  private void PropagateFromBottomLayer() {
-    for (int x = 0; x < width_; ++x) {
-      for (int z = 0; z < depth_; ++z) {
-        Tile tile = wave_[x, current_layer_, z];
-        Tile[] bottom_neighbors = GetBottomNeighbors(tile);
-        wave_changed_[tile.X, tile.Y, tile.Z] = true;
-
-        foreach (Tile neighbor in bottom_neighbors) {
-          if (!tile.Collapsed()) {
-            List<TileModel> removed_models = tile.UpdateAvailableModels(neighbor, GetNeighborOrientation(tile, neighbor));
-            available_corners_.Decrease(removed_models);
-          }
-        }
-      }
-    }
   }
 
   private void RenderWave() {
@@ -348,6 +230,23 @@ public class WCFGenerator : MonoBehaviour {
         wave_changed_[tile.X, tile.Y, tile.Z] = false;
       }
     }
+  }
+
+  public void ResetWave() {
+    current_layer_ = 0;
+    graph_.Reset();
+    for (int x = 0; x < width_; ++x) {
+      for (int y = 0; y < height_; ++y) {
+        for (int z = 0; z < depth_; ++z) {
+          if (wave_ != null && wave_[x, y, z] != null) {
+            // TODO : Factory/ pool, null initialize
+            Object.Destroy(wave_[x, y, z].gameObject);
+          }
+        }
+      }
+    }
+    wave_ = null;
+    wave_changed_ = null;
   }
 
   /// <summary>
@@ -395,13 +294,42 @@ public class WCFGenerator : MonoBehaviour {
     }
 
     int random_index = Random.Range(0, max_probabilities_models.Count);
-    TileModel collapsed_model = max_probabilities_models[random_index];
-
-    available_corners_.Decrease(tile.AvailableModels);
-    tile.Collapse(collapsed_model);
-    collapsed_corners_.Increase(collapsed_model);
+    tile.Collapse(max_probabilities_models[random_index]);
+    this.UpdateGraph(tile);
   }
 
+  private void InitializeNextLayer() {
+    graph_.Reset();
+    // TODO RESET GRAPH
+    if (current_layer_ == height_ - 1) {
+      return;
+    }
+    ++current_layer_;
+
+    PropagateFromBottomLayer();
+    for (int x = 0; x < width_; ++x) {
+      for (int z = 0; z < depth_; ++z) {
+        PropagateSideEntropy(wave_[x, current_layer_, z]);
+      }
+    }
+  }
+
+  // Propagate entropy from current layer to top one
+  private void PropagateFromBottomLayer() {
+    for (int x = 0; x < width_; ++x) {
+      for (int z = 0; z < depth_; ++z) {
+        Tile tile = wave_[x, current_layer_, z];
+        Tile[] bottom_neighbors = GetBottomNeighbors(tile);
+        wave_changed_[tile.X, tile.Y, tile.Z] = true;
+
+        foreach (Tile neighbor in bottom_neighbors) {
+          if (!tile.Collapsed()) {
+            List<TileModel> removed_models = tile.UpdateAvailableModels(neighbor, GetNeighborOrientation(tile, neighbor));
+          }
+        }
+      }
+    }
+  }
 
   private void PropagateSideEntropy(Tile tile_changed) {
     Stack<Tile> remaining_tiles = new Stack<Tile>();
@@ -419,16 +347,36 @@ public class WCFGenerator : MonoBehaviour {
           List<TileModel> removed_models = neighbor.UpdateAvailableModels(current_tile, GetNeighborOrientation(neighbor, current_tile));
           if (removed_models.Count != 0) {
             remaining_tiles.Push(neighbor);
-            available_corners_.Decrease(removed_models);
           }
         }
       }
     }
   }
 
-  #endregion
+  /// <summary>
+  /// Updates graph representation of the current layer. Adds the given tile and adds edges to it if needed.
+  /// </summary>
+  /// <param name="tile">Tile to be added to the graph.</param>
+  private void UpdateGraph(Tile tile) {
+    // Add tile to graph
+    Vertex<Tile> vertex = graph_.AddVertex(tile);
 
-  #region HELPER METHODS
+    // Check neighbor connections (and add edges if needed)
+    Tile[] neighbors = GetSideNeighbors(tile);
+
+    foreach (Tile neighbor_tile in neighbors) {
+      FaceOrientation connected_face_orietation = GetNeighborOrientation(tile, neighbor_tile);
+      FaceAdjacency face = tile.Model.Adjacencies.Adjacencies[(int)connected_face_orietation];
+      if (neighbor_tile.Collapsed()) {
+        FaceAdjacency neighbor_face = neighbor_tile.Model.Adjacencies.Adjacencies[(int)connected_face_orietation.Opposite()];
+        if (face.EdgesId != 0 && face.EdgesId == neighbor_face.EdgesId) {
+          Vertex<Tile> neighbor_vertex = graph_.GetVertex(neighbor_tile);
+          graph_.AddEdge(vertex, neighbor_vertex);
+        }
+      }
+    }
+  }
+
 
   /// <summary>
   /// Get which face of Tile is connected to Neighbor
@@ -513,18 +461,5 @@ public class WCFGenerator : MonoBehaviour {
     // Others
     return all_models; 
   }
-
-  private bool ClosedBuilding() {
-    return collapsed_corners_.wn > 1 && collapsed_corners_.wn == collapsed_corners_.es &&
-            collapsed_corners_.ne > 1 && collapsed_corners_.ne == collapsed_corners_.sw;
-  }
-
-  private bool MayBeClosedBuilding() {
-    return(collapsed_corners_.wn + available_corners_.wn) >= collapsed_corners_.es &&
-        (collapsed_corners_.es + available_corners_.es) >= collapsed_corners_.wn &&
-        (collapsed_corners_.ne + available_corners_.ne) >= collapsed_corners_.sw &&
-        (collapsed_corners_.sw + available_corners_.sw) >= collapsed_corners_.ne;
-  }
-
   #endregion
 }
