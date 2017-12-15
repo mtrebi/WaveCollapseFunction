@@ -38,7 +38,6 @@ public class UIManager : MonoBehaviour {
   #region Private Methods
 
   private void UpdateZoomFromMouseWheel() {
-    Debug.Log(zoom_);
     zoom_ -= Input.GetAxis("Mouse ScrollWheel");
     zoom_ = Mathf.Clamp(zoom_, min_zoom, max_zoom);
     main_camera.GetComponent<Camera>().orthographicSize = zoom_;
