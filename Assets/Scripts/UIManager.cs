@@ -4,27 +4,48 @@ public class UIManager : MonoBehaviour {
   // TODO Interactive UI to build tiles by clicking!
   // Show available states
   // Collapse to one state
-
+  #region Public Fields
   public GameObject generator;
   public GameObject main_camera;
   public GameObject debug_camera;
 
+  public const int min_zoom = 3;
+  public const int max_zoom = 7;
+
+  #endregion
+
+  #region Private Fields
   private WCFGenerator WCFGenerator_;
 
   private int width_ = 8, 
               height_ = 5, 
               depth_ = 8;
-	// Use this for initialization
-	void Start () {
+
+  public float zoom_ = 0;
+  #endregion
+
+  #region Unity Methods
+  void Start () {
     WCFGenerator_ = generator.GetComponent<WCFGenerator>();
   }
 
-  // Update is called once per frame
   void Update() {
-
+    UpdateZoomFromMouseWheel();
   }
 
-  public void SetWidth(string width) {
+  #endregion
+
+  #region Private Methods
+
+  private void UpdateZoomFromMouseWheel() {
+    Debug.Log(zoom_);
+    zoom_ -= Input.GetAxis("Mouse ScrollWheel");
+    zoom_ = Mathf.Clamp(zoom_, min_zoom, max_zoom);
+    main_camera.GetComponent<Camera>().orthographicSize = zoom_;
+    debug_camera.GetComponent<Camera>().orthographicSize = zoom_;
+  }
+
+  private void SetWidth(string width) {
     if (!System.String.IsNullOrEmpty(width)) {
       width_ = System.Int32.Parse(width);
     }
@@ -33,7 +54,7 @@ public class UIManager : MonoBehaviour {
     }
   }
 
-  public void SetDepth(string depth) {
+  private void SetDepth(string depth) {
     if (!System.String.IsNullOrEmpty(depth)) {
       depth_ = System.Int32.Parse(depth);
     }
@@ -42,7 +63,7 @@ public class UIManager : MonoBehaviour {
     }
   }
 
-  public void SetHeight(string height) {
+  private void SetHeight(string height) {
     if (!System.String.IsNullOrEmpty(height)) {
       height_ = System.Int32.Parse(height);
     }
@@ -51,13 +72,7 @@ public class UIManager : MonoBehaviour {
     }
   }
 
-  public void ChangeZoom(float zoom) {
-    main_camera.GetComponent<Camera>().orthographicSize = zoom;
-    debug_camera.GetComponent<Camera>().orthographicSize = zoom;
-
-  }
-
-  public void Generate() {
+  private void Generate() {
     if (width_ != 0 &&
       depth_ != 0 &&
       height_ != 0) {
@@ -71,4 +86,5 @@ public class UIManager : MonoBehaviour {
       Debug.Log("Dimensions must be bigger than 0");
     }
   }
+  #endregion
 }
