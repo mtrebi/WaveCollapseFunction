@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 
 // TODO: Backtracking
-// TODO Second camera always on top DEBUG UI
+
 
 // TODO GRaph thing
   // On each iteration check how many graphs there are
@@ -299,8 +299,7 @@ public class WCFGenerator : MonoBehaviour {
   }
 
   private void InitializeNextLayer() {
-    graph_.Reset();
-    // TODO RESET GRAPH
+    //graph_.Reset();
     if (current_layer_ == height_ - 1) {
       return;
     }
@@ -358,11 +357,14 @@ public class WCFGenerator : MonoBehaviour {
   /// </summary>
   /// <param name="tile">Tile to be added to the graph.</param>
   private void UpdateGraph(Tile tile) {
+    if (tile.Model.Type == Type.EMPTY) {
+      return;
+    }
     // Add tile to graph
     Vertex<Tile> vertex = graph_.AddVertex(tile);
 
     // Check neighbor connections (and add edges if needed)
-    Tile[] neighbors = GetSideNeighbors(tile);
+    Tile[] neighbors = GetAllNeighbors(tile);
 
     foreach (Tile neighbor_tile in neighbors) {
       FaceOrientation connected_face_orietation = GetNeighborOrientation(tile, neighbor_tile);
@@ -435,6 +437,31 @@ public class WCFGenerator : MonoBehaviour {
         if ((x >= 0 && x < width_) && (z >= 0 && z < depth_) &&
             ((x == tile.X &&  z != tile.Z) || (x != tile.X && z == tile.Z))) {
           neighbors.Add(wave_[x, tile.Y, z]);
+        }
+      }
+    }
+    return neighbors.ToArray();
+  }
+
+  /// <summary>
+  /// Get neighbors of a given tile in all directions (north, south, east, west, top, bottom)
+  /// </summary>
+  /// <param name="tile"></param>
+  /// <returns> An array that contains the neighbor tiles </returns>
+  private Tile[] GetAllNeighbors(Tile tile) {
+    List<Tile> neighbors = new List<Tile>();
+    for (int x = tile.X - 1; x <= tile.X + 1; ++x) {
+      for (int y = tile.Y - 1; y <= tile.Y + 1; ++y) {
+        for (int z = tile.Z - 1; z <= tile.Z + 1; ++z) {
+          if (((x == tile.X && y == tile.Y && z != tile.Z)
+              || (x == tile.X && y != tile.Y && z == tile.Z)
+              || (x != tile.X && y == tile.Y && z == tile.Z))
+              && (x >= 0 && x < width_)
+              && (y >= 0 && y < height_)
+              && (z >= 0 && z < depth_)
+          ) {
+            neighbors.Add(wave_[x, y, z]);
+          }
         }
       }
     }
