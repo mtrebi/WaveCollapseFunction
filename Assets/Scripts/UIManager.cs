@@ -6,7 +6,8 @@ public class UIManager : MonoBehaviour {
   // Collapse to one state
 
   public GameObject generator;
-  public GameObject camera;
+  public GameObject main_camera;
+  public GameObject debug_camera;
 
   private WCFGenerator WCFGenerator_;
 
@@ -51,7 +52,9 @@ public class UIManager : MonoBehaviour {
   }
 
   public void ChangeZoom(float zoom) {
-    camera.GetComponent<Camera>().orthographicSize = zoom;
+    main_camera.GetComponent<Camera>().orthographicSize = zoom;
+    debug_camera.GetComponent<Camera>().orthographicSize = zoom;
+
   }
 
   public void Generate() {
