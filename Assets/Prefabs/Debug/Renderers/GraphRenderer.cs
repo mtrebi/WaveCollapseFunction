@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// TODO Second camera always on top DEBUG UI
-
 public class GraphRenderer : MonoBehaviour {
   #region Public Fields
   public WCFGenerator generator;
@@ -68,6 +66,7 @@ public class GraphRenderer : MonoBehaviour {
   private void RenderVertex(Vertex<Tile> vertex) {
     Vector3 position = GetPosition(vertex);
     GameObject obj = Instantiate(VertexPrefab, position, Quaternion.identity, this.transform);
+    obj.layer = LayerMask.NameToLayer("Debug");
     rendered_objects_.Add(position, obj);
   }
 
@@ -80,6 +79,7 @@ public class GraphRenderer : MonoBehaviour {
     Vector3 position = GetPosition(edge);
 
     GameObject obj = Instantiate(EdgePrefab, position, EdgeRotation(edge), this.transform);
+    obj.layer = LayerMask.NameToLayer("Debug");
     rendered_objects_.Add(position, obj);
   }
 
