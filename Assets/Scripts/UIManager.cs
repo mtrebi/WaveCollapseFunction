@@ -9,7 +9,7 @@ public class UIManager : MonoBehaviour {
   public GameObject main_camera;
   public GameObject debug_camera;
 
-  public const int min_zoom = 3;
+  public const int min_zoom = 4;
   public const int max_zoom = 7;
 
   #endregion
