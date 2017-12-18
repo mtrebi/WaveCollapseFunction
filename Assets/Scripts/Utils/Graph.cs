@@ -34,10 +34,15 @@ public class Edge<T> {
 public class Vertex<T> {
   public T data;
   public LinkedList<Edge<T>> neighbors;
+  /// <summary>
+  /// 
+  /// </summary>
+  public int component_id = -1;
 
-  public Vertex(T data) {
+  public Vertex(T data, int component_id) {
     this.data = data;
     this.neighbors = new LinkedList<Edge<T>>();
+    this.component_id = component_id;
   }
 
   public Edge<T> AddEdge(Vertex<T> v2) {
@@ -56,9 +61,9 @@ public class Graph<T> {
 
   #region Private Fields
   /// <summary>
-  /// List of vertices and the component id to which they belong.
+  /// List of vertices
   /// </summary>
-  private List<Tuple<Vertex<T>, int>> vertices_;
+  private List<Vertex<T>> vertices_;
 
   /// <summary>
   /// Number of components in the graph structure
@@ -67,7 +72,7 @@ public class Graph<T> {
   #endregion
 
   #region Getters/Setters
-  public List<Tuple<Vertex<T>, int>> Vertices {
+  public List<Vertex<T>> Vertices {
     get {
       return vertices_;
     }
@@ -84,18 +89,19 @@ public class Graph<T> {
   #region Public Methods
 
   public Graph(){
-    vertices_ = new List<Tuple<Vertex<T>,int>>();
-    n_components_ = 0;
+    vertices_ = new List<Vertex<T>>();
+    n_components_ = -1;
   }
 
   public void Reset() {
     vertices_.Clear();
+    n_components_ = -1;
   }
 
   public Vertex<T> GetVertex(T data) {
-    foreach(Tuple<Vertex<T>, int> tuple in vertices_) {
-      if (tuple.First.data.Equals(data)) {
-        return tuple.First;
+    foreach(Vertex<T> vertex in vertices_) {
+      if (vertex.data.Equals(data)) {
+        return vertex;
       }
     }
     return null;
@@ -103,9 +109,8 @@ public class Graph<T> {
 
   public Vertex<T> AddVertex(T data) {
     if (GetVertex(data) == null) {
-      Vertex<T> vertex = new Vertex<T>(data);
-      Tuple<Vertex<T>, int> tuple = new Tuple<Vertex<T>, int>(vertex, 0);
-      vertices_.Add(tuple);
+      Vertex<T> vertex = new Vertex<T>(data, ++n_components_);
+      vertices_.Add(vertex);
       return vertex;
     }
     Debug.LogWarning("Vertex " + data.ToString() + " already exists");
@@ -117,12 +122,13 @@ public class Graph<T> {
     if (new_edge != null) {
       UpdateConnectedComponents(new_edge);
     }
+    else {
+      Debug.LogWarning("Edge " + v1 + " -> " + v2 + " already exists");
+    }
 
     if (bidirectional_edge) {
       AddEdge(v2, v1, false);
     }
-
-    Debug.LogWarning("Edge " + v1 + " -> " + v2 + " already exists");
   }
 
   #endregion
@@ -131,8 +137,37 @@ public class Graph<T> {
   #region Private Methods
 
   private void UpdateConnectedComponents(Edge<T> edge) {
-    // TODO Check which components does edge connects
-    // If different components are connected, assign lowest component number to all vertices with those component id
+    // If connected nodes belong to different components
+    if (edge.node1.component_id != edge.node2.component_id) {
+      int min_component_id = Mathf.Min(edge.node1.component_id, edge.node2.component_id);
+      ChangeComponentId(edge.node1, min_component_id);
+      ChangeComponentId(edge.node2, min_component_id);
+      --n_components_;
+    }
+  }
+
+  /// <summary>
+  /// Sets the component id of all nodes that belong to the same component as the given vertex
+  /// </summary>
+  /// <param name="origin"></param>
+  /// <param name="component_id"></param>
+  private void ChangeComponentId(Vertex<T> origin, int component_id) {
+    Stack<Vertex<T>> remaining_nodes = new Stack<Vertex<T>>();
+    HashSet<Vertex<T>> visited_nodes = new HashSet<Vertex<T>>();
+    remaining_nodes.Push(origin);
+
+    while (remaining_nodes.Count > 0) {
+      Vertex<T> node = remaining_nodes.Pop();
+      visited_nodes.Add(node);
+
+      node.component_id = component_id;
+
+      foreach(Edge<T> neighbor in node.neighbors) {
+        if (!visited_nodes.Contains(neighbor.node2)) {
+          remaining_nodes.Push(neighbor.node2);
+        }
+      }
+    }
   }
 
   #endregion
