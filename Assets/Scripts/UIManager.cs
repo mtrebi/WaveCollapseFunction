@@ -60,6 +60,7 @@ public class UIManager : MonoBehaviour {
       depth_ != 0 &&
       height_ != 0) {
 
+      Camera.main.GetComponent<CameraController>().RotationPoint = new Vector3(width_, 0, depth_) / 2;
       WCFGenerator_.ResetWave();
       WCFGenerator_.Width = width_;
       WCFGenerator_.Depth = depth_;
