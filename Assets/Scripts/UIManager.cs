@@ -6,22 +6,14 @@ public class UIManager : MonoBehaviour {
   // Collapse to one state
   #region Public Fields
   public GameObject generator;
-  public GameObject main_camera;
-  public GameObject debug_camera;
-
-  public const int min_zoom = 4;
-  public const int max_zoom = 7;
-
   #endregion
 
   #region Private Fields
   private WCFGenerator WCFGenerator_;
 
-  private int width_ = 8, 
+  private int width_  = 8, 
               height_ = 5, 
-              depth_ = 8;
-
-  public float zoom_ = 0;
+              depth_  = 8;
   #endregion
 
   #region Unity Methods
@@ -30,19 +22,11 @@ public class UIManager : MonoBehaviour {
   }
 
   void Update() {
-    UpdateZoomFromMouseWheel();
   }
 
   #endregion
 
   #region Private Methods
-
-  private void UpdateZoomFromMouseWheel() {
-    zoom_ -= Input.GetAxis("Mouse ScrollWheel");
-    zoom_ = Mathf.Clamp(zoom_, min_zoom, max_zoom);
-    main_camera.GetComponent<Camera>().orthographicSize = zoom_;
-    debug_camera.GetComponent<Camera>().orthographicSize = zoom_;
-  }
 
   private void SetWidth(string width) {
     if (!System.String.IsNullOrEmpty(width)) {
