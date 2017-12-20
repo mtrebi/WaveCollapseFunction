@@ -22,6 +22,7 @@ public class UIManager : MonoBehaviour {
   }
 
   void Update() {
+    UpdateDebugPanelState();
   }
 
   #endregion
@@ -70,5 +71,13 @@ public class UIManager : MonoBehaviour {
       Debug.Log("Dimensions must be bigger than 0");
     }
   }
+  
+  private void UpdateDebugPanelState() {
+    if (Input.GetKeyUp("d")) {
+      GameObject debug_panel = this.transform.FindChild("Canvas").FindChild("Debug Panel").gameObject;
+      debug_panel.SetActive(!debug_panel.activeSelf);
+    }
+  }
+  
   #endregion
 }
