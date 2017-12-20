@@ -6,10 +6,11 @@ public class GraphRenderer : MonoBehaviour {
   #region Public Fields
   public WCFGenerator generator;
   public GameObject VertexPrefab;
-  public GameObject EdgePrefab;  
+  public GameObject EdgePrefab;
   #endregion
 
   #region Private Fields
+  bool render_ = false;
   Graph<Tile> graph_;
   Dictionary<Vector3, GameObject> rendered_objects_;
 
@@ -41,6 +42,12 @@ public class GraphRenderer : MonoBehaviour {
   #endregion
 
   #region Getters/Setters
+
+  public void SetRender(bool render) {
+    render_ = render;
+    UpdateRenderedObjectStatus(render_);
+  }
+
   #endregion
 
   #region Unity Methods
@@ -58,10 +65,16 @@ public class GraphRenderer : MonoBehaviour {
     }
     Reset();
     Render();
-	}
+  }
   #endregion
 
   #region Private Methods
+
+  private void UpdateRenderedObjectStatus(bool active) {
+    foreach(GameObject obj in rendered_objects_.Values) {
+      obj.SetActive(active);
+    }
+  }
 
   private void Render() {
     foreach(Vertex<Tile> vertex in graph_.Vertices) {
@@ -92,6 +105,7 @@ public class GraphRenderer : MonoBehaviour {
   private void RenderVertex(Vertex<Tile> vertex) {
     Vector3 position = GetPosition(vertex);
     GameObject obj = Instantiate(VertexPrefab, position, Quaternion.identity, this.transform);
+    obj.SetActive(render_);
     obj.layer = LayerMask.NameToLayer("Debug");
     ChangeObjColor(obj, CalculateColorComponent(vertex.component_id));
     rendered_objects_.Add(position, obj);
@@ -104,8 +118,8 @@ public class GraphRenderer : MonoBehaviour {
 
   private void RenderEdge(Edge<Tile> edge) {
     Vector3 position = GetPosition(edge);
-
     GameObject obj = Instantiate(EdgePrefab, position, EdgeRotation(edge), this.transform);
+    obj.SetActive(render_);
     obj.layer = LayerMask.NameToLayer("Debug");
     ChangeObjColor(obj, CalculateColorComponent(edge.node1.component_id));
     rendered_objects_.Add(position, obj);
